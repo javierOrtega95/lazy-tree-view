@@ -1,19 +1,11 @@
-import {
-  FolderNode,
-  FoldersMap,
-  ParentMap,
-  TreeNode,
-  TreeNodeType,
-} from '../types'
+import { FolderNode, FoldersState, NodeParents, TreeNode } from '../types'
+import { isFolderNode } from './validations'
 
-export function recursiveTreeMap(
-  tree: TreeNode[],
-  fn: (item: TreeNode) => TreeNode
-): TreeNode[] {
+export function recursiveTreeMap(tree: TreeNode[], fn: (item: TreeNode) => TreeNode): TreeNode[] {
   return tree.map((item) => {
     const newNode = fn({ ...item })
 
-    if (newNode.nodeType === TreeNodeType.Folder && newNode.children.length) {
+    if (isFolderNode(newNode) && newNode.children.length > 0) {
       newNode.children = recursiveTreeMap(newNode.children, fn)
     }
 
@@ -21,44 +13,44 @@ export function recursiveTreeMap(
   })
 }
 
-export function getParentMap(tree: TreeNode[]): ParentMap {
-  const parentMap: ParentMap = new Map()
+export function getNodeParents(tree: TreeNode[]): NodeParents {
+  const nodeParents: NodeParents = {}
 
-  initializeParentMap(tree, null)
+  initializeNodeParents(tree, null)
 
-  function initializeParentMap(nodes: TreeNode[], parent: FolderNode | null) {
+  function initializeNodeParents(nodes: TreeNode[], parent: FolderNode | null) {
     for (const node of nodes) {
-      parentMap.set(node.id, parent)
+      nodeParents[node.id] = parent
 
-      const isFolder = 'children' in node
-
-      if (isFolder && node.children.length) {
-        initializeParentMap(node.children, node)
+      if (isFolderNode(node) && node.children.length > 0) {
+        initializeNodeParents(node.children, node)
       }
     }
   }
 
-  return parentMap
+  return nodeParents
 }
 
-export function getFoldersMap(tree: TreeNode[]): FoldersMap {
-  const foldersMap: FoldersMap = new Map()
+export function getFoldersState(tree: TreeNode[]): FoldersState {
+  const foldersState: FoldersState = {}
 
-  initializeFolderMap(tree)
+  initializeFoldersState(tree)
 
-  function initializeFolderMap(nodes: TreeNode[]) {
+  function initializeFoldersState(nodes: TreeNode[]) {
     for (const node of nodes) {
-      if (node.nodeType === TreeNodeType.Folder) {
-        foldersMap.set(node.id, {
-          isOpen: node.isOpen ?? false,
+      if (isFolderNode(node)) {
+        const isOpen = node?.isOpen ?? node.children.length > 0
+
+        foldersState[node.id] = {
+          isOpen,
           isLoading: false,
           hasFetched: false,
-        })
+        }
 
-        if (node.children.length) initializeFolderMap(node.children)
+        if (node.children.length > 0) initializeFoldersState(node.children)
       }
     }
   }
 
-  return foldersMap
+  return foldersState
 }

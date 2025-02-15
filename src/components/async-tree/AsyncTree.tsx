@@ -1,59 +1,64 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './AsyncTree.css'
-import { default as TreeNodeComponent } from './components/tree-node/TreeNode'
+import { default as DefaultFolder } from './components/tree-folder/TreeFolder'
+import { default as DefaultItem } from './components/tree-item/TreeItem'
+import TreeNode from './components/tree-node/TreeNode'
 import { ROOT_NODE } from './constants'
+import { AsyncTreeContext } from './context/AsyncTreeContext'
 import {
   AsyncTreeProps,
-  DropPosition,
   FolderNode,
-  FoldersMap,
+  FoldersState,
   FolderState,
-  TreeMove,
-  TreeNode,
+  MoveData,
+  TreeNode as Node,
 } from './types'
 import { moveNode } from './utils/tree-operations'
-import { getFoldersMap, getParentMap, recursiveTreeMap } from './utils/tree-recursive'
-import { isFolderNode, isValidMove } from './utils/validations'
+import { getFoldersState, getNodeParents, recursiveTreeMap } from './utils/tree-recursive'
+import { isFolderNode } from './utils/validations'
 
 export default function AsyncTree({
-  initialTree,
-  customItem,
-  customFolder,
+  treeData,
+  folder: Folder = DefaultFolder,
+  item: Item = DefaultItem,
   fetchOnce = true,
   loadChildren,
   onDrop,
   onChange,
 }: AsyncTreeProps): JSX.Element {
-  const [tree, setTree] = useState<TreeNode[]>([{ ...ROOT_NODE, children: initialTree }])
-  const [foldersMap, setFoldersMap] = useState<FoldersMap>(() => getFoldersMap(initialTree))
+  const firstRenderRef = useRef(true)
+  const [foldersState, setFoldersState] = useState<FoldersState>(getFoldersState(treeData))
 
   useEffect(() => {
-    setTree([{ ...ROOT_NODE, children: initialTree }])
-    setFoldersMap(getFoldersMap(initialTree))
-  }, [initialTree])
+    if (firstRenderRef.current) return
 
-  const parentMap = useMemo(() => getParentMap(tree), [tree])
+    firstRenderRef.current = false
+
+    setFoldersState(getFoldersState(treeData))
+  }, [treeData])
+
+  const tree = useMemo(() => [{ ...ROOT_NODE, children: treeData }], [treeData])
+
+  const nodeParents = useMemo(() => getNodeParents(tree), [tree])
 
   const updateFolderState = (folderId: FolderNode['id'], newFolderState: Partial<FolderState>) => {
-    setFoldersMap((prevState) => {
-      const prevFolderState = prevState.get(folderId)
-
+    setFoldersState((prev) => {
       const updatedFolderState = {
-        ...prevFolderState,
+        ...prev[folderId],
         ...newFolderState,
       }
 
-      return new Map(prevState).set(folderId, updatedFolderState)
+      return { ...prev, [folderId]: updatedFolderState }
     })
   }
 
   const updateFolderChildren = (
-    tree: TreeNode[],
-    folderId: TreeNode['id'],
-    updatedChildren: TreeNode[]
+    tree: Node[],
+    folderId: FolderNode['id'],
+    updatedChildren: Node[]
   ) => {
     return recursiveTreeMap(tree, (node) => {
-      if (node.id === folderId && isFolderNode(node)) {
+      if (isFolderNode(node) && node.id === folderId) {
         return { ...node, children: updatedChildren }
       }
 
@@ -63,7 +68,8 @@ export default function AsyncTree({
 
   const handleFolderClick = async (folder: FolderNode) => {
     const { id } = folder
-    const { isOpen = false, hasFetched = false } = foldersMap.get(id) ?? {}
+    console.log(foldersState)
+    const { isOpen = false, hasFetched = false } = foldersState[id] ?? {}
 
     if (isOpen) return updateFolderState(id, { isOpen: false })
 
@@ -74,14 +80,10 @@ export default function AsyncTree({
 
       const children = await loadChildren(folder)
 
-      setTree((prev) => {
-        const newTree = updateFolderChildren(prev, id, children)
-        const rootChildren = [...(newTree[0] as FolderNode).children]
+      const newTree = updateFolderChildren(tree, id, children)
+      const { children: rootChildren } = newTree[0] as FolderNode
 
-        onChange?.(rootChildren)
-
-        return newTree
-      })
+      onChange?.(rootChildren)
 
       updateFolderState(id, {
         isOpen: true,
@@ -94,27 +96,12 @@ export default function AsyncTree({
     }
   }
 
-  const handleDrop = ({ source, target, position }: TreeMove) => {
-    if (source.id === target.id) return
+  const handleDrop = (dropData: MoveData) => {
+    const { source, target, position, prevParent, nextParent } = dropData
 
-    const isDroppingInside = position === DropPosition.Inside
+    const newTree = moveNode({ tree, ...dropData })
+    const { children: rootChildren } = newTree[0] as FolderNode
 
-    const prevParent = parentMap.get(source.id)
-    const nextParent = isDroppingInside && isFolderNode(target) ? target : parentMap.get(target.id)
-
-    if (!prevParent || !nextParent) return
-
-    const dropData = {
-      source,
-      target,
-      position,
-      prevParent,
-      nextParent,
-    }
-
-    if (!isValidMove({ ...dropData, parentMap })) return
-
-    /**@todo canDrop?.(dropData) */
     onDrop?.({
       source,
       target,
@@ -123,44 +110,36 @@ export default function AsyncTree({
       nextParent: nextParent.id === ROOT_NODE.id ? null : nextParent,
     })
 
-    setTree((prevTree) => {
-      const newTree = moveNode({ tree: prevTree, ...dropData })
-
-      const rootChildren = [...(newTree[0] as FolderNode).children]
-      onChange?.(rootChildren)
-
-      return newTree
-    })
+    onChange?.(rootChildren)
   }
 
-  const renderNode = (node: TreeNode, level: number = 0) => {
-    const { isOpen = false, isLoading = false } = foldersMap.get(node.id) ?? {}
+  const renderNode = (node: Node, level: number = 0) => {
+    const { isOpen = false, isLoading = false } = foldersState[node.id] ?? {}
+    const isFolder = isFolderNode(node)
 
     return (
       <React.Fragment key={node.id}>
-        <TreeNodeComponent
+        <TreeNode
           node={node}
           level={level}
           isOpen={isOpen}
           isLoading={isLoading}
-          customItem={customItem}
-          customFolder={customFolder}
+          folder={Folder}
+          item={Item}
           onFolderClick={handleFolderClick}
           onDrop={handleDrop}
         >
-          {isFolderNode(node) && isOpen && (
-            <ul role='group' className='tree-group'>
-              {node.children.map((child) => renderNode(child, level + 1))}
-            </ul>
-          )}
-        </TreeNodeComponent>
+          {isFolder && isOpen && node.children.map((child) => renderNode(child, level + 1))}
+        </TreeNode>
       </React.Fragment>
     )
   }
 
   return (
-    <ul role='tree' className='async-tree'>
-      {(tree[0] as FolderNode).children.map((node) => renderNode(node))}
-    </ul>
+    <AsyncTreeContext.Provider value={{ nodeParents }}>
+      <ul role='tree' className='async-tree'>
+        {tree[0].children.map((node) => renderNode(node))}
+      </ul>
+    </AsyncTreeContext.Provider>
   )
 }

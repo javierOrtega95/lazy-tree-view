@@ -5,9 +5,15 @@ export default function TreeFolder({
   node,
   isOpen = false,
   isLoading = false,
+  onToggleOpen,
 }: FolderProps): JSX.Element {
   return (
-    <div id={node.id} data-testid={node.id} className='tree-folder'>
+    <div
+      id={node.id}
+      data-testid={node.id}
+      className='tree-folder'
+      onClick={(e) => onToggleOpen(e, node)}
+    >
       <svg
         data-testid={`${node.id}-${isLoading ? 'loading-icon' : 'chevron-icon'}`}
         width={isLoading ? '12' : '24'}

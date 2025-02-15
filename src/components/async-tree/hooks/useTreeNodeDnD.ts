@@ -1,41 +1,33 @@
-import { useRef, useState } from 'react'
-import { DropPosition, TreeNode, TreeNodeProps } from '../types'
+import { useState } from 'react'
+import { useAsyncTree } from '../context/AsyncTreeContext'
+import { DropPosition, FolderNode, MoveData, OnDropNodeFn, TreeNode } from '../types'
 import { calculateDragPosition, parseNodeData } from '../utils/tree-operations'
-import { isFolderNode } from '../utils/validations'
-import { TreeNodeDnDdata } from './types'
+import { isFolderNode, isValidMove } from '../utils/validations'
 
-export default function useTreeNodeDnD(
-  node: TreeNode<{ isOpen?: boolean }>,
-  onDrop: TreeNodeProps['onDrop']
-): TreeNodeDnDdata {
+type TreeNodeDnDdata = {
+  dragPosition: DropPosition | null
+  handleDragStart: (event: React.DragEvent) => void
+  handleDragLeave: (event: React.DragEvent) => void
+  handleDragOver: (event: React.DragEvent) => void
+  handleDrop: (event: React.DragEvent) => void
+}
+
+export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): TreeNodeDnDdata {
+  const { nodeParents } = useAsyncTree()
   const [dragPosition, setDragPosition] = useState<DropPosition | null>(null)
-  const nodeRef = useRef<HTMLLIElement>(null)
-  const dragCounter = useRef<number>(0)
 
   const handleDragStart = (e: React.DragEvent) => {
     e.stopPropagation()
 
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('application/json', JSON.stringify(node))
-  }
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    dragCounter.current++
+    e.dataTransfer.setData('text/plain', JSON.stringify(node))
   }
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.stopPropagation()
     e.preventDefault()
 
-    dragCounter.current--
-
-    if (dragCounter.current <= 0) {
-      dragCounter.current = 0
-      setDragPosition(null)
-    }
+    setDragPosition(null)
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -44,17 +36,7 @@ export default function useTreeNodeDnD(
 
     e.dataTransfer.dropEffect = 'move'
 
-    if (!nodeRef.current) return
-
-    const contentRect = nodeRef.current.getBoundingClientRect()
-
-    const isFolder = isFolderNode(node)
-
-    const position = calculateDragPosition({
-      event: e,
-      contentRect,
-      isFolder,
-    })
+    const position = calculateDragPosition(e, isFolderNode(node))
 
     setDragPosition(position)
   }
@@ -63,28 +45,39 @@ export default function useTreeNodeDnD(
     e.preventDefault()
     e.stopPropagation()
 
-    dragCounter.current = 0
+    const source = parseNodeData(e.dataTransfer.getData('text/plain'))
+    const target = { ...node }
 
-    const sourceData = e.dataTransfer.getData('application/json')
-    const source = parseNodeData(sourceData)
+    const isSameNodeDrop = source?.id === target.id
 
-    if (!dragPosition || !source) return setDragPosition(null)
+    if (!dragPosition || !source || isSameNodeDrop) return setDragPosition(null)
 
-    const dropData = {
+    const isDroppingInside = dragPosition === DropPosition.Inside
+
+    const prevParent = nodeParents[source.id]
+    const nextParent = isDroppingInside ? (target as FolderNode) : nodeParents[target.id]
+
+    if (!prevParent || !nextParent) return
+
+    const data: MoveData = {
       source,
-      target: node,
+      target,
       position: dragPosition,
+      prevParent,
+      nextParent,
     }
 
-    onDrop(dropData)
+    if (!isValidMove({ ...data, nodeParents })) return setDragPosition(null)
+
+    /**@todo canDrop?.(data) */
+
     setDragPosition(null)
+    onDrop(data)
   }
 
   return {
     dragPosition,
-    nodeRef,
     handleDragStart,
-    handleDragEnter,
     handleDragLeave,
     handleDragOver,
     handleDrop,

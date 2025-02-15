@@ -1,12 +1,9 @@
-import {
-  THRESHOLD_AFTER_FOLDER_PERCENT,
-  THRESHOLD_BEFORE_PERCENT,
-  THRESHOLD_MID_PERCENT,
-} from '../constants'
-import { MoveData, DropPosition, FolderNode, TreeNode, TreeNodeType } from '../types'
+import { DROP_AFTER_FOLDER_PERCENT, DROP_BEFORE_PERCENT, DROP_MID_PERCENT } from '../constants'
+import { DropPosition, FolderNode, MoveData, TreeNode } from '../types'
 import { recursiveTreeMap } from './tree-recursive'
+import { isFolderNode } from './validations'
 
-export function moveNode(data: MoveData): TreeNode[] {
+export function moveNode(data: { tree: TreeNode[] } & MoveData): TreeNode[] {
   const { tree, source, target, position, prevParent, nextParent } = data
 
   const isDroppedInSameParent = prevParent.id === nextParent.id
@@ -22,7 +19,7 @@ function handleSameParentMove({
   target,
   position,
   prevParent,
-}: Omit<MoveData, 'nextParent'>): TreeNode[] {
+}: Omit<MoveData, 'nextParent'> & { tree: TreeNode[] }): TreeNode[] {
   const { id, children } = prevParent
 
   const sourceIndex = children.findIndex((child) => child.id === source.id)
@@ -62,9 +59,8 @@ function handleDifferentParentMove({
   position,
   prevParent,
   nextParent,
-}: MoveData): TreeNode[] {
-  const isDroppingInsideFolder =
-    target.nodeType === TreeNodeType.Folder && position === DropPosition.Inside
+}: MoveData & { tree: TreeNode[] }): TreeNode[] {
+  const isDroppingInsideFolder = isFolderNode(target) && position === DropPosition.Inside
 
   return recursiveTreeMap(tree, (node) => {
     if (node.id === prevParent.id) {
@@ -103,31 +99,22 @@ function handleDifferentParentMove({
   })
 }
 
-export function calculateDragPosition({
-  event,
-  contentRect,
-  isFolder,
-}: {
-  event: React.DragEvent
-  contentRect: Pick<DOMRect, 'height' | 'top'>
-  isFolder: boolean
-}): DropPosition {
-  const { height, top } = contentRect
-  const relativeY = event.clientY - top
+export function calculateDragPosition(event: React.DragEvent, isFolder: boolean): DropPosition {
+  const target = event.currentTarget as HTMLElement
+  const offsetY = event.nativeEvent.offsetY
+  const height = target.offsetHeight
 
-  if (isFolder) {
-    if (relativeY < height * THRESHOLD_BEFORE_PERCENT) {
-      return DropPosition.Before
-    }
+  const beforeThreshold = height * DROP_BEFORE_PERCENT
 
-    if (relativeY > height * THRESHOLD_AFTER_FOLDER_PERCENT) {
-      return DropPosition.After
-    }
+  const afterPercent = isFolder ? DROP_AFTER_FOLDER_PERCENT : DROP_MID_PERCENT
 
-    return DropPosition.Inside
-  }
+  const afterThreshold = height * afterPercent
 
-  return relativeY < height * THRESHOLD_MID_PERCENT ? DropPosition.Before : DropPosition.After
+  if (offsetY <= beforeThreshold) return DropPosition.Before
+
+  if (isFolder && offsetY <= afterThreshold) return DropPosition.Inside
+
+  return DropPosition.After
 }
 
 export function parseNodeData(data: string): TreeNode | null {
