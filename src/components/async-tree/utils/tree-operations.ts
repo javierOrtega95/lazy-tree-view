@@ -100,14 +100,15 @@ function handleDifferentParentMove({
 }
 
 export function calculateDragPosition(event: React.DragEvent, isFolder: boolean): DropPosition {
-  const target = event.currentTarget as HTMLElement
-  const offsetY = event.nativeEvent.offsetY
+  const { currentTarget, nativeEvent } = event
+
+  const target = currentTarget as HTMLElement
+  const { offsetY } = nativeEvent
   const height = target.offsetHeight
 
   const beforeThreshold = height * DROP_BEFORE_PERCENT
 
   const afterPercent = isFolder ? DROP_AFTER_FOLDER_PERCENT : DROP_MID_PERCENT
-
   const afterThreshold = height * afterPercent
 
   if (offsetY <= beforeThreshold) return DropPosition.Before

@@ -4,7 +4,7 @@ import { DropPosition, FolderNode, MoveData, OnDropNodeFn, TreeNode } from '../t
 import { calculateDragPosition, parseNodeData } from '../utils/tree-operations'
 import { isFolderNode, isValidMove } from '../utils/validations'
 
-type TreeNodeDnDdata = {
+export type TreeNodeDnDdata = {
   dragPosition: DropPosition | null
   handleDragStart: (event: React.DragEvent) => void
   handleDragLeave: (event: React.DragEvent) => void
@@ -20,7 +20,7 @@ export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): Tr
     e.stopPropagation()
 
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', JSON.stringify(node))
+    e.dataTransfer.setData('application/json', JSON.stringify(node))
   }
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -45,7 +45,7 @@ export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): Tr
     e.preventDefault()
     e.stopPropagation()
 
-    const source = parseNodeData(e.dataTransfer.getData('text/plain'))
+    const source = parseNodeData(e.dataTransfer.getData('application/json'))
     const target = { ...node }
 
     const isSameNodeDrop = source?.id === target.id

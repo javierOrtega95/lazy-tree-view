@@ -1,24 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { FolderNode, TreeNode, TreeNodeType } from '../types'
-import { getFoldersMap, getParentMap, recursiveTreeMap } from './tree-recursive'
+import { FolderNode, TreeNode } from '../types'
+import { getFoldersState, getNodeParents, recursiveTreeMap } from './tree-recursive'
 
 describe('tree-recursive utilities', () => {
+  const rootFolder = {
+    id: crypto.randomUUID(),
+    name: 'Folder 1',
+  }
+
+  const childrenFolder = {
+    id: crypto.randomUUID(),
+    name: 'Folder 2',
+    children: [],
+  }
+
   const mockTree: TreeNode[] = [
     {
-      id: crypto.randomUUID(),
-      name: 'Folder 1',
-      nodeType: TreeNodeType.Folder,
+      ...rootFolder,
       children: [
-        {
-          id: crypto.randomUUID(),
-          name: 'Folder 2',
-          nodeType: TreeNodeType.Folder,
-          children: [],
-        },
+        childrenFolder,
         {
           id: crypto.randomUUID(),
           name: 'Item 1',
-          nodeType: TreeNodeType.Item,
         },
       ],
     },
@@ -43,90 +46,85 @@ describe('tree-recursive utilities', () => {
     })
   })
 
-  describe('getParentMap', () => {
+  describe('getNodeParents', () => {
     it('should map each node to its parent correctly', () => {
-      const parentMap = getParentMap(mockTree)
+      const nodeParents = getNodeParents(mockTree)
 
       const [rootFolder] = mockTree
       const { children } = rootFolder as FolderNode
 
-      // Assert that 'Folder1' has no parent (root node)
-      const parentOfFirstNode = parentMap.get(rootFolder.id)
+      const parentOfFirstNode = nodeParents[rootFolder.id]
       expect(parentOfFirstNode).toBeNull()
 
-      // Assert that the parent of 'Folder2' and 'Item1' is 'Folder1'
       for (const child of children) {
-        const childParent = parentMap.get(child.id)
+        const childParent = nodeParents[child.id]
         expect(childParent).toBe(rootFolder)
       }
     })
 
-    it('should return an empty map for an empty tree', () => {
-      const emptyTree: TreeNode[] = []
-      const parentMap = getParentMap(emptyTree)
+    it('should return an empty object for an empty tree', () => {
+      const nodeParents = getNodeParents([])
 
-      // Assert that the map is empty
-      expect(parentMap.size).toBe(0)
+      expect(nodeParents).toEqual({})
     })
   })
 
-  describe('getFoldersMap', () => {
-    it('should return an empty map for an empty tree', () => {
-      const tree: TreeNode[] = []
-      const foldersMap = getFoldersMap(tree)
+  describe('getFoldersState', () => {
+    it('should return an empty object for an empty tree', () => {
+      const foldersState = getFoldersState([])
 
-      expect(foldersMap.size).toBe(0)
+      expect(foldersState).toEqual({})
     })
 
-    it('should return an empty map when there are no folders', () => {
+    it('should return an empty object when there are no folders', () => {
       const tree: TreeNode[] = [
-        { id: 'item1', name: 'Item 1', nodeType: TreeNodeType.Item },
-        { id: 'item2', name: 'Item 2', nodeType: TreeNodeType.Item },
+        { id: 'item1', name: 'Item 1' },
+        { id: 'item2', name: 'Item 2' },
       ]
-      const foldersMap = getFoldersMap(tree)
+      const foldersState = getFoldersState(tree)
 
-      expect(foldersMap.size).toBe(0)
+      expect(foldersState).toEqual({})
     })
 
     it('should map all folders with default states', () => {
-      const foldersMap = getFoldersMap(mockTree)
+      const foldersState = getFoldersState(mockTree)
 
-      expect(foldersMap.size).toBe(2)
-
-      const expectedState = {
+      const defaultState = {
         isOpen: false,
         isLoading: false,
         hasFetched: false,
       }
 
-      const { id, children } = mockTree[0] as FolderNode
+      const exectedState = {
+        [rootFolder.id]: {
+          ...defaultState,
+          isOpen: true,
+        },
+        [childrenFolder.id]: defaultState,
+      }
 
-      const firstFolder = foldersMap.get(id)
-      const secondFolder = foldersMap.get(children[0].id)
-
-      expect(firstFolder).toEqual(expectedState)
-      expect(secondFolder).toEqual(expectedState)
+      expect(foldersState).toEqual(exectedState)
     })
 
     it('should preserve the `isOpen` value if defined in the tree', () => {
       const mockFolder = {
         id: crypto.randomUUID(),
         name: 'Folder 1',
-        nodeType: TreeNodeType.Folder,
         isOpen: true,
         children: [],
       }
 
-      const foldersMap = getFoldersMap([mockFolder])
+      const foldersState = getFoldersState([mockFolder])
 
       const expectedState = {
-        isOpen: true,
-        isLoading: false,
-        hasFetched: false,
+        [mockFolder.id]: {
+          isOpen: true,
+          isLoading: false,
+          hasFetched: false,
+        },
       }
 
-      expect(foldersMap.size).toBe(1)
-      expect(foldersMap.get(mockFolder.id)).toEqual(expectedState)
+      expect(foldersState).toEqual(expectedState)
     })
   })
 })

@@ -2,20 +2,21 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TREE_NODE_INDENTATION } from '../../constants'
-import { TreeNodeDnDdata } from '../../hooks/types'
+import { AsyncTreeContext } from '../../context/AsyncTreeContext'
 import {
+  BaseNode,
   DropPosition,
   FolderNode,
   FolderProps,
-  ItemNode,
   ItemProps,
   TreeNodeProps,
-  TreeNodeType,
 } from '../../types'
+import TreeFolder from '../tree-folder/TreeFolder'
+import TreeItem from '../tree-item/TreeItem'
 import TreeNode from './TreeNode'
+import { TreeNodeDnDdata } from '../../hooks/useTreeNodeDnD'
 
 const mockHandleDragStart = vi.fn()
-const mockHandleDragEnter = vi.fn()
 const mockHandleDragLeave = vi.fn()
 const mockHandleDragOver = vi.fn()
 const mockHandleDrop = vi.fn()
@@ -24,10 +25,8 @@ const defaultTreeNodeDnDdata: TreeNodeDnDdata = {
   handleDragStart: mockHandleDragStart,
   handleDragLeave: mockHandleDragLeave,
   handleDragOver: mockHandleDragOver,
-  handleDragEnter: mockHandleDragEnter,
   handleDrop: mockHandleDrop,
   dragPosition: null,
-  nodeRef: { current: null },
 }
 
 vi.mock('../../hooks/useTreeNodeDnD', () => ({
@@ -38,20 +37,18 @@ describe('TreeNode Component', () => {
   const mockFolderNode: FolderNode = {
     id: crypto.randomUUID(),
     name: 'Test Folder',
-    nodeType: TreeNodeType.Folder,
     children: [],
   }
 
-  const mockItemNode: ItemNode = {
+  const mockItemNode: BaseNode = {
     id: crypto.randomUUID(),
     name: 'Test Folder',
-    nodeType: TreeNodeType.Item,
   }
 
   const defaultProps: Omit<TreeNodeProps, 'node'> = {
     level: 0,
-    customItem: undefined,
-    customFolder: undefined,
+    item: TreeItem,
+    folder: TreeFolder,
     isOpen: false,
     isLoading: false,
     onFolderClick: vi.fn(),
@@ -67,7 +64,11 @@ describe('TreeNode Component', () => {
     const { node } = folderProps
     const id = `tree-node-${node.id}`
 
-    render(<TreeNode {...folderProps} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...folderProps} />
+      </AsyncTreeContext.Provider>
+    )
 
     const $treeNode = screen.getByTestId(id)
     expect($treeNode).toBeInTheDocument()
@@ -84,7 +85,11 @@ describe('TreeNode Component', () => {
       node: mockFolderNode,
     }
 
-    render(<TreeNode {...folderProps} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...folderProps} />
+      </AsyncTreeContext.Provider>
+    )
 
     const $folderNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
     expect($folderNode).toBeInTheDocument()
@@ -96,7 +101,11 @@ describe('TreeNode Component', () => {
       node: mockItemNode,
     }
 
-    render(<TreeNode {...itemProps} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...itemProps} />
+      </AsyncTreeContext.Provider>
+    )
 
     const $itemNode = screen.getByTestId(`tree-node-${mockItemNode.id}`)
     expect($itemNode).toBeInTheDocument()
@@ -110,10 +119,14 @@ describe('TreeNode Component', () => {
     const props: TreeNodeProps = {
       ...defaultProps,
       node: mockFolderNode,
-      customFolder: CusmtomFolder,
+      folder: CusmtomFolder,
     }
 
-    render(<TreeNode {...props} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...props} />
+      </AsyncTreeContext.Provider>
+    )
 
     const $customFolder = screen.getByTestId(`custom-folder-${mockFolderNode.id}`)
     expect($customFolder).toBeInTheDocument()
@@ -127,10 +140,14 @@ describe('TreeNode Component', () => {
     const props: TreeNodeProps = {
       ...defaultProps,
       node: mockItemNode,
-      customItem: CusmtomItem,
+      item: CusmtomItem,
     }
 
-    render(<TreeNode {...props} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...props} />
+      </AsyncTreeContext.Provider>
+    )
 
     const $customItem = screen.getByTestId(`custom-item-${mockItemNode.id}`)
     expect($customItem).toBeInTheDocument()
@@ -140,7 +157,11 @@ describe('TreeNode Component', () => {
     const props = { ...defaultProps, node: mockItemNode, level: 2 }
     const { node, level } = props
 
-    render(<TreeNode {...props} level={level} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...props} level={level} />
+      </AsyncTreeContext.Provider>
+    )
 
     const $folderNode = screen.getByTestId(`tree-node-${node.id}`)
     expect($folderNode).toHaveStyle(`padding-left: ${TREE_NODE_INDENTATION * level}px`)
@@ -149,12 +170,16 @@ describe('TreeNode Component', () => {
   it('should handle onFolderClick correctly', async () => {
     const user = userEvent.setup()
 
-    const props = { ...defaultProps, node: mockFolderNode, level: 2 }
+    const props = { ...defaultProps, node: mockFolderNode }
     const { node, onFolderClick } = props
 
-    render(<TreeNode {...props} />)
+    render(
+      <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
+        <TreeNode {...props} />
+      </AsyncTreeContext.Provider>
+    )
 
-    const $folderNode = screen.getByTestId(`tree-node-${node.id}`)
+    const $folderNode = screen.getByTestId(node.id)
 
     await user.click($folderNode)
 

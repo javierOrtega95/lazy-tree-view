@@ -1,19 +1,26 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
-import { FolderNode, TreeNodeType } from '../../types'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { FolderNode } from '../../types'
 import TreeFolder from './TreeFolder'
 
-const mockNode: FolderNode = {
-  id: crypto.randomUUID(),
-  name: 'TreeFolder Test',
-  nodeType: TreeNodeType.Folder,
-  children: [],
-}
-
 describe('TreeFolder', () => {
+  const mockNode: FolderNode = {
+    id: crypto.randomUUID(),
+    name: 'TreeFolder Test',
+    children: [],
+  }
+
+  const mockOnToggleOpen = vi.fn()
+
   it('renders the TreeFolder component successfully', () => {
     render(
-      <TreeFolder node={mockNode} level={0} isOpen={false} isLoading={false} childrenCount={0} />
+      <TreeFolder
+        node={mockNode}
+        level={0}
+        isOpen={false}
+        isLoading={false}
+        onToggleOpen={mockOnToggleOpen}
+      />
     )
 
     const { id, name } = mockNode
@@ -31,7 +38,13 @@ describe('TreeFolder', () => {
 
   it('displays a loading icon when isLoading is true', () => {
     render(
-      <TreeFolder node={mockNode} isOpen={false} isLoading={true} level={0} childrenCount={0} />
+      <TreeFolder
+        node={mockNode}
+        isOpen={false}
+        isLoading={true}
+        level={0}
+        onToggleOpen={mockOnToggleOpen}
+      />
     )
 
     const $loadingIcon = screen.getByTestId(`${mockNode.id}-loading-icon`)
@@ -41,11 +54,35 @@ describe('TreeFolder', () => {
 
   it('displays an open chevron icon when isOpen is true', () => {
     render(
-      <TreeFolder node={mockNode} isOpen={true} isLoading={false} level={0} childrenCount={0} />
+      <TreeFolder
+        node={mockNode}
+        isOpen={true}
+        isLoading={false}
+        level={0}
+        onToggleOpen={mockOnToggleOpen}
+      />
     )
 
     const $chevronIcon = screen.getByTestId(`${mockNode.id}-chevron-icon`)
     expect($chevronIcon).toBeInTheDocument()
     expect($chevronIcon).toHaveClass('icon chevron open')
+  })
+
+  it('calls onToggleOpen when clicking the folder', () => {
+    render(
+      <TreeFolder
+        node={mockNode}
+        isOpen={false}
+        isLoading={false}
+        level={0}
+        onToggleOpen={mockOnToggleOpen}
+      />
+    )
+
+    const folder = screen.getByTestId(mockNode.id)
+
+    fireEvent.click(folder)
+
+    expect(mockOnToggleOpen).toHaveBeenCalledWith(expect.any(Object), mockNode)
   })
 })

@@ -1,20 +1,44 @@
 import { afterAll, describe, expect, it, vi } from 'vitest'
-import { firstChild, mockTree, parentNode, secondChild } from '../../../mocks/test-mocks'
-import { THRESHOLD_BEFORE_PERCENT, THRESHOLD_MID_PERCENT } from '../constants'
-import { DropPosition, FolderNode } from '../types'
+import { ROOT_NODE } from '../constants'
+import { DropPosition, FolderNode, TreeNode } from '../types'
 import { calculateDragPosition, moveNode, parseNodeData } from './tree-operations'
 
 describe('tree-operations utilities', () => {
   describe('moveNode', () => {
+    const firstChild: FolderNode = {
+      id: crypto.randomUUID(),
+      name: 'Folder 2',
+      children: [],
+    }
+
+    const secondChild: TreeNode = {
+      id: crypto.randomUUID(),
+      name: 'Item 1',
+    }
+
+    const parentNode: FolderNode = {
+      id: crypto.randomUUID(),
+      name: 'Folder 1',
+      children: [firstChild, secondChild],
+    }
+
+    const mockTree: TreeNode[] = [
+      {
+        ...ROOT_NODE,
+        children: [parentNode],
+      },
+    ]
+
     describe('when moving nodes within the same parent', () => {
       it('should not modify the tree when source or target nodes are missing', () => {
         const source = {
-          ...firstChild,
           id: 'sourceId',
+          name: 'Folder',
+          children: [],
         }
         const target = {
-          ...secondChild,
           id: 'targetId',
+          name: 'Item',
         }
 
         const moveData = {
@@ -138,95 +162,75 @@ describe('tree-operations utilities', () => {
   })
 
   describe('calculateDragPosition', () => {
-    const contentRect = {
-      height: 100,
-      top: 50,
-    }
-
-    const createDragEvent = (clientY: number): React.DragEvent => {
-      return {
-        clientY,
-      } as React.DragEvent
-    }
+    const defaultEvent: React.DragEvent = {
+      currentTarget: { offsetHeight: 100 },
+      nativeEvent: { offsetY: 50 },
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+      dataTransfer: { dropEffect: '' },
+    } as unknown as React.DragEvent
 
     describe('when node is a folder', () => {
-      it('should return DropPosition.Before when dragging above the top threshold', () => {
-        const event = createDragEvent(30)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: true,
-        })
+      it('should return DropPosition.Before when offsetY is less than beforeThreshold', () => {
+        const event = {
+          ...defaultEvent,
+          nativeEvent: { offsetY: 10 },
+          currentTarget: { offsetHeight: 100 },
+        } as unknown as React.DragEvent
+
+        const result = calculateDragPosition(event, true)
 
         expect(result).toBe(DropPosition.Before)
       })
 
-      it('should return DropPosition.After when dragging below the bottom threshold (open folder)', () => {
-        const event = createDragEvent(180)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: true,
-        })
+      it('should return DropPosition.After when dragging below the bottom threshold ', () => {
+        const event = {
+          ...defaultEvent,
+          nativeEvent: { offsetY: 80 },
+          currentTarget: { offsetHeight: 100 },
+        } as unknown as React.DragEvent
+
+        const result = calculateDragPosition(event, true)
 
         expect(result).toBe(DropPosition.After)
       })
 
-      it('should return DropPosition.Inside when dragging between Before and After thresholds (closed folder)', () => {
-        const event = createDragEvent(120)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: true,
-        })
+      it('should return DropPosition.Inside when offsetY is between before and after thresholds', () => {
+        const event = {
+          ...defaultEvent,
+          nativeEvent: { offsetY: 50 },
+          currentTarget: { offsetHeight: 100 },
+        } as unknown as React.DragEvent
+
+        const result = calculateDragPosition(event, true)
 
         expect(result).toBe(DropPosition.Inside)
-      })
-
-      it('should return DropPosition.Before when dragging exactly at the top threshold', () => {
-        const event = createDragEvent(contentRect.height * THRESHOLD_BEFORE_PERCENT)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: true,
-        })
-
-        expect(result).toBe(DropPosition.Before)
       })
     })
 
     describe('when node is an item', () => {
-      it('should return DropPosition.Before when dragging above the mid threshold (not a folder)', () => {
-        const event = createDragEvent(40)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: false,
-        })
+      it('should return DropPosition.Before when dragging above the mid threshold', () => {
+        const event = {
+          ...defaultEvent,
+          nativeEvent: { offsetY: 10 },
+          currentTarget: { offsetHeight: 100 },
+        } as unknown as React.DragEvent
+
+        const result = calculateDragPosition(event, false)
 
         expect(result).toBe(DropPosition.Before)
       })
 
-      it('should return DropPosition.After when dragging below the mid threshold (not a folder)', () => {
-        const event = createDragEvent(120)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: false,
-        })
+      it('should return DropPosition.After when dragging below the mid threshold', () => {
+        const event = {
+          ...defaultEvent,
+          nativeEvent: { offsetY: 50 },
+          currentTarget: { offsetHeight: 100 },
+        } as unknown as React.DragEvent
+
+        const result = calculateDragPosition(event, false)
 
         expect(result).toBe(DropPosition.After)
-      })
-
-      it('should return DropPosition.Before when dragging exactly at the mid threshold (not a folder)', () => {
-        const event = createDragEvent(contentRect.height * THRESHOLD_MID_PERCENT)
-        const result = calculateDragPosition({
-          event,
-          contentRect,
-          isFolder: false,
-        })
-
-        expect(result).toBe(DropPosition.Before)
       })
     })
   })

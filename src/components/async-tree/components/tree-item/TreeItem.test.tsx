@@ -1,13 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { ItemNode, TreeNodeType } from '../../types'
 import TreeItem from './TreeItem'
+import { BaseNode } from '../../types'
 
 describe('TreeItem', () => {
-  const mockNode: ItemNode = {
+  const mockNode: BaseNode = {
     id: crypto.randomUUID(),
     name: 'TreeItem Test',
-    nodeType: TreeNodeType.Item,
   }
 
   it('renders the TreeItem component successfully', () => {
