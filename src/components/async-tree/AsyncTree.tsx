@@ -68,7 +68,6 @@ export default function AsyncTree({
 
   const handleFolderClick = async (folder: FolderNode) => {
     const { id } = folder
-    console.log(foldersState)
     const { isOpen = false, hasFetched = false } = foldersState[id] ?? {}
 
     if (isOpen) return updateFolderState(id, { isOpen: false })

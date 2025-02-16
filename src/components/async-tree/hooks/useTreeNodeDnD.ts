@@ -16,36 +16,36 @@ export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): Tr
   const { nodeParents } = useAsyncTree()
   const [dragPosition, setDragPosition] = useState<DropPosition | null>(null)
 
-  const handleDragStart = (e: React.DragEvent) => {
-    e.stopPropagation()
+  const handleDragStart = (event: React.DragEvent) => {
+    event.stopPropagation()
 
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('application/json', JSON.stringify(node))
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('application/json', JSON.stringify(node))
   }
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
 
     setDragPosition(null)
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
 
-    e.dataTransfer.dropEffect = 'move'
+    event.dataTransfer.dropEffect = 'move'
 
-    const position = calculateDragPosition(e, isFolderNode(node))
+    const position = calculateDragPosition(event, isFolderNode(node))
 
     setDragPosition(position)
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
 
-    const source = parseNodeData(e.dataTransfer.getData('application/json'))
+    const source = parseNodeData(event.dataTransfer.getData('application/json'))
     const target = { ...node }
 
     const isSameNodeDrop = source?.id === target.id
@@ -61,8 +61,8 @@ export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): Tr
 
     const data: MoveData = {
       source,
-      target,
       position: dragPosition,
+      target,
       prevParent,
       nextParent,
     }
