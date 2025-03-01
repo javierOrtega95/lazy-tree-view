@@ -27,16 +27,26 @@ export type FolderState = {
   hasFetched?: boolean
 }
 
+export type DragClassNames = {
+  dragOver: string
+  dragBefore: string
+  dragAfter: string
+  dropNotAllowed: string
+}
+
 export interface AsyncTreeProps {
   treeData: TreeNode[]
   loadChildren: (node: TreeNode) => Promise<TreeNode[]>
   fetchOnce?: boolean
   folder?: React.FC<FolderProps>
   item?: React.FC<ItemProps>
+  dragClassNames?: DragClassNames
+  canDrop?: canDropFn
   onDrop?: (data: DropData) => void
   onChange?: (tree: TreeNode[]) => void
 }
 
+export type canDropFn = (data: DropData) => boolean
 export type OnDropNodeFn = (data: MoveData) => void
 
 export interface TreeNodeProps
@@ -45,7 +55,9 @@ export interface TreeNodeProps
     ItemProps {
   folder: React.FC<FolderProps>
   item: React.FC<ItemProps>
+  dragClassNames: DragClassNames
   onFolderClick: (node: FolderNode) => void
+  canDrop: canDropFn
   onDrop: OnDropNodeFn
 }
 

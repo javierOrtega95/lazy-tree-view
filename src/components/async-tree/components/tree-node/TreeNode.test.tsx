@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { TREE_NODE_INDENTATION } from '../../constants'
+import { defaultDnDclassNames, TREE_NODE_INDENTATION } from '../../constants'
 import { AsyncTreeContext } from '../../context/AsyncTreeContext'
 import {
   BaseNode,
@@ -22,6 +22,7 @@ const mockHandleDragOver = vi.fn()
 const mockHandleDrop = vi.fn()
 
 const defaultTreeNodeDnDdata: TreeNodeDnDdata = {
+  isDropAllowed: true,
   handleDragStart: mockHandleDragStart,
   handleDragLeave: mockHandleDragLeave,
   handleDragOver: mockHandleDragOver,
@@ -51,6 +52,8 @@ describe('TreeNode Component', () => {
     folder: TreeFolder,
     isOpen: false,
     isLoading: false,
+    dragClassNames: defaultDnDclassNames,
+    canDrop: vi.fn(),
     onFolderClick: vi.fn(),
     onDrop: vi.fn(),
   }
@@ -227,6 +230,26 @@ describe('TreeNode Component', () => {
       expect(mockHandleDragOver).toHaveBeenCalled()
     })
 
+    it('should apply custom drag-over class when dragging over ', () => {
+      defaultTreeNodeDnDdata.dragPosition = DropPosition.Inside
+
+      const customClassName = 'custom-drag-over'
+
+      const props = {
+        ...defaultProps,
+        node: mockFolderNode,
+        dragClassNames: { ...defaultProps.dragClassNames, dragOver: customClassName },
+      }
+      render(<TreeNode {...props} />)
+
+      const $treeNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
+
+      fireEvent.dragOver($treeNode)
+
+      expect($treeNode).toHaveClass(`tree-node ${customClassName}`)
+      expect(mockHandleDragOver).toHaveBeenCalled()
+    })
+
     it('should call handleDrop when a node is dropped', async () => {
       const props = { ...defaultProps, node: mockFolderNode }
       render(<TreeNode {...props} />)
@@ -249,6 +272,27 @@ describe('TreeNode Component', () => {
       )
 
       expect($dropIndicator).toBeInTheDocument()
+      expect($dropIndicator).toHaveClass('drag-before')
+    })
+
+    it('should apply custom className to drop indicator when position is before', () => {
+      defaultTreeNodeDnDdata.dragPosition = DropPosition.Before
+
+      const customClassName = 'custom-drag-before'
+
+      const props = {
+        ...defaultProps,
+        node: mockFolderNode,
+        dragClassNames: { ...defaultProps.dragClassNames, dragBefore: customClassName },
+      }
+      render(<TreeNode {...props} />)
+
+      const $dropIndicator = screen.getByTestId(
+        `drop-indicator-${DropPosition.Before}-${mockFolderNode.id}`
+      )
+
+      expect($dropIndicator).toBeInTheDocument()
+      expect($dropIndicator).toHaveClass(customClassName)
     })
 
     it('should display a drop indicator after the tree node', () => {
@@ -262,6 +306,27 @@ describe('TreeNode Component', () => {
       )
 
       expect($dropIndicator).toBeInTheDocument()
+      expect($dropIndicator).toHaveClass('drag-after')
+    })
+
+    it('should apply custom className to drop indicator when position is after', () => {
+      defaultTreeNodeDnDdata.dragPosition = DropPosition.After
+
+      const customClassName = 'custom-drag-after'
+
+      const props = {
+        ...defaultProps,
+        node: mockFolderNode,
+        dragClassNames: { ...defaultProps.dragClassNames, dragAfter: customClassName },
+      }
+      render(<TreeNode {...props} />)
+
+      const $dropIndicator = screen.getByTestId(
+        `drop-indicator-${DropPosition.After}-${mockFolderNode.id}`
+      )
+
+      expect($dropIndicator).toBeInTheDocument()
+      expect($dropIndicator).toHaveClass(customClassName)
     })
   })
 })

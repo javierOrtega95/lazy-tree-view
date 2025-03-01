@@ -7,6 +7,7 @@ import { AsyncTreeContext } from '../context/AsyncTreeContext'
 
 describe('useTreeNodeDnD', () => {
   const mockOnDrop = vi.fn()
+  const mockCanDrop = vi.fn().mockReturnValue(false)
 
   const mockTree: TreeNode[] = [
     {
@@ -47,13 +48,17 @@ describe('useTreeNodeDnD', () => {
   )
 
   it('should initialize with null drag position', () => {
-    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop), { wrapper })
+    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop, mockCanDrop), {
+      wrapper,
+    })
 
     expect(result.current.dragPosition).toBeNull()
   })
 
   it('should handle drag start correctly', () => {
-    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop), { wrapper })
+    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop, mockCanDrop), {
+      wrapper,
+    })
 
     const dragEvent = {
       stopPropagation: vi.fn(),
@@ -73,7 +78,9 @@ describe('useTreeNodeDnD', () => {
   })
 
   it('should set dragPosition on drag over', () => {
-    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop), { wrapper })
+    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop, mockCanDrop), {
+      wrapper,
+    })
 
     const dragEvent = {
       preventDefault: vi.fn(),
@@ -95,7 +102,9 @@ describe('useTreeNodeDnD', () => {
   })
 
   it('should call onDrop with correct data', () => {
-    const { result } = renderHook(() => useTreeNodeDnD(childrenFolder, mockOnDrop), { wrapper })
+    const { result } = renderHook(() => useTreeNodeDnD(childrenFolder, mockOnDrop, mockCanDrop), {
+      wrapper,
+    })
 
     const dragEvent = {
       stopPropagation: vi.fn(),
@@ -129,5 +138,35 @@ describe('useTreeNodeDnD', () => {
     expect(dragEvent.preventDefault).toHaveBeenCalled()
     expect(dragEvent.stopPropagation).toHaveBeenCalled()
     expect(mockOnDrop).toHaveBeenCalledWith(onDropData)
+  })
+
+  it('should update isDropAllowed based on canDrop function', () => {
+    const mockCanDrop = vi.fn().mockReturnValue(false)
+    const { result } = renderHook(() => useTreeNodeDnD(childrenItem, mockOnDrop, mockCanDrop), {
+      wrapper,
+    })
+
+    const dragEvent = {
+      stopPropagation: vi.fn(),
+      preventDefault: vi.fn(),
+      currentTarget: { offsetHeight: 100 },
+      nativeEvent: { offsetY: 50 },
+      dataTransfer: {
+        setData: vi.fn(),
+        getData: vi.fn().mockReturnValue(JSON.stringify(childrenFolder)),
+      },
+    } as unknown as React.DragEvent
+
+    act(() => {
+      result.current.handleDragStart(dragEvent)
+      result.current.handleDragOver(dragEvent)
+    })
+
+    act(() => {
+      result.current.handleDrop(dragEvent)
+    })
+
+    expect(mockCanDrop).toHaveBeenCalled()
+    expect(result.current.isDropAllowed).toBe(false)
   })
 })

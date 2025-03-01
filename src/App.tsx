@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import AsyncTree from './components/async-tree/AsyncTree'
 import { DropData, TreeNode } from './components/async-tree/types'
-import { DEFAULT_TREE } from './mocks/tree-mocks'
+import { DEFAULT_TREE } from './mocks/storybook'
 
 function App() {
   const [treeData, setTreeData] = useState<TreeNode[]>(DEFAULT_TREE)

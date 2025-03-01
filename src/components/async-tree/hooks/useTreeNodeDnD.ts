@@ -1,19 +1,25 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useAsyncTree } from '../context/AsyncTreeContext'
-import { DropPosition, FolderNode, MoveData, OnDropNodeFn, TreeNode } from '../types'
-import { calculateDragPosition, parseNodeData } from '../utils/tree-operations'
+import { canDropFn, DropPosition, FolderNode, MoveData, OnDropNodeFn, TreeNode } from '../types'
+import { calculateDragPosition, normalizeNewParent, parseNodeData } from '../utils/tree-operations'
 import { isFolderNode, isValidMove } from '../utils/validations'
 
 export type TreeNodeDnDdata = {
   dragPosition: DropPosition | null
+  isDropAllowed: boolean
   handleDragStart: (event: React.DragEvent) => void
   handleDragLeave: (event: React.DragEvent) => void
   handleDragOver: (event: React.DragEvent) => void
   handleDrop: (event: React.DragEvent) => void
 }
 
-export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): TreeNodeDnDdata {
+export default function useTreeNodeDnD(
+  node: TreeNode,
+  onDrop: OnDropNodeFn,
+  canDrop: canDropFn
+): TreeNodeDnDdata {
   const { nodeParents } = useAsyncTree()
+  const isDropAllowedRef = useRef<boolean>(true)
   const [dragPosition, setDragPosition] = useState<DropPosition | null>(null)
 
   const handleDragStart = (event: React.DragEvent) => {
@@ -69,14 +75,20 @@ export default function useTreeNodeDnD(node: TreeNode, onDrop: OnDropNodeFn): Tr
 
     if (!isValidMove({ ...data, nodeParents })) return setDragPosition(null)
 
-    /**@todo canDrop?.(data) */
+    const isDropAllowed = canDrop?.({
+      ...data,
+      prevParent: normalizeNewParent(prevParent),
+      nextParent: normalizeNewParent(nextParent),
+    })
 
+    isDropAllowedRef.current = isDropAllowed
     setDragPosition(null)
     onDrop(data)
   }
 
   return {
     dragPosition,
+    isDropAllowed: isDropAllowedRef.current,
     handleDragStart,
     handleDragLeave,
     handleDragOver,

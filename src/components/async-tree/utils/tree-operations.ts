@@ -1,4 +1,9 @@
-import { DROP_AFTER_FOLDER_PERCENT, DROP_BEFORE_PERCENT, DROP_MID_PERCENT } from '../constants'
+import {
+  DROP_AFTER_FOLDER_PERCENT,
+  DROP_BEFORE_PERCENT,
+  DROP_MID_PERCENT,
+  ROOT_NODE,
+} from '../constants'
 import { DropPosition, FolderNode, MoveData, TreeNode } from '../types'
 import { recursiveTreeMap } from './tree-recursive'
 import { isFolderNode } from './validations'
@@ -125,4 +130,10 @@ export function parseNodeData(data: string): TreeNode | null {
     console.error('Invalid JSON data:', error)
     return null
   }
+}
+
+export function normalizeNewParent(newParent: FolderNode | null): FolderNode | null {
+  const parent = newParent?.id === ROOT_NODE.id ? null : newParent
+
+  return parent
 }

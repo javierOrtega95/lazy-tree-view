@@ -14,25 +14,46 @@ export default function TreeNode({
   folder: Folder,
   item: Item,
   children,
+  dragClassNames,
   onFolderClick,
+  canDrop,
   onDrop,
 }: TreeNodeProps): JSX.Element {
-  const { dragPosition, handleDragStart, handleDragLeave, handleDragOver, handleDrop } =
-    useTreeNodeDragAndDrop(node, onDrop)
+  const {
+    dragPosition,
+    isDropAllowed,
+    handleDragStart,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+  } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
 
   const isFolder = isFolderNode(node)
   const isItem = isBaseNode(node)
 
-  const isDroppingInside = dragPosition === DropPosition.Inside
   const isDroppingBefore = dragPosition === DropPosition.Before
   const isDroppingAfter = dragPosition === DropPosition.After
+  const dropAllowedClassName = isDropAllowed ? '' : dragClassNames.dropNotAllowed
+
+  const getNodeDnDClassName = () => {
+    if (!dragPosition) return ''
+
+    const isDroppingInside = dragPosition === DropPosition.Inside
+
+    return isDroppingInside ? `${dragClassNames.dragOver} ${dropAllowedClassName}` : ''
+  }
+
+  const getDropIndicatorClassName = () => {
+    if (!dragPosition) return ''
+
+    if (isDroppingBefore) return `${dragClassNames.dragBefore} ${dropAllowedClassName}`
+    if (isDroppingAfter) return `${dragClassNames.dragAfter} ${dropAllowedClassName}`
+  }
 
   const left = TREE_NODE_INDENTATION * level
 
-  const dropOverClassName = isDroppingInside ? 'drag-over' : ''
-
-  const handleToggleOpen = (e: MouseEvent, node: Node) => {
-    e.stopPropagation()
+  const handleToggleOpen = (event: MouseEvent, node: Node) => {
+    event.stopPropagation()
 
     onFolderClick(node as FolderNode)
   }
@@ -43,7 +64,7 @@ export default function TreeNode({
       data-testid={`tree-node-${node.id}`}
       role='treeitem'
       draggable={true}
-      className={`tree-node ${dropOverClassName}`}
+      className={`tree-node ${getNodeDnDClassName()}`}
       style={{ paddingLeft: left }}
       onDragStart={handleDragStart}
       onDragLeave={handleDragLeave}
@@ -51,7 +72,11 @@ export default function TreeNode({
       onDrop={handleDrop}
     >
       {isDroppingBefore && (
-        <DropIndicator id={`drop-indicator-before-${node.id}`} indentation={left} />
+        <DropIndicator
+          id={`drop-indicator-before-${node.id}`}
+          className={getDropIndicatorClassName()}
+          indentation={left}
+        />
       )}
 
       {isFolder && (
@@ -67,7 +92,11 @@ export default function TreeNode({
       {isItem && <Item node={node} level={level} />}
 
       {isDroppingAfter && (
-        <DropIndicator id={`drop-indicator-after-${node.id}`} indentation={left} />
+        <DropIndicator
+          id={`drop-indicator-after-${node.id}`}
+          className={getDropIndicatorClassName()}
+          indentation={left}
+        />
       )}
 
       <ul role='group' className='tree-group'>

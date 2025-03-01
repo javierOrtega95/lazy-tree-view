@@ -1,5 +1,4 @@
 import { DropIndicatorProps } from '../../types'
-import './DropIndicator.css'
 
 export default function DropIndicator({
   id,

@@ -1,7 +1,12 @@
 import { afterAll, describe, expect, it, vi } from 'vitest'
 import { ROOT_NODE } from '../constants'
 import { DropPosition, FolderNode, TreeNode } from '../types'
-import { calculateDragPosition, moveNode, parseNodeData } from './tree-operations'
+import {
+  calculateDragPosition,
+  moveNode,
+  normalizeNewParent,
+  parseNodeData,
+} from './tree-operations'
 
 describe('tree-operations utilities', () => {
   describe('moveNode', () => {
@@ -271,6 +276,21 @@ describe('tree-operations utilities', () => {
       const result = parseNodeData(nonJsonData)
 
       expect(result).toBeNull()
+    })
+  })
+
+  describe('normalizeNewParent', () => {
+    it('should return null if newParent is ROOT_NODE', () => {
+      expect(normalizeNewParent(ROOT_NODE)).toBeNull()
+    })
+
+    it('should return newParent if it is not ROOT_NODE', () => {
+      const newParent = { id: 'some-id' } as FolderNode
+      expect(normalizeNewParent(newParent)).toBe(newParent)
+    })
+
+    it('should return null if newParent is null', () => {
+      expect(normalizeNewParent(null)).toBeNull()
     })
   })
 })

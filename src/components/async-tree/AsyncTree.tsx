@@ -3,7 +3,7 @@ import './AsyncTree.css'
 import { default as DefaultFolder } from './components/tree-folder/TreeFolder'
 import { default as DefaultItem } from './components/tree-item/TreeItem'
 import TreeNode from './components/tree-node/TreeNode'
-import { ROOT_NODE } from './constants'
+import { defaultDnDclassNames, ROOT_NODE } from './constants'
 import { AsyncTreeContext } from './context/AsyncTreeContext'
 import {
   AsyncTreeProps,
@@ -13,7 +13,7 @@ import {
   MoveData,
   TreeNode as Node,
 } from './types'
-import { moveNode } from './utils/tree-operations'
+import { moveNode, normalizeNewParent } from './utils/tree-operations'
 import { getFoldersState, getNodeParents, recursiveTreeMap } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'
 
@@ -22,7 +22,9 @@ export default function AsyncTree({
   folder: Folder = DefaultFolder,
   item: Item = DefaultItem,
   fetchOnce = true,
+  dragClassNames = defaultDnDclassNames,
   loadChildren,
+  canDrop = () => true,
   onDrop,
   onChange,
 }: AsyncTreeProps): JSX.Element {
@@ -105,8 +107,8 @@ export default function AsyncTree({
       source,
       target,
       position,
-      prevParent: prevParent.id === ROOT_NODE.id ? null : prevParent,
-      nextParent: nextParent.id === ROOT_NODE.id ? null : nextParent,
+      prevParent: normalizeNewParent(prevParent),
+      nextParent: normalizeNewParent(nextParent),
     })
 
     onChange?.(rootChildren)
@@ -125,7 +127,9 @@ export default function AsyncTree({
           isLoading={isLoading}
           folder={Folder}
           item={Item}
+          dragClassNames={dragClassNames}
           onFolderClick={handleFolderClick}
+          canDrop={canDrop}
           onDrop={handleDrop}
         >
           {isFolder && isOpen && node.children.map((child) => renderNode(child, level + 1))}
