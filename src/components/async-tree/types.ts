@@ -16,7 +16,6 @@ export type BaseNode = {
 export type TreeNode<T = object> = (FolderNode | BaseNode) & T
 
 export interface FolderNode extends BaseNode {
-  isOpen?: boolean
   children: TreeNode[]
 }
 

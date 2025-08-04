@@ -1,4 +1,11 @@
-import { BaseNode, DropPosition, FolderNode, MoveData, NodeParents, TreeNode } from '../types'
+import {
+  type BaseNode,
+  DropPosition,
+  type FolderNode,
+  type MoveData,
+  type NodeParents,
+  type TreeNode,
+} from '../types'
 
 export function isValidMove({
   source,

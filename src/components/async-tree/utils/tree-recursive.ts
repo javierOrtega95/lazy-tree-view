@@ -1,4 +1,4 @@
-import { FolderNode, FoldersState, NodeParents, TreeNode } from '../types'
+import type { FolderNode, FoldersState, NodeParents, TreeNode } from '../types'
 import { isFolderNode } from './validations'
 
 export function recursiveTreeMap(tree: TreeNode[], fn: (item: TreeNode) => TreeNode): TreeNode[] {
@@ -39,7 +39,7 @@ export function getFoldersState(tree: TreeNode[]): FoldersState {
   function initializeFoldersState(nodes: TreeNode[]) {
     for (const node of nodes) {
       if (isFolderNode(node)) {
-        const isOpen = node?.isOpen ?? node.children.length > 0
+        const isOpen = node.children.length > 0
 
         foldersState[node.id] = {
           isOpen,
