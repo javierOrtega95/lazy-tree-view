@@ -1,11 +1,11 @@
-import { DropIndicatorProps } from '../../types'
+import { HTMLAttributes } from 'react'
+import './DropIndicator.css'
 
 export default function DropIndicator({
   id,
-  indentation,
   className = '',
   ...props
-}: DropIndicatorProps): JSX.Element {
+}: HTMLAttributes<HTMLSpanElement>): JSX.Element {
   return (
     <span
       id={id}
@@ -13,7 +13,6 @@ export default function DropIndicator({
       role='presentation'
       aria-hidden='true'
       className={`drop-indicator ${className}`}
-      style={{ left: indentation }}
       {...props}
     />
   )

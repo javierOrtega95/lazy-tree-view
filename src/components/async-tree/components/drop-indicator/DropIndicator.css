@@ -1,0 +1,12 @@
+.drop-indicator {
+  position: absolute;
+
+  &.drag-before,
+  &.drag-after {
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #3b82f6;
+    pointer-events: none;
+  }
+}
