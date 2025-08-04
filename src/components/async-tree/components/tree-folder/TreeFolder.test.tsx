@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { FolderNode } from '../../types'
+import type { FolderNode } from '../../types'
 import TreeFolder from './TreeFolder'
 
 describe('TreeFolder', () => {
@@ -16,7 +16,7 @@ describe('TreeFolder', () => {
     render(
       <TreeFolder
         node={mockNode}
-        level={0}
+        depth={0}
         isOpen={false}
         isLoading={false}
         onToggleOpen={mockOnToggleOpen}
@@ -42,7 +42,7 @@ describe('TreeFolder', () => {
         node={mockNode}
         isOpen={false}
         isLoading={true}
-        level={0}
+        depth={0}
         onToggleOpen={mockOnToggleOpen}
       />
     )
@@ -58,7 +58,7 @@ describe('TreeFolder', () => {
         node={mockNode}
         isOpen={true}
         isLoading={false}
-        level={0}
+        depth={0}
         onToggleOpen={mockOnToggleOpen}
       />
     )
@@ -74,7 +74,7 @@ describe('TreeFolder', () => {
         node={mockNode}
         isOpen={false}
         isLoading={false}
-        level={0}
+        depth={0}
         onToggleOpen={mockOnToggleOpen}
       />
     )

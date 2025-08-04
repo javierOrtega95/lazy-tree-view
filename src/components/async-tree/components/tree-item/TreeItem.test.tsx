@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import TreeItem from './TreeItem'
-import { BaseNode } from '../../types'
+import type { BaseNode } from '../../types'
 
 describe('TreeItem', () => {
   const mockNode: BaseNode = {
@@ -10,7 +10,7 @@ describe('TreeItem', () => {
   }
 
   it('renders the TreeItem component successfully', () => {
-    render(<TreeItem node={mockNode} level={0} />)
+    render(<TreeItem node={mockNode} depth={0} />)
 
     const { id, name } = mockNode
     const $treeItem = screen.getByTestId(id)

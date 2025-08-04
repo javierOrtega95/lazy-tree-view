@@ -1,18 +1,24 @@
-import { FolderProps } from '../../types'
+import { type CSSProperties } from 'react'
+import { BASE_NODE_INDENTATION } from '../../constants'
+import type { FolderNode, FolderProps } from '../../types'
 import './TreeFolder.css'
 
 export default function TreeFolder({
   node,
   isOpen = false,
   isLoading = false,
+  depth,
   onToggleOpen,
 }: FolderProps): JSX.Element {
+  const indentation = BASE_NODE_INDENTATION * depth
+
   return (
     <div
       id={node.id}
       data-testid={node.id}
       className='tree-folder'
-      onClick={(e) => onToggleOpen(e, node)}
+      style={{ '--tree-item-indentation': `${indentation}px` } as CSSProperties}
+      onClick={(event) => onToggleOpen(event, node as FolderNode)}
     >
       <svg
         data-testid={`${node.id}-${isLoading ? 'loading-icon' : 'chevron-icon'}`}
