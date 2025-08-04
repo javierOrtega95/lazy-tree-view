@@ -1,6 +1,7 @@
+import { type DragEvent } from 'react'
 import { afterAll, describe, expect, it, vi } from 'vitest'
 import { ROOT_NODE } from '../constants'
-import { DropPosition, FolderNode, TreeNode } from '../types'
+import { DropPosition, type FolderNode, type TreeNode } from '../types'
 import {
   calculateDragPosition,
   moveNode,
@@ -167,13 +168,13 @@ describe('tree-operations utilities', () => {
   })
 
   describe('calculateDragPosition', () => {
-    const defaultEvent: React.DragEvent = {
+    const defaultEvent: DragEvent = {
       currentTarget: { offsetHeight: 100 },
       nativeEvent: { offsetY: 50 },
       preventDefault: vi.fn(),
       stopPropagation: vi.fn(),
       dataTransfer: { dropEffect: '' },
-    } as unknown as React.DragEvent
+    } as unknown as DragEvent
 
     describe('when node is a folder', () => {
       it('should return DropPosition.Before when offsetY is less than beforeThreshold', () => {
@@ -181,19 +182,19 @@ describe('tree-operations utilities', () => {
           ...defaultEvent,
           nativeEvent: { offsetY: 10 },
           currentTarget: { offsetHeight: 100 },
-        } as unknown as React.DragEvent
+        } as unknown as DragEvent
 
         const result = calculateDragPosition(event, true)
 
         expect(result).toBe(DropPosition.Before)
       })
 
-      it('should return DropPosition.After when dragging below the bottom threshold ', () => {
+      it('should return DropPosition.After when offsetY is greater than afterThreshold', () => {
         const event = {
           ...defaultEvent,
-          nativeEvent: { offsetY: 80 },
+          nativeEvent: { offsetY: 110 },
           currentTarget: { offsetHeight: 100 },
-        } as unknown as React.DragEvent
+        } as unknown as DragEvent
 
         const result = calculateDragPosition(event, true)
 
@@ -205,7 +206,7 @@ describe('tree-operations utilities', () => {
           ...defaultEvent,
           nativeEvent: { offsetY: 50 },
           currentTarget: { offsetHeight: 100 },
-        } as unknown as React.DragEvent
+        } as unknown as DragEvent
 
         const result = calculateDragPosition(event, true)
 
@@ -214,24 +215,24 @@ describe('tree-operations utilities', () => {
     })
 
     describe('when node is an item', () => {
-      it('should return DropPosition.Before when dragging above the mid threshold', () => {
+      it('should return DropPosition.Before when offsetY is less than midThreshold', () => {
         const event = {
           ...defaultEvent,
           nativeEvent: { offsetY: 10 },
           currentTarget: { offsetHeight: 100 },
-        } as unknown as React.DragEvent
+        } as unknown as DragEvent
 
         const result = calculateDragPosition(event, false)
 
         expect(result).toBe(DropPosition.Before)
       })
 
-      it('should return DropPosition.After when dragging below the mid threshold', () => {
+      it('should return DropPosition.After when offsetY is greater than midThreshold', () => {
         const event = {
           ...defaultEvent,
-          nativeEvent: { offsetY: 50 },
+          nativeEvent: { offsetY: 60 },
           currentTarget: { offsetHeight: 100 },
-        } as unknown as React.DragEvent
+        } as unknown as DragEvent
 
         const result = calculateDragPosition(event, false)
 

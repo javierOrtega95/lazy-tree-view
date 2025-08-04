@@ -1,10 +1,6 @@
-import {
-  DROP_AFTER_FOLDER_PERCENT,
-  DROP_BEFORE_PERCENT,
-  DROP_MID_PERCENT,
-  ROOT_NODE,
-} from '../constants'
-import { DropPosition, FolderNode, MoveData, TreeNode } from '../types'
+import { type DragEvent } from 'react'
+import { DROP_BEFORE_FOLDER_PERCENT, DROP_MID_PERCENT, ROOT_NODE } from '../constants'
+import { DropPosition, type FolderNode, type MoveData, type TreeNode } from '../types'
 import { recursiveTreeMap } from './tree-recursive'
 import { isFolderNode } from './validations'
 
@@ -104,23 +100,26 @@ function handleDifferentParentMove({
   })
 }
 
-export function calculateDragPosition(event: React.DragEvent, isFolder: boolean): DropPosition {
-  const { currentTarget, nativeEvent } = event
+export function calculateDragPosition(event: DragEvent, isFolder: boolean): DropPosition {
+  const target = event.currentTarget as HTMLElement
+  const offsetY = event.nativeEvent.offsetY
 
-  const target = currentTarget as HTMLElement
-  const { offsetY } = nativeEvent
   const height = target.offsetHeight
 
-  const beforeThreshold = height * DROP_BEFORE_PERCENT
+  // not a folder, so just check is dragging before or after
+  if (!isFolder) {
+    const midThreshold = height * DROP_MID_PERCENT
 
-  const afterPercent = isFolder ? DROP_AFTER_FOLDER_PERCENT : DROP_MID_PERCENT
-  const afterThreshold = height * afterPercent
+    return offsetY <= midThreshold ? DropPosition.Before : DropPosition.After
+  }
+
+  const beforeThreshold = height * DROP_BEFORE_FOLDER_PERCENT
 
   if (offsetY <= beforeThreshold) return DropPosition.Before
 
-  if (isFolder && offsetY <= afterThreshold) return DropPosition.Inside
+  if (offsetY >= height) return DropPosition.After
 
-  return DropPosition.After
+  return DropPosition.Inside
 }
 
 export function parseNodeData(data: string): TreeNode | null {

@@ -3,18 +3,18 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defaultDnDclassNames, TREE_NODE_INDENTATION } from '../../constants'
 import { AsyncTreeContext } from '../../context/AsyncTreeContext'
+import { TreeNodeDnDdata } from '../../hooks/useTreeNodeDnD'
 import {
-  BaseNode,
+  type BaseNode,
   DropPosition,
-  FolderNode,
-  FolderProps,
-  ItemProps,
-  TreeNodeProps,
+  type FolderNode,
+  type FolderProps,
+  type ItemProps,
+  type TreeNodeProps,
 } from '../../types'
 import TreeFolder from '../tree-folder/TreeFolder'
 import TreeItem from '../tree-item/TreeItem'
 import TreeNode from './TreeNode'
-import { TreeNodeDnDdata } from '../../hooks/useTreeNodeDnD'
 
 const mockHandleDragStart = vi.fn()
 const mockHandleDragLeave = vi.fn()
@@ -54,7 +54,7 @@ describe('TreeNode Component', () => {
     isLoading: false,
     dragClassNames: defaultDnDclassNames,
     canDrop: vi.fn(),
-    onFolderClick: vi.fn(),
+    onToggleOpen: vi.fn(),
     onDrop: vi.fn(),
   }
 
@@ -170,11 +170,11 @@ describe('TreeNode Component', () => {
     expect($folderNode).toHaveStyle(`padding-left: ${TREE_NODE_INDENTATION * level}px`)
   })
 
-  it('should handle onFolderClick correctly', async () => {
+  it('should handle onFolderOpen correctly', async () => {
     const user = userEvent.setup()
 
     const props = { ...defaultProps, node: mockFolderNode }
-    const { node, onFolderClick } = props
+    const { node, onToggleOpen } = props
 
     render(
       <AsyncTreeContext.Provider value={{ nodeParents: {} }}>
@@ -186,7 +186,7 @@ describe('TreeNode Component', () => {
 
     await user.click($folderNode)
 
-    expect(onFolderClick).toHaveBeenCalledWith(node)
+    expect(onToggleOpen).toHaveBeenCalledWith(node)
   })
 
   describe('TreeNode drag and drop', () => {

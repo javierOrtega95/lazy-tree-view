@@ -1,21 +1,20 @@
-import { MouseEvent } from 'react'
-import { TREE_NODE_INDENTATION } from '../../constants'
+import { type MouseEvent, useMemo } from 'react'
 import useTreeNodeDragAndDrop from '../../hooks/useTreeNodeDnD'
-import { DropPosition, FolderNode, TreeNode as Node, TreeNodeProps } from '../../types'
+import { DropPosition, type FolderNode, type TreeNodeProps } from '../../types'
 import { isBaseNode, isFolderNode } from '../../utils/validations'
 import DropIndicator from '../drop-indicator/DropIndicator'
 import './TreeNode.css'
 
 export default function TreeNode({
   node,
-  level,
+  depth,
   isOpen,
   isLoading,
   folder: Folder,
   item: Item,
   children,
   dragClassNames,
-  onFolderClick,
+  onToggleOpen,
   canDrop,
   onDrop,
 }: TreeNodeProps): JSX.Element {
@@ -28,80 +27,74 @@ export default function TreeNode({
     handleDrop,
   } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
 
-  const isFolder = isFolderNode(node)
-  const isItem = isBaseNode(node)
+  const nodeId = `tree-node-${node.id}`
 
   const isDroppingBefore = dragPosition === DropPosition.Before
   const isDroppingAfter = dragPosition === DropPosition.After
-  const dropAllowedClassName = isDropAllowed ? '' : dragClassNames.dropNotAllowed
 
-  const getNodeDnDClassName = () => {
+  const DnDClassName = useMemo(() => {
     if (!dragPosition) return ''
 
     const isDroppingInside = dragPosition === DropPosition.Inside
 
-    return isDroppingInside ? `${dragClassNames.dragOver} ${dropAllowedClassName}` : ''
-  }
+    const { dragOver, dropNotAllowed } = dragClassNames
+    const dropAllowedClassName = isDropAllowed ? '' : dropNotAllowed
 
-  const getDropIndicatorClassName = () => {
+    return isDroppingInside ? `${dragOver} ${dropAllowedClassName}` : ''
+  }, [dragPosition, isDropAllowed, dragClassNames])
+
+  const indicatorClassName = useMemo(() => {
     if (!dragPosition) return ''
 
-    if (isDroppingBefore) return `${dragClassNames.dragBefore} ${dropAllowedClassName}`
-    if (isDroppingAfter) return `${dragClassNames.dragAfter} ${dropAllowedClassName}`
-  }
+    const { dragBefore, dragAfter, dropNotAllowed } = dragClassNames
+    const className = isDroppingBefore ? dragBefore : dragAfter
 
-  const left = TREE_NODE_INDENTATION * level
+    return `${className} ${dropNotAllowed}`
+  }, [dragPosition, dragClassNames, isDroppingBefore])
 
-  const handleToggleOpen = (event: MouseEvent, node: Node) => {
+  const handleToggleOpen = (event: MouseEvent, folder: FolderNode) => {
     event.stopPropagation()
 
-    onFolderClick(node as FolderNode)
+    onToggleOpen(folder)
   }
 
   return (
     <li
-      id={`tree-node-${node.id}`}
-      data-testid={`tree-node-${node.id}`}
+      id={nodeId}
+      data-testid={nodeId}
       role='treeitem'
       draggable={true}
-      className={`tree-node ${getNodeDnDClassName()}`}
-      style={{ paddingLeft: left }}
+      className={`tree-node ${DnDClassName}`}
       onDragStart={handleDragStart}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
       {isDroppingBefore && (
-        <DropIndicator
-          id={`drop-indicator-before-${node.id}`}
-          className={getDropIndicatorClassName()}
-          indentation={left}
-        />
+        <DropIndicator id={`drop-indicator-before-${node.id}`} className={indicatorClassName} />
       )}
 
-      {isFolder && (
+      {isFolderNode(node) && (
         <Folder
           node={node}
-          level={level}
+          depth={depth}
           isLoading={isLoading}
           isOpen={isOpen}
           onToggleOpen={handleToggleOpen}
         />
       )}
 
-      {isItem && <Item node={node} level={level} />}
+      {isBaseNode(node) && <Item node={node} depth={depth} />}
 
       {isDroppingAfter && (
-        <DropIndicator
-          id={`drop-indicator-after-${node.id}`}
-          className={getDropIndicatorClassName()}
-          indentation={left}
-        />
+        <DropIndicator id={`drop-indicator-after-${node.id}`} className={indicatorClassName} />
       )}
 
-      <ul role='group' className='tree-group'>
-        {children}
-      </ul>
+      {children && (
+        <ul role='group' className='tree-group'>
+          {children}
+        </ul>
+      )}
     </li>
   )
 }
