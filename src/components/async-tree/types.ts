@@ -1,4 +1,4 @@
-import { HTMLAttributes, MouseEvent, PropsWithChildren } from 'react'
+import { type MouseEvent, type ReactNode } from 'react'
 
 export enum DropPosition {
   Before = 'before',
@@ -6,8 +6,10 @@ export enum DropPosition {
   After = 'after',
 }
 
-export interface BaseNode {
-  id: string
+export type NodeId = string
+
+export type BaseNode = {
+  id: NodeId
   name: string
 }
 
@@ -18,8 +20,8 @@ export interface FolderNode extends BaseNode {
   children: TreeNode[]
 }
 
-export type FoldersState = Record<FolderNode['id'], FolderState>
-export type NodeParents = Record<FolderNode['id'], FolderNode | null>
+export type FoldersState = Record<NodeId, FolderState>
+export type NodeParents = Record<NodeId, FolderNode | null>
 
 export type FolderState = {
   isOpen?: boolean
@@ -34,12 +36,15 @@ export type DragClassNames = {
   dropNotAllowed: string
 }
 
+type CustomFolderFC = React.FC<FolderProps>
+type CustomItemFC = React.FC<BaseNodeProps>
+
 export interface AsyncTreeProps {
-  treeData: TreeNode[]
+  data: TreeNode[]
   loadChildren: (node: TreeNode) => Promise<TreeNode[]>
   fetchOnce?: boolean
-  folder?: React.FC<FolderProps>
-  item?: React.FC<ItemProps>
+  folder?: CustomFolderFC
+  item?: CustomItemFC
   dragClassNames?: DragClassNames
   canDrop?: canDropFn
   onDrop?: (data: DropData) => void
@@ -49,33 +54,25 @@ export interface AsyncTreeProps {
 export type canDropFn = (data: DropData) => boolean
 export type OnDropNodeFn = (data: MoveData) => void
 
-export interface TreeNodeProps
-  extends PropsWithChildren,
-    Omit<FolderProps, 'onToggleOpen'>,
-    ItemProps {
-  folder: React.FC<FolderProps>
-  item: React.FC<ItemProps>
+export type BaseNodeProps = {
+  node: TreeNode
+  depth: number
+}
+
+export interface TreeNodeProps extends BaseNodeProps, Pick<FolderProps, 'isOpen' | 'isLoading'> {
+  folder: CustomFolderFC
+  item: CustomItemFC
   dragClassNames: DragClassNames
-  onFolderClick: (node: FolderNode) => void
+  children: ReactNode
+  onToggleOpen: (node: FolderNode) => void
   canDrop: canDropFn
   onDrop: OnDropNodeFn
 }
 
-export interface DropIndicatorProps extends HTMLAttributes<HTMLSpanElement> {
-  indentation: number
-}
-
-export interface FolderProps {
-  node: TreeNode
-  level: number
+export interface FolderProps extends BaseNodeProps {
   isOpen: boolean
   isLoading: boolean
-  onToggleOpen: (e: MouseEvent<Element>, node: TreeNode) => void
-}
-
-export interface ItemProps {
-  node: TreeNode
-  level: number
+  onToggleOpen: (event: MouseEvent<Element>, folder: FolderNode) => void
 }
 
 export type TreeMove = {
