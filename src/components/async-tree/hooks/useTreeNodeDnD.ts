@@ -50,8 +50,6 @@ export default function useTreeNodeDnD(
     event.dataTransfer.dropEffect = 'move'
 
     const position = calculateDragPosition(event, isFolderNode(node))
-    console.log('handleDragOver', position)
-
     setDragPosition(position)
   }
 
