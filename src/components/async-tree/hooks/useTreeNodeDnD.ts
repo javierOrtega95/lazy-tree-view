@@ -1,11 +1,10 @@
 import { type DragEvent, useRef, useState } from 'react'
 import { useAsyncTree } from '../context/AsyncTreeContext'
 import {
-  type canDropFn,
+  type CanDropFn,
   DropPosition,
   type FolderNode,
   type MoveData,
-  type OnDropNodeFn,
   type TreeNode,
 } from '../types'
 import { calculateDragPosition, normalizeNewParent, parseNodeData } from '../utils/tree-operations'
@@ -22,8 +21,8 @@ type TreeNodeDnDParams = {
 
 export default function useTreeNodeDnD(
   node: TreeNode,
-  onDrop: OnDropNodeFn,
-  canDrop: canDropFn = () => true
+  onDrop: (data: MoveData) => void,
+  canDrop: CanDropFn = () => true
 ): TreeNodeDnDParams {
   const { nodeParents } = useAsyncTree()
   const isDropAllowedRef = useRef<boolean>(true)
