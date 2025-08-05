@@ -15,7 +15,7 @@ export const defaultDnDclassNames: DragClassNames = {
   dropNotAllowed: 'drop-not-allowed',
 }
 
-export const BASE_NODE_INDENTATION = 14
+export const BASE_NODE_INDENTATION = 28
 
 export const DROP_BEFORE_FOLDER_PERCENT = 0.1
 export const DROP_MID_PERCENT = 0.5
