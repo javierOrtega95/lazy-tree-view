@@ -22,8 +22,8 @@ export default function TreeFolder({
     >
       <svg
         data-testid={`${node.id}-${isLoading ? 'loading-icon' : 'chevron-icon'}`}
-        width={isLoading ? '12' : '24'}
-        height={isLoading ? '12' : '24'}
+        width={isLoading ? '16' : '24'}
+        height={isLoading ? '16' : '24'}
         viewBox='0 0 24 24'
         fill='none'
         stroke='currentColor'
