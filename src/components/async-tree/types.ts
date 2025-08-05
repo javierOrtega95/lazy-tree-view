@@ -41,7 +41,7 @@ type CustomItemFC = React.FC<BaseNodeProps>
 export type CanDropFn = (data: DropData) => boolean
 
 export interface AsyncTreeProps {
-  data: TreeNode[]
+  initialTree: TreeNode[]
   loadChildren: (node: TreeNode) => Promise<TreeNode[]>
   fetchOnce?: boolean
   folder?: CustomFolderFC

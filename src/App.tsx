@@ -1,31 +1,84 @@
-import { useState } from 'react'
 import './App.css'
 import AsyncTree from './components/async-tree/AsyncTree'
-import { DropData, TreeNode } from './components/async-tree/types'
-import { DEFAULT_TREE } from './mocks/storybook'
+import type { TreeNode } from './components/async-tree/types'
+
+const initialTree: TreeNode[] = [
+  {
+    id: crypto.randomUUID(),
+    name: 'Projects',
+    children: [
+      {
+        id: crypto.randomUUID(),
+        name: 'Website Redesign',
+        children: [
+          { id: crypto.randomUUID(), name: 'wireframes.pdf' },
+          { id: crypto.randomUUID(), name: 'colors.png' },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Mobile App',
+        children: [],
+      },
+    ],
+  },
+  {
+    id: crypto.randomUUID(),
+    name: 'Personal',
+    children: [],
+  },
+  {
+    id: crypto.randomUUID(),
+    name: 'Photos',
+    children: [],
+  },
+]
 
 function App() {
-  const [treeData, setTreeData] = useState<TreeNode[]>(DEFAULT_TREE)
   const loadChildren = async (folder: TreeNode): Promise<TreeNode[]> => {
-    console.log(`Fetching children of folder ${folder.id}`)
+    console.info(`Fetching children of folder "${folder.name}" (${folder.id})`)
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
+    if (folder.name === 'Mobile App') {
+      return [
+        { id: crypto.randomUUID(), name: 'design.sketch' },
+        { id: crypto.randomUUID(), name: 'api-specs.yaml' },
+      ]
+    }
+
+    if (folder.name === 'Photos') {
+      return [
+        {
+          id: crypto.randomUUID(),
+          name: 'Vacation 2024',
+          children: [
+            { id: crypto.randomUUID(), name: 'beach.jpg' },
+            { id: crypto.randomUUID(), name: 'mountains.jpg' },
+          ],
+        },
+        { id: crypto.randomUUID(), name: 'profile.jpg' },
+      ]
+    }
+
+    if (folder.name === 'Personal') {
+      return [
+        { id: crypto.randomUUID(), name: 'Resume.docx' },
+        { id: crypto.randomUUID(), name: 'Taxes.xlsx' },
+      ]
+    }
 
     return [
       {
         id: crypto.randomUUID(),
-        name: 'Folder',
+        name: 'New Folder',
         children: [],
       },
       {
         id: crypto.randomUUID(),
-        name: 'item.pdf',
+        name: 'note.txt',
       },
     ]
-  }
-
-  const handleDrop = (data: DropData) => {
-    console.log(data)
   }
 
   return (
@@ -33,12 +86,7 @@ function App() {
       <h1>Async Tree Demo</h1>
 
       <main className='tree-container'>
-        <AsyncTree
-          treeData={treeData}
-          loadChildren={loadChildren}
-          onDrop={handleDrop}
-          onChange={setTreeData}
-        />
+        <AsyncTree initialTree={initialTree} loadChildren={loadChildren} />
       </main>
     </>
   )

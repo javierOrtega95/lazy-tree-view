@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FolderNode, TreeNode } from '../types'
+import type { FolderNode, FoldersState, TreeNode } from '../types'
 import { getFoldersState, getNodeParents, recursiveTreeMap } from './tree-recursive'
 
 describe('tree-recursive utilities', () => {
@@ -95,7 +95,7 @@ describe('tree-recursive utilities', () => {
         hasFetched: false,
       }
 
-      const exectedState = {
+      const expectedState = {
         [rootFolder.id]: {
           ...defaultState,
           isOpen: true,
@@ -103,7 +103,40 @@ describe('tree-recursive utilities', () => {
         [childrenFolder.id]: defaultState,
       }
 
-      expect(foldersState).toEqual(exectedState)
+      expect(foldersState).toEqual(expectedState)
+    })
+
+    it('should respect isOpen from initialState if provided', () => {
+      const initialState: FoldersState = {
+        [rootFolder.id]: { isOpen: false, isLoading: true, hasFetched: true },
+      }
+
+      const foldersState = getFoldersState(mockTree, initialState)
+
+      expect(foldersState[rootFolder.id].isOpen).toBe(false)
+      expect(foldersState[rootFolder.id].isLoading).toBe(false)
+      expect(foldersState[rootFolder.id].hasFetched).toBe(false)
+    })
+
+    it('should use default isOpen if not present in initialState', () => {
+      const initialState: FoldersState = {
+        [rootFolder.id]: { isOpen: true, isLoading: true, hasFetched: true },
+      }
+
+      const foldersState = getFoldersState(mockTree, initialState)
+
+      expect(foldersState[childrenFolder.id].isOpen).toBe(false)
+    })
+
+    it('should handle partial initialState', () => {
+      const initialState: FoldersState = {
+        [rootFolder.id]: { isOpen: false, isLoading: false, hasFetched: false },
+      }
+
+      const foldersState = getFoldersState(mockTree, initialState)
+
+      expect(foldersState[rootFolder.id].isOpen).toBe(false)
+      expect(foldersState[childrenFolder.id].isOpen).toBe(false)
     })
   })
 })

@@ -19,7 +19,7 @@ import { getFoldersState, getNodeParents, recursiveTreeMap } from './utils/tree-
 import { isFolderNode } from './utils/validations'
 
 export default function AsyncTree({
-  data,
+  initialTree,
   folder: Folder = DefaultFolder,
   item: Item = DefaultItem,
   fetchOnce = true,
@@ -30,17 +30,20 @@ export default function AsyncTree({
   onChange,
 }: AsyncTreeProps): JSX.Element {
   const firstRenderRef = useRef<boolean>(true)
-  const [foldersState, setFoldersState] = useState<FoldersState>(getFoldersState(data))
+
+  const [treeData, setTreeData] = useState<Node[]>(initialTree)
+  const [foldersState, setFoldersState] = useState<FoldersState>(() => getFoldersState(initialTree))
 
   useEffect(() => {
-    if (firstRenderRef.current) return
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false
+      return
+    }
 
-    firstRenderRef.current = false
+    setFoldersState((prev) => getFoldersState(treeData, prev))
+  }, [treeData])
 
-    setFoldersState(getFoldersState(data))
-  }, [data])
-
-  const tree = useMemo(() => [{ ...ROOT_NODE, children: data }], [data])
+  const tree = useMemo(() => [{ ...ROOT_NODE, children: treeData }], [treeData])
 
   const nodeParents = useMemo(() => getNodeParents(tree), [tree])
 
@@ -78,16 +81,17 @@ export default function AsyncTree({
 
       const children = await loadChildren(folder)
 
-      const newTree = updateFolderChildren(tree, id, children)
-      const { children: rootChildren } = newTree[0] as FolderNode
+      setTreeData((prevData) => {
+        const prevTree = [{ ...ROOT_NODE, children: prevData }]
+        const newTree = updateFolderChildren(prevTree, id, children)
+        const { children: rootChildren } = newTree[0] as FolderNode
 
-      onChange?.(rootChildren)
+        onChange?.(rootChildren)
 
-      updateFolderState(id, {
-        isOpen: true,
-        isLoading: false,
-        hasFetched: true,
+        return rootChildren
       })
+
+      updateFolderState(id, { isOpen: true, isLoading: false, hasFetched: true })
     } catch (error) {
       console.error(`Error loading children for folder ${id}`, error)
       updateFolderState(id, { isOpen: false, isLoading: false })
@@ -97,18 +101,24 @@ export default function AsyncTree({
   const handleDrop = (dropData: MoveData) => {
     const { source, target, position, prevParent, nextParent } = dropData
 
-    const newTree = moveNode({ tree, ...dropData })
-    const { children: rootChildren } = newTree[0] as FolderNode
+    setTreeData((prevData) => {
+      const prevTree = [{ ...ROOT_NODE, children: prevData }]
+      const newTree = moveNode({ tree: prevTree, ...dropData })
 
-    onDrop?.({
-      source,
-      target,
-      position,
-      prevParent: normalizeNewParent(prevParent),
-      nextParent: normalizeNewParent(nextParent),
+      const { children: rootChildren } = newTree[0] as FolderNode
+
+      onDrop?.({
+        source,
+        target,
+        position,
+        prevParent: normalizeNewParent(prevParent),
+        nextParent: normalizeNewParent(nextParent),
+      })
+
+      onChange?.(rootChildren)
+
+      return rootChildren
     })
-
-    onChange?.(rootChildren)
   }
 
   const renderNode = (node: Node, depth: number = 0) => {

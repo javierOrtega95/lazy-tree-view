@@ -31,23 +31,23 @@ export function getNodeParents(tree: TreeNode[]): NodeParents {
   return nodeParents
 }
 
-export function getFoldersState(tree: TreeNode[]): FoldersState {
-  const foldersState: FoldersState = {}
+export function getFoldersState(tree: TreeNode[], initialState: FoldersState = {}): FoldersState {
+  const foldersState: FoldersState = { ...initialState }
 
   initializeFoldersState(tree)
 
   function initializeFoldersState(nodes: TreeNode[]) {
     for (const node of nodes) {
       if (isFolderNode(node)) {
-        const isOpen = node.children.length > 0
+        const hasChildren = node.children.length > 0
 
         foldersState[node.id] = {
-          isOpen,
+          isOpen: foldersState[node.id]?.isOpen ?? hasChildren,
           isLoading: false,
           hasFetched: false,
         }
 
-        if (node.children.length > 0) initializeFoldersState(node.children)
+        if (hasChildren) initializeFoldersState(node.children)
       }
     }
   }
