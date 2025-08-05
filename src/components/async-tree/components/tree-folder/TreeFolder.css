@@ -15,6 +15,7 @@
 .tree-node.drag-over {
   outline: #3b82f6 solid 2px;
   border-radius: 0.25rem;
+  z-index: 1;
 
   > .tree-folder .folder-name {
     color: #3b82f6;
