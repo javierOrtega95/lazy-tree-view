@@ -38,6 +38,8 @@ export type DragClassNames = {
 type CustomFolderFC = React.FC<FolderProps>
 type CustomItemFC = React.FC<BaseNodeProps>
 
+export type CanDropFn = (data: DropData) => boolean
+
 export interface AsyncTreeProps {
   data: TreeNode[]
   loadChildren: (node: TreeNode) => Promise<TreeNode[]>
@@ -45,13 +47,10 @@ export interface AsyncTreeProps {
   folder?: CustomFolderFC
   item?: CustomItemFC
   dragClassNames?: DragClassNames
-  canDrop?: canDropFn
+  canDrop?: CanDropFn
   onDrop?: (data: DropData) => void
   onChange?: (tree: TreeNode[]) => void
 }
-
-export type canDropFn = (data: DropData) => boolean
-export type OnDropNodeFn = (data: MoveData) => void
 
 export type BaseNodeProps = {
   node: TreeNode
@@ -64,8 +63,8 @@ export interface TreeNodeProps extends BaseNodeProps, Pick<FolderProps, 'isOpen'
   dragClassNames: DragClassNames
   children: ReactNode
   onToggleOpen: (node: FolderNode) => void
-  canDrop: canDropFn
-  onDrop: OnDropNodeFn
+  canDrop: CanDropFn
+  onDrop: (data: MoveData) => void
 }
 
 export interface FolderProps extends BaseNodeProps {
