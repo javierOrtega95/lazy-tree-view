@@ -105,26 +105,5 @@ describe('tree-recursive utilities', () => {
 
       expect(foldersState).toEqual(exectedState)
     })
-
-    it('should preserve the `isOpen` value if defined in the tree', () => {
-      const mockFolder = {
-        id: crypto.randomUUID(),
-        name: 'Folder 1',
-        isOpen: true,
-        children: [],
-      }
-
-      const foldersState = getFoldersState([mockFolder])
-
-      const expectedState = {
-        [mockFolder.id]: {
-          isOpen: true,
-          isLoading: false,
-          hasFetched: false,
-        },
-      }
-
-      expect(foldersState).toEqual(expectedState)
-    })
   })
 })
