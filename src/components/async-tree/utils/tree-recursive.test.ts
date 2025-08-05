@@ -89,33 +89,26 @@ describe('tree-recursive utilities', () => {
     it('should map all folders with default states', () => {
       const foldersState = getFoldersState(mockTree)
 
-      const defaultState = {
-        isOpen: false,
-        isLoading: false,
-        hasFetched: false,
-      }
+      const defaultState = { isOpen: false, isLoading: false, hasFetched: false }
 
       const expectedState = {
-        [rootFolder.id]: {
-          ...defaultState,
-          isOpen: true,
-        },
+        [rootFolder.id]: { ...defaultState, isOpen: true },
         [childrenFolder.id]: defaultState,
       }
 
       expect(foldersState).toEqual(expectedState)
     })
 
-    it('should respect isOpen from initialState if provided', () => {
-      const initialState: FoldersState = {
-        [rootFolder.id]: { isOpen: false, isLoading: true, hasFetched: true },
-      }
+    it('should respect isOpen and hasFetched from initialState', () => {
+      const initialFolderState = { isOpen: false, isLoading: false, hasFetched: true }
+      const initialState: FoldersState = { [rootFolder.id]: initialFolderState }
 
       const foldersState = getFoldersState(mockTree, initialState)
+      const { isOpen, isLoading, hasFetched } = foldersState[rootFolder.id]
 
-      expect(foldersState[rootFolder.id].isOpen).toBe(false)
-      expect(foldersState[rootFolder.id].isLoading).toBe(false)
-      expect(foldersState[rootFolder.id].hasFetched).toBe(false)
+      expect(isOpen).toBe(initialFolderState.isOpen)
+      expect(isLoading).toBe(initialFolderState.isLoading)
+      expect(hasFetched).toBe(initialFolderState.hasFetched)
     })
 
     it('should use default isOpen if not present in initialState', () => {

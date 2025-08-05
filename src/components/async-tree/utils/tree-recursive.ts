@@ -41,11 +41,9 @@ export function getFoldersState(tree: TreeNode[], initialState: FoldersState = {
       if (isFolderNode(node)) {
         const hasChildren = node.children.length > 0
 
-        foldersState[node.id] = {
-          isOpen: foldersState[node.id]?.isOpen ?? hasChildren,
-          isLoading: false,
-          hasFetched: false,
-        }
+        const { isOpen = hasChildren, hasFetched = false } = foldersState[node.id] || {}
+
+        foldersState[node.id] = { isOpen, isLoading: false, hasFetched }
 
         if (hasChildren) initializeFoldersState(node.children)
       }
