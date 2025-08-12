@@ -1,39 +1,16 @@
 import { act, renderHook } from '@testing-library/react'
-import { DragEvent, ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { AsyncTreeContext } from '../context/AsyncTreeContext'
-import {
-  DropPosition,
-  type FolderNode,
-  type MoveData,
-  type NodeParents,
-  type TreeNode,
-} from '../types'
+import { createDragOverEvent, dragStartEvent, mockDnDTree } from '../../../../mocks/DnD'
+import { AsyncTreeContext } from '../../context/AsyncTreeContext'
+import { DropPosition, type FolderNode, type MoveData, type NodeParents } from '../../types'
 import useTreeNodeDnD from './useTreeNodeDnD'
 
 describe('useTreeNodeDnD', () => {
   const mockOnDrop = vi.fn()
   const mockCanDrop = vi.fn().mockReturnValue(false)
 
-  const mockTree: TreeNode[] = [
-    {
-      id: crypto.randomUUID(),
-      name: 'Folder 1',
-      children: [
-        {
-          id: crypto.randomUUID(),
-          name: 'Folder 2',
-          children: [],
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Item 1',
-        },
-      ],
-    },
-  ]
-
-  const [rootFolder] = mockTree
+  const [rootFolder] = mockDnDTree
   const parentFolder = rootFolder as FolderNode
   const [childrenFolder, childrenItem] = parentFolder.children
 
@@ -66,18 +43,13 @@ describe('useTreeNodeDnD', () => {
       wrapper,
     })
 
-    const dragEvent = {
-      stopPropagation: vi.fn(),
-      dataTransfer: { effectAllowed: '', setData: vi.fn() },
-    } as unknown as DragEvent
-
     act(() => {
-      result.current.handleDragStart(dragEvent)
+      result.current.handleDragStart(dragStartEvent)
     })
 
-    expect(dragEvent.stopPropagation).toHaveBeenCalled()
-    expect(dragEvent.dataTransfer.effectAllowed).toBe('move')
-    expect(dragEvent.dataTransfer.setData).toHaveBeenCalledWith(
+    expect(dragStartEvent.stopPropagation).toHaveBeenCalled()
+    expect(dragStartEvent.dataTransfer.effectAllowed).toBe('move')
+    expect(dragStartEvent.dataTransfer.setData).toHaveBeenCalledWith(
       'application/json',
       JSON.stringify(childrenItem)
     )
@@ -88,18 +60,10 @@ describe('useTreeNodeDnD', () => {
       wrapper,
     })
 
-    const dragEvent = {
-      preventDefault: vi.fn(),
-      stopPropagation: vi.fn(),
-      currentTarget: { offsetHeight: 100 },
-      nativeEvent: { offsetY: 10 },
-      dataTransfer: {
-        dropEffect: '',
-      },
-    } as unknown as DragEvent
+    const dragEvent = createDragOverEvent({ offsetHeight: 100, offsetY: 10 })
 
     act(() => {
-      result.current.handleDragOver(dragEvent as unknown as DragEvent)
+      result.current.handleDragOver(dragEvent)
     })
 
     expect(dragEvent.preventDefault).toHaveBeenCalled()
@@ -112,17 +76,14 @@ describe('useTreeNodeDnD', () => {
       wrapper,
     })
 
-    const dragEvent = {
-      stopPropagation: vi.fn(),
-      preventDefault: vi.fn(),
-      currentTarget: { offsetHeight: 100 },
-      nativeEvent: { offsetY: 50 },
+    const dragEvent = createDragOverEvent({
+      offsetHeight: 100,
+      offsetY: 50,
       dataTransfer: {
-        effectAllowed: '',
         setData: vi.fn(),
         getData: vi.fn().mockReturnValue(JSON.stringify(childrenItem)),
       },
-    } as unknown as DragEvent
+    })
 
     act(() => {
       result.current.handleDragStart(dragEvent)
@@ -148,20 +109,19 @@ describe('useTreeNodeDnD', () => {
 
   it('should update isDropAllowed based on canDrop function', () => {
     const mockCanDrop = vi.fn().mockReturnValue(false)
+
     const { result } = renderHook(() => useTreeNodeDnD(childrenFolder, mockOnDrop, mockCanDrop), {
       wrapper,
     })
 
-    const dragEvent = {
-      stopPropagation: vi.fn(),
-      preventDefault: vi.fn(),
-      currentTarget: { offsetHeight: 100 },
-      nativeEvent: { offsetY: 50 },
+    const dragEvent = createDragOverEvent({
+      offsetHeight: 100,
+      offsetY: 50,
       dataTransfer: {
         setData: vi.fn(),
         getData: vi.fn().mockReturnValue(JSON.stringify(childrenItem)),
       },
-    } as unknown as DragEvent
+    })
 
     act(() => {
       result.current.handleDragStart(dragEvent)

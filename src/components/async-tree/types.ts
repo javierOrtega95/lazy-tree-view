@@ -61,7 +61,7 @@ export interface TreeNodeProps extends BaseNodeProps, Pick<FolderProps, 'isOpen'
   folder: CustomFolderFC
   item: CustomItemFC
   dragClassNames: DragClassNames
-  children: ReactNode
+  children?: ReactNode
   onToggleOpen: (node: FolderNode) => void
   canDrop: CanDropFn
   onDrop: (data: MoveData) => void
