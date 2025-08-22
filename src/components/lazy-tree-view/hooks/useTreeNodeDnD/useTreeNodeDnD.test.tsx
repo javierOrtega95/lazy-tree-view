@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { type ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createDragOverEvent, dragStartEvent, mockDnDTree } from '../../../../mocks/DnD'
-import { AsyncTreeContext } from '../../context/AsyncTreeContext'
+import { LazyTreeViewContext } from '../../context/LazyTreeViewContext'
 import { DropPosition, type FolderNode, type MoveData, type NodeParents } from '../../types'
 import useTreeNodeDnD from './useTreeNodeDnD'
 
@@ -25,9 +25,9 @@ describe('useTreeNodeDnD', () => {
   })
 
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <AsyncTreeContext.Provider value={{ nodeParents: mockNodeParents }}>
+    <LazyTreeViewContext.Provider value={{ nodeParents: mockNodeParents }}>
       {children}
-    </AsyncTreeContext.Provider>
+    </LazyTreeViewContext.Provider>
   )
 
   it('should initialize with null drag position', () => {

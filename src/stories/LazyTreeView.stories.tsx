@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import AsyncTree from '../components/async-tree/AsyncTree'
+import LazyTreeView from '../components/lazy-tree-view/LazyTreeView'
 import { CHILDREN_BY_FOLDER, DEFAULT_TREE, mockLoadChildren } from '../mocks/storybook'
 
-const meta: Meta<typeof AsyncTree> = {
-  component: AsyncTree,
+const meta: Meta<typeof LazyTreeView> = {
+  component: LazyTreeView,
   tags: ['autodocs'],
   argTypes: {
-    treeData: {
+    initialTree: {
       description: 'The tree structure to be displayed.',
       control: 'object',
     },
@@ -18,11 +18,11 @@ const meta: Meta<typeof AsyncTree> = {
 }
 
 export default meta
-type Story = StoryObj<typeof AsyncTree>
+type Story = StoryObj<typeof LazyTreeView>
 
 export const Default: Story = {
   args: {
-    treeData: DEFAULT_TREE,
+    initialTree: DEFAULT_TREE,
     loadChildren: (folder) => mockLoadChildren(CHILDREN_BY_FOLDER[folder.name]),
   },
 }

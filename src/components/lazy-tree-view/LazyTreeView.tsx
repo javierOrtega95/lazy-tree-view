@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import './AsyncTree.css'
+import './LazyTreeView.css'
 import { default as DefaultFolder } from './components/tree-folder/TreeFolder'
 import { default as DefaultItem } from './components/tree-item/TreeItem'
 import TreeNode from './components/tree-node/TreeNode'
 import { defaultDnDclassNames, ROOT_NODE } from './constants'
-import { AsyncTreeContext } from './context/AsyncTreeContext'
+import { LazyTreeViewContext } from './context/LazyTreeViewContext'
 import type {
-  AsyncTreeProps,
   FolderNode,
   FoldersState,
   FolderState,
+  LazyTreeViewProps,
   MoveData,
   TreeNode as Node,
   NodeId,
@@ -18,7 +18,7 @@ import { moveNode, normalizeNewParent } from './utils/tree-operations'
 import { getFoldersState, getNodeParents, recursiveTreeMap } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'
 
-export default function AsyncTree({
+export default function LazyTreeView({
   initialTree,
   folder: Folder = DefaultFolder,
   item: Item = DefaultItem,
@@ -28,7 +28,7 @@ export default function AsyncTree({
   canDrop = () => true,
   onDrop,
   onChange,
-}: AsyncTreeProps): JSX.Element {
+}: LazyTreeViewProps): JSX.Element {
   const firstRenderRef = useRef<boolean>(true)
 
   const [treeData, setTreeData] = useState<Node[]>(initialTree)
@@ -144,10 +144,10 @@ export default function AsyncTree({
   }
 
   return (
-    <AsyncTreeContext.Provider value={{ nodeParents }}>
-      <ul role='tree' className='async-tree'>
+    <LazyTreeViewContext.Provider value={{ nodeParents }}>
+      <ul role='tree' className='lazy-tree-view'>
         {tree[0].children.map((node) => renderNode(node))}
       </ul>
-    </AsyncTreeContext.Provider>
+    </LazyTreeViewContext.Provider>
   )
 }

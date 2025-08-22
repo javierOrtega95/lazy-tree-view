@@ -1,6 +1,6 @@
 import './App.css'
-import AsyncTree from './components/async-tree/AsyncTree'
-import type { TreeNode } from './components/async-tree/types'
+import LazyTreeView from './components/lazy-tree-view/LazyTreeView'
+import type { TreeNode } from './components/lazy-tree-view/types'
 
 const initialTree: TreeNode[] = [
   {
@@ -86,7 +86,7 @@ function App() {
       <h1>Async Tree Demo</h1>
 
       <main className='tree-container'>
-        <AsyncTree initialTree={initialTree} loadChildren={loadChildren} />
+        <LazyTreeView initialTree={initialTree} loadChildren={loadChildren} />
       </main>
     </>
   )

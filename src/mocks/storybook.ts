@@ -1,4 +1,4 @@
-import { FolderNode, TreeNode } from '../components/async-tree/types'
+import { FolderNode, TreeNode } from '../components/lazy-tree-view/types'
 
 export const DEFAULT_TREE: TreeNode[] = [
   // {

@@ -1,8 +1,8 @@
-.async-tree {
+.lazy-tree-view {
   position: relative;
 }
 
-.async-tree,
+.lazy-tree-view,
 .tree-group {
   margin: 0;
   padding: 0;

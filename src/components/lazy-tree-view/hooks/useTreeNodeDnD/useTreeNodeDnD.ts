@@ -1,5 +1,5 @@
 import { type DragEvent, useRef, useState } from 'react'
-import { useAsyncTree } from '../../context/AsyncTreeContext'
+import { useLazyTreeView } from '../../context/LazyTreeViewContext'
 import {
   type CanDropFn,
   DropPosition,
@@ -20,8 +20,9 @@ export default function useTreeNodeDnD(
   onDrop: (data: MoveData) => void,
   canDrop: CanDropFn = () => true
 ): TreeNodeDnDParams {
-  const { nodeParents } = useAsyncTree()
   const isDropAllowedRef = useRef<boolean>(true)
+  const { nodeParents } = useLazyTreeView()
+
   const [dragPosition, setDragPosition] = useState<DropPosition | null>(null)
 
   const handleDragStart = (event: DragEvent) => {
