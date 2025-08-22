@@ -1,6 +1,6 @@
 ## Lazy Tree View
 
-React component for managing an lazy tree view.
+React component for managing and displaying hierarchical data with lazy loading.
 
 ### Features
 
