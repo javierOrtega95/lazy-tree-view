@@ -1,6 +1,6 @@
-## Async Tree
+## Lazy Tree View
 
-React component for managing an asynchronous tree.
+React component for managing an lazy tree view.
 
 ### Features
 
@@ -17,7 +17,7 @@ React component for managing an asynchronous tree.
 ### Getting Started
 
 ```bash
-cd async-tree
+cd lazy-tree-view
 ```
 
 ```bash
