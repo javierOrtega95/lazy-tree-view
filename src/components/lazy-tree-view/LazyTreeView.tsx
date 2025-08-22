@@ -49,10 +49,7 @@ export default function LazyTreeView({
 
   const updateFolderState = (folderId: NodeId, newFolderState: Partial<FolderState>) => {
     setFoldersState((prev) => {
-      const updatedFolderState = {
-        ...prev[folderId],
-        ...newFolderState,
-      }
+      const updatedFolderState = { ...prev[folderId], ...newFolderState }
 
       return { ...prev, [folderId]: updatedFolderState }
     })

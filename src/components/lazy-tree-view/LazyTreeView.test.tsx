@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import LazyTreeView from './LazyTreeView'
 import type { FolderNode, TreeNode } from './types'
 
-describe('AsyncTree Component', () => {
+describe('LazyTreeView Component', () => {
   describe('Basic rendering', () => {
     it('renders the AsyncTree component successfully with empty initialTree', () => {
       render(<LazyTreeView initialTree={[]} loadChildren={async () => []} />)
