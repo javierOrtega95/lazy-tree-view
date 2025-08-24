@@ -1,8 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { createDragOverEvent, dragStartEvent } from '../../mocks/DnD'
 import LazyTreeView from './LazyTreeView'
-import type { FolderNode, TreeNode } from './types'
+import { DropPosition, type FolderNode, type TreeNode } from './types'
 
 describe('LazyTreeView Component', () => {
   describe('Basic rendering', () => {
@@ -175,6 +176,98 @@ describe('LazyTreeView Component', () => {
 
       // folder should remain closed after error
       expect($folder.children).toHaveLength(1)
+    })
+  })
+
+  describe('Drag and Drop', () => {
+    const parent: FolderNode = { id: '1', name: 'Parent', children: [] }
+    const child: TreeNode = { id: '1-1', name: 'Child' }
+    const folder: FolderNode = { id: '2', name: 'Folder', children: [] }
+
+    it('moves a node from one parent to another and calls onDrop and onChange', () => {
+      const mockOnDrop = vi.fn()
+      const mockOnChange = vi.fn()
+
+      const initialTree: TreeNode[] = [{ ...parent, children: [child] }, folder]
+
+      render(
+        <LazyTreeView
+          initialTree={initialTree}
+          loadChildren={vi.fn()}
+          onDrop={mockOnDrop}
+          onChange={mockOnChange}
+        />
+      )
+
+      const $childNode = screen.getByTestId(`tree-node-${child.id}`)
+      const $folderNode = screen.getByTestId(`tree-node-${folder.id}`)
+
+      const dragEvent = createDragOverEvent({
+        offsetHeight: 100,
+        offsetY: 50,
+        dataTransfer: {
+          setData: vi.fn(),
+          getData: vi.fn().mockReturnValue(JSON.stringify(child)),
+        },
+      })
+
+      fireEvent.dragStart($childNode, dragStartEvent)
+      fireEvent.dragOver($folderNode, dragEvent)
+      fireEvent.drop($folderNode, dragEvent)
+
+      const newTree: TreeNode[] = [
+        { ...parent, children: [] },
+        { ...folder, children: [child] },
+      ]
+
+      expect(mockOnDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: child,
+          target: folder,
+          position: DropPosition.Inside,
+        })
+      )
+
+      expect(mockOnDrop.mock.calls[0][0].prevParent.id).toBe(parent.id)
+      expect(mockOnDrop.mock.calls[0][0].nextParent.id).toBe(folder.id)
+
+      expect(mockOnChange).toHaveBeenCalledWith(newTree)
+    })
+
+    it('does not move a node if canDrop returns false', () => {
+      const mockOnDrop = vi.fn()
+      const mockOnChange = vi.fn()
+
+      const initialTree: TreeNode[] = [{ ...parent, children: [child] }, folder]
+
+      render(
+        <LazyTreeView
+          initialTree={initialTree}
+          loadChildren={vi.fn()}
+          onDrop={mockOnDrop}
+          onChange={mockOnChange}
+          canDrop={() => false}
+        />
+      )
+
+      const $childNode = screen.getByTestId(`tree-node-${child.id}`)
+      const $folderNode = screen.getByTestId(`tree-node-${folder.id}`)
+
+      const dragEvent = createDragOverEvent({
+        offsetHeight: 100,
+        offsetY: 50,
+        dataTransfer: {
+          setData: vi.fn(),
+          getData: vi.fn().mockReturnValue(JSON.stringify(child)),
+        },
+      })
+
+      fireEvent.dragStart($childNode, dragStartEvent)
+      fireEvent.dragOver($folderNode, dragEvent)
+      fireEvent.drop($folderNode, dragEvent)
+
+      expect(mockOnDrop).not.toHaveBeenCalled()
+      expect(mockOnChange).not.toHaveBeenCalled()
     })
   })
 })
