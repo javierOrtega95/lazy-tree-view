@@ -6,7 +6,7 @@ import type { FolderNode, TreeNode } from './types'
 
 describe('LazyTreeView Component', () => {
   describe('Basic rendering', () => {
-    it('renders the AsyncTree component successfully with empty initialTree', () => {
+    it('renders successfully with empty initialTree', () => {
       render(<LazyTreeView initialTree={[]} loadChildren={async () => []} />)
 
       const $tree = screen.getByRole('tree')
@@ -58,12 +58,13 @@ describe('LazyTreeView Component', () => {
     })
   })
 
-  describe('Folder toggle behavior (handleToggleOpen)', () => {
+  describe('Folder toggle behavior', () => {
     it('opens a closed folder and loads children via loadChildren', async () => {
       const user = userEvent.setup()
 
-      const folder = { id: '1', name: 'Folder', children: [] }
-      const children = [{ id: '1-1', name: 'Child' }]
+      const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
+      const child: TreeNode = { id: '1-1', name: 'Child' }
+      const children = [child]
 
       const loadChildren = vi.fn().mockResolvedValue(children)
       const onChange = vi.fn()
@@ -80,44 +81,100 @@ describe('LazyTreeView Component', () => {
 
       expect(loadChildren).toHaveBeenCalledWith(folder)
 
-      await waitFor(() => {
-        expect(screen.getByTestId(`tree-node-${children[0].id}`)).toBeInTheDocument()
-      })
+      const $childNode = screen.queryByTestId(`tree-node-${child.id}`)
+
+      await waitFor(() => expect($childNode).toBeInTheDocument())
 
       const newTree: TreeNode[] = [{ ...folder, children }]
 
       expect(onChange).toHaveBeenCalledWith(newTree)
     })
-    //   it('does not reload children if fetchOnce is true and hasFetched is true', async () => {})
-    //   it('closes an open folder', () => {})
-    //   it('handles errors during async children loading', async () => {})
 
-    // describe('Drag and Drop behavior (handleDrop)', () => {
-    //   it('moves a node and calls onDrop and onChange callbacks', () => {})
-    //   it('updates the tree data correctly after moving a node', () => {})
-    //   it('normalizes previous and next parents correctly', () => {})
-    //   it('respects canDrop prop to allow or deny drops', () => {})
-    // })
+    it('does not reload children if fetchOnce is true and hasFetched is true', async () => {
+      const user = userEvent.setup()
 
-    // describe('Conditional rendering of nodes', () => {
-    //   it('renders children only if folder is open', () => {})
-    //   it('shows loading state when children are loading', () => {})
-    // })
+      const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
+      const node: TreeNode = { id: '1-1', name: 'Child' }
+      const loadChildren = vi.fn().mockResolvedValue([node])
 
-    // describe('Callbacks and prop interactions', () => {
-    //   it('calls onChange when tree data changes', () => {})
-    //   it('calls onDrop when a drop action occurs', () => {})
-    //   it('canDrop prop controls if drop is allowed', () => {})
-    // })
+      render(<LazyTreeView initialTree={[folder]} fetchOnce={true} loadChildren={loadChildren} />)
 
-    // describe('Context provider (AsyncTreeContext)', () => {
-    //   it('provides nodeParents data correctly via context', () => {})
-    // })
+      const $toggleIcon = screen.getByTestId(`${folder.id}-chevron-icon`)
+      await user.click($toggleIcon)
 
-    // describe('Internal utility functions (if exported for iting)', () => {
-    //   it('updateFolderState updates folder state correctly', () => {})
-    //   it('updateFolderChildren updates folder children correctly', () => {})
-    //   it('renderNode recursively renders nodes with correct depth', () => {})
-    // })
+      const $childNode = screen.getByTestId(`tree-node-${node.id}`)
+
+      await waitFor(() => expect($childNode).toBeInTheDocument())
+
+      // closing + reopening the folder should NOT trigger a reload
+      await user.click($toggleIcon)
+
+      await user.click($toggleIcon)
+
+      expect(loadChildren).toHaveBeenCalledTimes(1)
+    })
+
+    it('reloads children every time if fetchOnce is false', async () => {
+      const user = userEvent.setup()
+
+      const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
+      const child: TreeNode = { id: '1-1', name: 'Child' }
+      const loadChildren = vi.fn().mockResolvedValue([child])
+
+      render(<LazyTreeView initialTree={[folder]} fetchOnce={false} loadChildren={loadChildren} />)
+
+      const toggleIcon = screen.getByTestId(`${folder.id}-chevron-icon`)
+
+      await user.click(toggleIcon)
+      await waitFor(() => expect(screen.getByTestId(`tree-node-${child.id}`)).toBeInTheDocument())
+
+      // closing + reopening the folder should trigger a reload
+      await user.click(toggleIcon)
+      await user.click(toggleIcon)
+
+      await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(2))
+    })
+
+    it('closes an open folder', async () => {
+      const user = userEvent.setup()
+
+      const child: TreeNode = { id: '1-1', name: 'Child' }
+      const folder: FolderNode = { id: '1', name: 'Folder', children: [child] }
+
+      render(<LazyTreeView initialTree={[folder]} loadChildren={vi.fn()} />)
+
+      const toggleIcon = screen.getByTestId(`${folder.id}-chevron-icon`)
+
+      const nodeId = `tree-node-${child.id}`
+      const $node = screen.getByTestId(nodeId)
+
+      // child must be visible initially
+      expect($node).toBeInTheDocument()
+
+      await user.click(toggleIcon)
+
+      // child must be hidden after closing the folder
+      expect($node).not.toBeInTheDocument()
+    })
+
+    it('handles errors during async children loading', async () => {
+      const user = userEvent.setup()
+
+      const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
+      const loadChildren = vi.fn().mockRejectedValue(new Error('Failed to load children'))
+
+      render(<LazyTreeView initialTree={[folder]} loadChildren={loadChildren} />)
+
+      const toggleIcon = screen.getByTestId(`${folder.id}-chevron-icon`)
+
+      const $folder = screen.getByTestId(`tree-node-${folder.id}`)
+
+      await user.click(toggleIcon)
+
+      await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(1))
+
+      // folder should remain closed after error
+      expect($folder.children).toHaveLength(1)
+    })
   })
 })
