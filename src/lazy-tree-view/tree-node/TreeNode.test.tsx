@@ -2,14 +2,15 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { dragStartEvent } from '../../mocks/DnD'
-import { DropPosition } from '../../types/dnd'
 import type { BaseNode, FolderNode } from '../../types/tree'
 import { defaultDnDclassNames } from '../constants'
+import { LazyTreeViewContext, LazyTreeViewContextData } from '../context/LazyTreeViewContext'
 import type { TreeNodeDnDParams } from '../hooks/useTreeNodeDnD/types'
 import TreeFolder from '../tree-folder/TreeFolder'
 import TreeItem from '../tree-item/TreeItem'
 import { type BaseNodeProps, type FolderProps, type TreeNodeProps } from '../types'
 import TreeNode from './TreeNode'
+import { DropPosition } from '../../types/dnd'
 
 const mockHandleDragStart = vi.fn()
 const mockHandleDragLeave = vi.fn()
@@ -25,7 +26,7 @@ const defaultTreeNodeDnDdata: TreeNodeDnDParams = {
   dragPosition: null,
 }
 
-vi.mock('../../hooks/useTreeNodeDnD/useTreeNodeDnD', () => ({
+vi.mock('../hooks/useTreeNodeDnD/useTreeNodeDnD', () => ({
   default: () => ({ ...defaultTreeNodeDnDdata }),
 }))
 
@@ -53,6 +54,15 @@ describe('TreeNode Component', () => {
     onDrop: vi.fn(),
   }
 
+  const renderWithContext = (
+    ui: React.ReactElement,
+    contextValue: LazyTreeViewContextData = { nodeParents: {} }
+  ) => {
+    return render(
+      <LazyTreeViewContext.Provider value={contextValue}>{ui}</LazyTreeViewContext.Provider>
+    )
+  }
+
   describe('rendering', () => {
     it('should render a tree node correctly', () => {
       const folderProps = { ...defaultProps, node: mockFolderNode }
@@ -60,7 +70,7 @@ describe('TreeNode Component', () => {
       const { node } = folderProps
       const id = `tree-node-${node.id}`
 
-      render(<TreeNode {...folderProps} />)
+      renderWithContext(<TreeNode {...folderProps} />)
 
       const $treeNode = screen.getByTestId(id)
 
@@ -74,7 +84,7 @@ describe('TreeNode Component', () => {
     it('should render default folder node correctly', () => {
       const folderProps = { ...defaultProps, node: mockFolderNode }
 
-      render(<TreeNode {...folderProps} />)
+      renderWithContext(<TreeNode {...folderProps} />)
 
       const $folderNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
       expect($folderNode).toBeInTheDocument()
@@ -83,7 +93,7 @@ describe('TreeNode Component', () => {
     it('should render default item node correctly', () => {
       const itemProps = { ...defaultProps, node: mockItemNode }
 
-      render(<TreeNode {...itemProps} />)
+      renderWithContext(<TreeNode {...itemProps} />)
 
       const $itemNode = screen.getByTestId(`tree-node-${mockItemNode.id}`)
       expect($itemNode).toBeInTheDocument()
@@ -96,7 +106,7 @@ describe('TreeNode Component', () => {
 
       const props: TreeNodeProps = { ...defaultProps, node: mockFolderNode, folder: CusmtomFolder }
 
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $customFolder = screen.getByTestId(`custom-folder-${mockFolderNode.id}`)
       expect($customFolder).toBeInTheDocument()
@@ -109,7 +119,7 @@ describe('TreeNode Component', () => {
 
       const props: TreeNodeProps = { ...defaultProps, node: mockItemNode, item: CusmtomItem }
 
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $customItem = screen.getByTestId(`custom-item-${mockItemNode.id}`)
       expect($customItem).toBeInTheDocument()
@@ -122,7 +132,7 @@ describe('TreeNode Component', () => {
     const props = { ...defaultProps, node: mockFolderNode }
     const { node, onToggleOpen } = props
 
-    render(<TreeNode {...props} />)
+    renderWithContext(<TreeNode {...props} />)
 
     const $folderNode = screen.getByTestId(node.id)
 
@@ -140,7 +150,7 @@ describe('TreeNode Component', () => {
 
     it('should call handleDragStart when dragging starts', () => {
       const props = { ...defaultProps, node: mockFolderNode }
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $treeNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
 
@@ -151,7 +161,7 @@ describe('TreeNode Component', () => {
 
     it('should call handleDragLeave when dragging leaves the node', () => {
       const props = { ...defaultProps, node: mockFolderNode }
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $treeNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
 
@@ -164,7 +174,7 @@ describe('TreeNode Component', () => {
       defaultTreeNodeDnDdata.dragPosition = DropPosition.Inside
 
       const props = { ...defaultProps, node: mockFolderNode }
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $treeNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
 
@@ -184,7 +194,8 @@ describe('TreeNode Component', () => {
         node: mockFolderNode,
         dragClassNames: { ...defaultProps.dragClassNames, dragOver: customClassName },
       }
-      render(<TreeNode {...props} />)
+
+      renderWithContext(<TreeNode {...props} />)
 
       const $treeNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
 
@@ -196,7 +207,7 @@ describe('TreeNode Component', () => {
 
     it('should call handleDrop when a node is dropped', async () => {
       const props = { ...defaultProps, node: mockFolderNode }
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $treeNode = screen.getByTestId(`tree-node-${mockFolderNode.id}`)
 
@@ -209,7 +220,7 @@ describe('TreeNode Component', () => {
       defaultTreeNodeDnDdata.dragPosition = DropPosition.Before
 
       const props = { ...defaultProps, node: mockFolderNode }
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $dropIndicator = screen.getByTestId(
         `drop-indicator-${DropPosition.Before}-${mockFolderNode.id}`
@@ -229,7 +240,8 @@ describe('TreeNode Component', () => {
         node: mockFolderNode,
         dragClassNames: { ...defaultProps.dragClassNames, dragBefore: customClassName },
       }
-      render(<TreeNode {...props} />)
+
+      renderWithContext(<TreeNode {...props} />)
 
       const $dropIndicator = screen.getByTestId(
         `drop-indicator-${DropPosition.Before}-${mockFolderNode.id}`
@@ -243,7 +255,7 @@ describe('TreeNode Component', () => {
       defaultTreeNodeDnDdata.dragPosition = DropPosition.After
 
       const props = { ...defaultProps, node: mockFolderNode }
-      render(<TreeNode {...props} />)
+      renderWithContext(<TreeNode {...props} />)
 
       const $dropIndicator = screen.getByTestId(
         `drop-indicator-${DropPosition.After}-${mockFolderNode.id}`
@@ -263,7 +275,8 @@ describe('TreeNode Component', () => {
         node: mockFolderNode,
         dragClassNames: { ...defaultProps.dragClassNames, dragAfter: customClassName },
       }
-      render(<TreeNode {...props} />)
+
+      renderWithContext(<TreeNode {...props} />)
 
       const $dropIndicator = screen.getByTestId(
         `drop-indicator-${DropPosition.After}-${mockFolderNode.id}`
