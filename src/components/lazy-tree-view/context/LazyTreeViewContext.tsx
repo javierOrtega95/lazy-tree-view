@@ -1,11 +1,9 @@
 import { createContext, useContext } from 'react'
-import { NodeParents } from '../types'
+import type { NodeParents } from '../types'
 
-interface LazyTreeViewContextData {
-  nodeParents: NodeParents
-}
+type LazyTreeViewContextData = { nodeParents: NodeParents } | null
 
-export const LazyTreeViewContext = createContext<LazyTreeViewContextData | null>(null)
+export const LazyTreeViewContext = createContext<LazyTreeViewContextData>(null)
 
 export const useLazyTreeView = () => {
   const context = useContext(LazyTreeViewContext)
