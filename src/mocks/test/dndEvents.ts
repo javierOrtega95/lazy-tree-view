@@ -1,24 +1,5 @@
 import { DragEvent } from 'react'
 import { vi } from 'vitest'
-import type { TreeNode } from '../types/tree'
-
-export const mockDnDTree: TreeNode[] = [
-  {
-    id: crypto.randomUUID(),
-    name: 'Folder 1',
-    children: [
-      {
-        id: crypto.randomUUID(),
-        name: 'Folder 2',
-        children: [],
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Item 1',
-      },
-    ],
-  },
-]
 
 export const dragStartEvent = {
   stopPropagation: vi.fn(),

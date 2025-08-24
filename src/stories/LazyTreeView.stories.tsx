@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import LazyTreeView from '../components/lazy-tree-view/LazyTreeView'
-import { CHILDREN_BY_FOLDER, DEFAULT_TREE, mockLoadChildren } from '../mocks/storybook'
+import { CHILDREN_BY_FOLDER, DEFAULT_TREE, mockLoadChildren } from '../mocks/storybook/storybook'
+import LazyTreeView from '../lazy-tree-view/LazyTreeView'
 
 const meta: Meta<typeof LazyTreeView> = {
   component: LazyTreeView,

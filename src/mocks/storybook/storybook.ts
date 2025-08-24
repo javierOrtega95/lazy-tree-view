@@ -1,4 +1,4 @@
-import type { FolderNode, TreeNode } from '../types/tree'
+import type { FolderNode, TreeNode } from '../../types/tree'
 
 export const DEFAULT_TREE: TreeNode[] = [
   // {
