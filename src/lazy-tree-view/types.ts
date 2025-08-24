@@ -17,6 +17,7 @@ export interface LazyTreeViewProps {
   canDrop?: CanDropFn
   onDrop?: (data: DropData) => void
   onChange?: (tree: TreeNode[]) => void
+  onError?: (error: unknown, folder: FolderNode) => void
 }
 
 export type BaseNodeProps = {

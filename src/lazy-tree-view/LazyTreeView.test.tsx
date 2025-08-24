@@ -61,6 +61,24 @@ describe('LazyTreeView Component', () => {
   })
 
   describe('Folder toggle behavior', () => {
+    it('should call onError when loadChildren throws', async () => {
+      const user = userEvent.setup()
+      const loadChildreError = new Error('Load failed')
+      const failingLoadChildren = vi.fn().mockRejectedValue(loadChildreError)
+      const onError = vi.fn()
+
+      const folder: FolderNode = { id: '1', name: 'root', children: [] }
+
+      render(
+        <LazyTreeView initialTree={[folder]} loadChildren={failingLoadChildren} onError={onError} />
+      )
+
+      const $toggleIcon = screen.getByTestId(`${folder.id}-chevron-icon`)
+      await user.click($toggleIcon)
+
+      await waitFor(() => expect(onError).toBeCalledWith(loadChildreError, folder))
+    })
+
     it('opens a closed folder and loads children via loadChildren', async () => {
       const user = userEvent.setup()
 

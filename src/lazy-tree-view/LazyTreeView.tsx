@@ -22,6 +22,7 @@ export default function LazyTreeView({
   canDrop = () => true,
   onDrop,
   onChange,
+  onError,
 }: LazyTreeViewProps): JSX.Element {
   const firstRenderRef = useRef<boolean>(true)
 
@@ -84,8 +85,8 @@ export default function LazyTreeView({
 
       updateFolderState(id, { isOpen: true, isLoading: false, hasFetched: true })
     } catch (error) {
-      console.error(`Error loading children for folder ${id}`, error)
       updateFolderState(id, { isOpen: false, isLoading: false })
+      onError?.(error, folder)
     }
   }
 
