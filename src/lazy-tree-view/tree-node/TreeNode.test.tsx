@@ -1,19 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { dragStartEvent } from '../../../../mocks/DnD'
-import { defaultDnDclassNames } from '../../constants'
-import type { TreeNodeDnDParams } from '../../hooks/useTreeNodeDnD/types'
-import {
-  DropPosition,
-  type BaseNode,
-  type BaseNodeProps,
-  type FolderNode,
-  type FolderProps,
-  type TreeNodeProps,
-} from '../../types'
+import { dragStartEvent } from '../../mocks/DnD'
+import { DropPosition } from '../../types/dnd'
+import type { BaseNode, FolderNode } from '../../types/tree'
+import { defaultDnDclassNames } from '../constants'
+import type { TreeNodeDnDParams } from '../hooks/useTreeNodeDnD/types'
 import TreeFolder from '../tree-folder/TreeFolder'
 import TreeItem from '../tree-item/TreeItem'
+import { type BaseNodeProps, type FolderProps, type TreeNodeProps } from '../types'
 import TreeNode from './TreeNode'
 
 const mockHandleDragStart = vi.fn()

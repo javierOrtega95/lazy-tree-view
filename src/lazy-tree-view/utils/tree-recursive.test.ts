@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { FolderNode, FoldersState, TreeNode } from '../types'
+import type { FolderNode, FoldersState, TreeNode } from '../../types/tree'
 import { getFoldersState, getNodeParents, recursiveTreeMap } from './tree-recursive'
 
 describe('tree-recursive utilities', () => {

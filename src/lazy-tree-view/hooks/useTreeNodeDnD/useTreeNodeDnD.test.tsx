@@ -1,9 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
 import { type ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createDragOverEvent, dragStartEvent, mockDnDTree } from '../../../../mocks/DnD'
+import { createDragOverEvent, dragStartEvent, mockDnDTree } from '../../../mocks/DnD'
+import { DropPosition, type MoveData } from '../../../types/dnd'
+import type { FolderNode, NodeParents } from '../../../types/tree'
 import { LazyTreeViewContext } from '../../context/LazyTreeViewContext'
-import { DropPosition, type FolderNode, type MoveData, type NodeParents } from '../../types'
 import useTreeNodeDnD from './useTreeNodeDnD'
 
 describe('useTreeNodeDnD', () => {

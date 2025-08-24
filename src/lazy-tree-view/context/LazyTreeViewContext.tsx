@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { NodeParents } from '../types'
+import type { NodeParents } from '../../types/tree'
 
 type LazyTreeViewContextData = { nodeParents: NodeParents } | null
 

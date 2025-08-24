@@ -1,7 +1,7 @@
 import { type CSSProperties } from 'react'
-import type { BaseNodeProps } from '../../types'
+import { BASE_NODE_INDENTATION } from '../constants'
+import type { BaseNodeProps } from '../types'
 import './TreeItem.css'
-import { BASE_NODE_INDENTATION } from '../../constants'
 
 export default function TreeItem({ node, depth }: BaseNodeProps): JSX.Element {
   const indentation = BASE_NODE_INDENTATION * depth

@@ -1,4 +1,4 @@
-import { FolderNode, TreeNode } from '../components/lazy-tree-view/types'
+import type { FolderNode, TreeNode } from '../types/tree'
 
 export const DEFAULT_TREE: TreeNode[] = [
   // {

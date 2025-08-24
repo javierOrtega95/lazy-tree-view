@@ -1,4 +1,4 @@
-import type { FolderNode, FoldersState, NodeParents, TreeNode } from '../types'
+import { FolderNode, FoldersState, NodeParents, TreeNode } from '../../types/tree'
 import { isFolderNode } from './validations'
 
 export function recursiveTreeMap(tree: TreeNode[], fn: (item: TreeNode) => TreeNode): TreeNode[] {

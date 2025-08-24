@@ -1,4 +1,5 @@
-import type { DragClassNames, FolderNode } from './types'
+import type { DragClassNames } from '../types/dnd'
+import type { FolderNode } from '../types/tree'
 
 const ROOT_ID = crypto.randomUUID()
 

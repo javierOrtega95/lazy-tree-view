@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import type { FolderNode } from '../../types'
+import type { FolderNode } from '../../types/tree'
 import TreeFolder from './TreeFolder'
 
 describe('TreeFolder', () => {

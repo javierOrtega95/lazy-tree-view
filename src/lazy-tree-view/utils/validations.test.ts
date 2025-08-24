@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { DropPosition } from '../../types/dnd'
+import type { BaseNode, FolderNode, TreeNode } from '../../types/tree'
 import { ROOT_NODE } from '../constants'
-import { BaseNode, DropPosition, FolderNode, TreeNode } from '../types'
 import { getNodeParents } from './tree-recursive'
 import { isBaseNode, isFolderNode, isValidMove } from './validations'
 

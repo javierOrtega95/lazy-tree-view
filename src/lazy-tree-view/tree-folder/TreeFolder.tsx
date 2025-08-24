@@ -1,6 +1,7 @@
 import { type CSSProperties } from 'react'
-import { BASE_NODE_INDENTATION } from '../../constants'
-import type { FolderNode, FolderProps } from '../../types'
+import type { FolderNode } from '../../types/tree'
+import { BASE_NODE_INDENTATION } from '../constants'
+import type { FolderProps } from '../types'
 import './TreeFolder.css'
 
 export default function TreeFolder({

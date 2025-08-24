@@ -1,6 +1,6 @@
 import './App.css'
-import LazyTreeView from './components/lazy-tree-view/LazyTreeView'
-import type { TreeNode } from './components/lazy-tree-view/types'
+import LazyTreeView from './lazy-tree-view/LazyTreeView'
+import type { TreeNode } from './types/tree'
 
 const initialTree: TreeNode[] = [
   {

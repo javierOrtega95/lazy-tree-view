@@ -1,7 +1,8 @@
 import { type DragEvent } from 'react'
 import { afterAll, describe, expect, it, vi } from 'vitest'
+import { DropPosition } from '../../types/dnd'
+import type { FolderNode, TreeNode } from '../../types/tree'
 import { ROOT_NODE } from '../constants'
-import { DropPosition, type FolderNode, type TreeNode } from '../types'
 import {
   calculateDragPosition,
   moveNode,

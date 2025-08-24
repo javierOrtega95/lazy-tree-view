@@ -1,5 +1,5 @@
 import { type DragEvent } from 'react'
-import type { DropPosition } from '../../types'
+import { type DropPosition } from '../../../types/dnd'
 
 export type TreeNodeDnDParams = {
   dragPosition: DropPosition | null

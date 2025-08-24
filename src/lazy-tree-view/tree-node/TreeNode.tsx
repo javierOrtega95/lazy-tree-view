@@ -1,8 +1,10 @@
 import { type MouseEvent, useMemo } from 'react'
-import useTreeNodeDragAndDrop from '../../hooks/useTreeNodeDnD/useTreeNodeDnD'
-import { DropPosition, type FolderNode, type TreeNodeProps } from '../../types'
-import { isBaseNode, isFolderNode } from '../../utils/validations'
+import { DropPosition } from '../../types/dnd'
+import type { FolderNode } from '../../types/tree'
 import DropIndicator from '../drop-indicator/DropIndicator'
+import useTreeNodeDragAndDrop from '../hooks/useTreeNodeDnD/useTreeNodeDnD'
+import type { TreeNodeProps } from '../types'
+import { isBaseNode, isFolderNode } from '../utils/validations'
 import './TreeNode.css'
 
 export default function TreeNode({

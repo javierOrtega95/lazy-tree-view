@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import type { BaseNode } from '../../types/tree'
 import TreeItem from './TreeItem'
-import type { BaseNode } from '../../types'
 
 describe('TreeItem', () => {
   const mockNode: BaseNode = {

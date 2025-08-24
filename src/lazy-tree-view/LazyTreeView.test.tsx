@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { createDragOverEvent, dragStartEvent } from '../../mocks/DnD'
+import { createDragOverEvent, dragStartEvent } from '../mocks/DnD'
+import { DropPosition } from '../types/dnd'
+import { type FolderNode, type TreeNode } from '../types/tree'
 import LazyTreeView from './LazyTreeView'
-import { DropPosition, type FolderNode, type TreeNode } from './types'
 
 describe('LazyTreeView Component', () => {
   describe('Basic rendering', () => {

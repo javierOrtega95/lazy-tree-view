@@ -1,12 +1,8 @@
 import { type DragEvent, useRef, useState } from 'react'
+import { DropPosition, type MoveData } from '../../../types/dnd'
+import type { FolderNode, TreeNode } from '../../../types/tree'
 import { useLazyTreeView } from '../../context/LazyTreeViewContext'
-import {
-  type CanDropFn,
-  DropPosition,
-  type FolderNode,
-  type MoveData,
-  type TreeNode,
-} from '../../types'
+import type { CanDropFn } from '../../types'
 import {
   calculateDragPosition,
   normalizeNewParent,

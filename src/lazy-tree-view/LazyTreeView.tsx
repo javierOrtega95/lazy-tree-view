@@ -1,19 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import './LazyTreeView.css'
-import { default as DefaultFolder } from './components/tree-folder/TreeFolder'
-import { default as DefaultItem } from './components/tree-item/TreeItem'
-import TreeNode from './components/tree-node/TreeNode'
+import type { MoveData } from '../types/dnd'
+import type { FolderNode, FoldersState, FolderState, TreeNode as Node, NodeId } from '../types/tree'
 import { defaultDnDclassNames, ROOT_NODE } from './constants'
 import { LazyTreeViewContext } from './context/LazyTreeViewContext'
-import type {
-  FolderNode,
-  FoldersState,
-  FolderState,
-  LazyTreeViewProps,
-  MoveData,
-  TreeNode as Node,
-  NodeId,
-} from './types'
+import './LazyTreeView.css'
+import { default as DefaultFolder } from './tree-folder/TreeFolder'
+import { default as DefaultItem } from './tree-item/TreeItem'
+import TreeNode from './tree-node/TreeNode'
+import type { LazyTreeViewProps } from './types'
 import { moveNode, normalizeNewParent } from './utils/tree-operations'
 import { getFoldersState, getNodeParents, recursiveTreeMap } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'

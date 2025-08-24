@@ -1,6 +1,7 @@
 import { type DragEvent } from 'react'
+import { DropPosition, type MoveData } from '../../types/dnd'
+import type { FolderNode, TreeNode } from '../../types/tree'
 import { DROP_BEFORE_FOLDER_PERCENT, DROP_MID_PERCENT, ROOT_NODE } from '../constants'
-import { DropPosition, type FolderNode, type MoveData, type TreeNode } from '../types'
 import { recursiveTreeMap } from './tree-recursive'
 import { isFolderNode } from './validations'
 

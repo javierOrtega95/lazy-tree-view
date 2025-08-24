@@ -1,6 +1,6 @@
 import { DragEvent } from 'react'
 import { vi } from 'vitest'
-import type { TreeNode } from '../components/lazy-tree-view/types'
+import type { TreeNode } from '../types/tree'
 
 export const mockDnDTree: TreeNode[] = [
   {
