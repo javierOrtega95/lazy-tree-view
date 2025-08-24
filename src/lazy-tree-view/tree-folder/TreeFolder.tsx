@@ -9,6 +9,7 @@ export default function TreeFolder({
   isOpen = false,
   isLoading = false,
   depth,
+  error,
   onToggleOpen,
 }: FolderProps): JSX.Element {
   const indentation = BASE_NODE_INDENTATION * depth
@@ -21,24 +22,30 @@ export default function TreeFolder({
       style={{ '--tree-item-indentation': `${indentation}px` } as CSSProperties}
       onClick={(event) => onToggleOpen(event, node as FolderNode)}
     >
-      <svg
-        data-testid={`${node.id}-${isLoading ? 'loading-icon' : 'chevron-icon'}`}
-        width={isLoading ? '16' : '24'}
-        height={isLoading ? '16' : '24'}
-        viewBox='0 0 24 24'
-        fill='none'
-        stroke='currentColor'
-        strokeWidth='2'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-        className={`icon ${isLoading ? 'loading' : `chevron ${isOpen ? 'open' : ''}`}`}
-      >
-        {isLoading ? (
-          <path d='M21 12a9 9 0 1 1-6.219-8.56'></path>
-        ) : (
-          <path d='m9 18 6-6-6-6'></path>
+      <div className='icon-wrapper'>
+        {error !== undefined && (
+          <span data-testid={`${node.id}-error-icon`} className='error-icon' />
         )}
-      </svg>
+
+        <svg
+          data-testid={`${node.id}-${isLoading ? 'loading-icon' : 'chevron-icon'}`}
+          width={isLoading ? '16' : '24'}
+          height={isLoading ? '16' : '24'}
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          className={`icon ${isLoading ? 'loading' : `chevron ${isOpen ? 'open' : ''}`}`}
+        >
+          {isLoading ? (
+            <path d='M21 12a9 9 0 1 1-6.219-8.56'></path>
+          ) : (
+            <path d='m9 18 6-6-6-6'></path>
+          )}
+        </svg>
+      </div>
 
       <span className='folder-name'>{node.name}</span>
     </div>

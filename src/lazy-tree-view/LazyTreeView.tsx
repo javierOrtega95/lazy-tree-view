@@ -85,7 +85,7 @@ export default function LazyTreeView({
 
       updateFolderState(id, { isOpen: true, isLoading: false, hasFetched: true })
     } catch (error) {
-      updateFolderState(id, { isOpen: false, isLoading: false })
+      updateFolderState(id, { isOpen: false, isLoading: false, error })
       onError?.(error, folder)
     }
   }
@@ -114,7 +114,7 @@ export default function LazyTreeView({
   }
 
   const renderNode = (node: Node, depth: number = 0) => {
-    const { isOpen = false, isLoading = false } = foldersState[node.id] ?? {}
+    const { isOpen = false, isLoading = false, error } = foldersState[node.id] ?? {}
 
     return (
       <TreeNode
@@ -123,6 +123,7 @@ export default function LazyTreeView({
         depth={depth}
         isOpen={isOpen}
         isLoading={isLoading}
+        error={error}
         folder={Folder}
         item={Item}
         dragClassNames={dragClassNames}

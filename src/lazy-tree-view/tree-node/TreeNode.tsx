@@ -12,6 +12,7 @@ export default function TreeNode({
   depth,
   isOpen,
   isLoading,
+  error,
   folder: Folder,
   item: Item,
   children,
@@ -82,6 +83,7 @@ export default function TreeNode({
           depth={depth}
           isLoading={isLoading}
           isOpen={isOpen}
+          error={error}
           onToggleOpen={handleToggleOpen}
         />
       )}

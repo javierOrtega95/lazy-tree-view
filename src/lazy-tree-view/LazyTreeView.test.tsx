@@ -193,8 +193,11 @@ describe('LazyTreeView Component', () => {
 
       await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(1))
 
+      const $errorIcon = screen.getByTestId(`${folder.id}-error-icon`)
+
       // folder should remain closed after error
       expect($folder.children).toHaveLength(1)
+      expect($errorIcon).toBeInTheDocument()
     })
   })
 

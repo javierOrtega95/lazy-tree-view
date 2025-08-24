@@ -15,6 +15,7 @@ export type FolderState = {
   isOpen?: boolean
   isLoading?: boolean
   hasFetched?: boolean
+  error?: unknown
 }
 
 export type FoldersState = Record<NodeId, FolderState>

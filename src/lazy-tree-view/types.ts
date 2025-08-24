@@ -25,7 +25,9 @@ export type BaseNodeProps = {
   depth: number
 }
 
-export interface TreeNodeProps extends BaseNodeProps, Pick<FolderProps, 'isOpen' | 'isLoading'> {
+export interface TreeNodeProps
+  extends BaseNodeProps,
+    Pick<FolderProps, 'isOpen' | 'isLoading' | 'error'> {
   folder: CustomFolderFC
   item: CustomItemFC
   dragClassNames: DragClassNames
@@ -38,5 +40,6 @@ export interface TreeNodeProps extends BaseNodeProps, Pick<FolderProps, 'isOpen'
 export interface FolderProps extends BaseNodeProps {
   isOpen: boolean
   isLoading: boolean
+  error?: unknown
   onToggleOpen: (event: MouseEvent<Element>, folder: FolderNode) => void
 }

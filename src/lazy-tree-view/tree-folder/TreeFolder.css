@@ -10,34 +10,47 @@
   &:hover {
     background-color: #f3f4f6;
   }
-}
 
-.tree-node.drag-over {
-  outline: #3b82f6 solid 2px;
-  border-radius: 0.25rem;
-  z-index: 1;
+  .tree-node.drag-over {
+    outline: #3b82f6 solid 2px;
+    border-radius: 0.25rem;
+    z-index: 1;
 
-  > .tree-folder .folder-name {
-    color: #3b82f6;
-    font-weight: 500;
+    > .tree-folder .folder-name {
+      color: #3b82f6;
+      font-weight: 500;
+    }
   }
-}
 
-.icon {
-  width: 1rem;
-  height: 1rem;
-}
+  .icon-wrapper {
+    position: relative;
 
-.chevron {
-  transition: transform 0.2s;
-}
+    .error-icon {
+      position: absolute;
+      right: -3px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: red;
+    }
 
-.chevron.open {
-  transform: rotate(90deg);
-}
+    .icon {
+      width: 1rem;
+      height: 1rem;
+    }
 
-.loading {
-  animation: spin 1s linear infinite;
+    .chevron {
+      transition: transform 0.2s;
+    }
+
+    .chevron.open {
+      transform: rotate(90deg);
+    }
+
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+  }
 }
 
 @keyframes spin {

@@ -68,6 +68,22 @@ describe('TreeFolder', () => {
     expect($chevronIcon).toHaveClass('icon chevron open')
   })
 
+  it('shows error icon when error is passed', () => {
+    render(
+      <TreeFolder
+        node={mockNode}
+        depth={0}
+        isOpen={false}
+        isLoading={false}
+        error={new Error('Folder error')}
+        onToggleOpen={vi.fn()}
+      />
+    )
+
+    const $errorIcon = screen.getByTestId(`${mockNode.id}-error-icon`)
+    expect($errorIcon).toBeInTheDocument()
+  })
+
   it('calls onToggleOpen when clicking the folder', () => {
     render(
       <TreeFolder
