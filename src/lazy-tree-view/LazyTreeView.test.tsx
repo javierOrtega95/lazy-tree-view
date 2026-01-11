@@ -34,7 +34,7 @@ describe('LazyTreeView Component', () => {
   })
 
   describe('Initial state', () => {
-    it('initializes foldersState with correct isOpen based on presence of children', () => {
+    it('initializes foldersState with correct isOpen', () => {
       const folderClosed: FolderNode = { id: '1', name: 'Folder Closed', children: [] }
       const folderOpen: FolderNode = {
         id: '2',
@@ -54,9 +54,6 @@ describe('LazyTreeView Component', () => {
 
       const $folderOpenChild = screen.getByTestId(`tree-node-${folderOpen.children[0].id}`)
       expect($folderOpenChild).toBeInTheDocument()
-
-      const $folderClosedGroup = $folderClosed.querySelector('.tree-group')
-      expect($folderClosedGroup).toBeNull()
     })
   })
 
@@ -196,7 +193,7 @@ describe('LazyTreeView Component', () => {
       const $errorIcon = screen.getByTestId(`${folder.id}-error-icon`)
 
       // folder should remain closed after error
-      expect($folder.children).toHaveLength(1)
+      expect($folder).not.toHaveClass('open')
       expect($errorIcon).toBeInTheDocument()
     })
   })

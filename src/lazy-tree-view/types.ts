@@ -1,6 +1,6 @@
-import { type MouseEvent, type ReactNode, type FC } from 'react'
+import { type FC, type MouseEvent, type ReactNode, CSSProperties } from 'react'
 import { type DragClassNames, DropData, MoveData } from '../types/dnd'
-import type { FolderNode, TreeNode } from '../types/tree'
+import type { BaseNode, TreeNode, LoadChildrenFn, FolderNode } from '../types/tree'
 
 type CustomFolderFC = FC<FolderProps>
 type CustomItemFC = FC<BaseNodeProps>
@@ -9,37 +9,43 @@ export type CanDropFn = (data: DropData) => boolean
 
 export interface LazyTreeViewProps {
   initialTree: TreeNode[]
-  loadChildren: (node: TreeNode) => Promise<TreeNode[]>
-  fetchOnce?: boolean
+  loadChildren: LoadChildrenFn
   folder?: CustomFolderFC
   item?: CustomItemFC
+  allowDragAndDrop?: boolean
   dragClassNames?: DragClassNames
+  className?: string
+  style?: CSSProperties
+  onLoadStart?: (folder: FolderNode) => void
+  onLoadSuccess?: (folder: FolderNode, children: TreeNode[]) => void
+  onLoadError?: (folder: FolderNode, error: unknown) => void
+  onTreeChange?: (newTree: TreeNode[]) => void
   canDrop?: CanDropFn
   onDrop?: (data: DropData) => void
-  onChange?: (tree: TreeNode[]) => void
-  onError?: (error: unknown, folder: FolderNode) => void
 }
 
-export type BaseNodeProps = {
+type CommonTreeProps = Pick<LazyTreeViewProps, 'allowDragAndDrop' | 'dragClassNames'>
+
+type Depth = number
+
+export interface TreeNodeProps extends CommonTreeProps {
   node: TreeNode
-  depth: number
-}
-
-export interface TreeNodeProps
-  extends BaseNodeProps,
-    Pick<FolderProps, 'isOpen' | 'isLoading' | 'error'> {
-  folder: CustomFolderFC
-  item: CustomItemFC
+  depth: Depth
+  folder: FC<FolderProps>
+  item: FC<BaseNodeProps>
   dragClassNames: DragClassNames
+  allowDragAndDrop: boolean
   children?: ReactNode
-  onToggleOpen: (node: FolderNode) => void
+  onToggleOpen: (folder: FolderNode) => void
   canDrop: CanDropFn
   onDrop: (data: MoveData) => void
 }
 
-export interface FolderProps extends BaseNodeProps {
-  isOpen: boolean
-  isLoading: boolean
-  error?: unknown
-  onToggleOpen: (event: MouseEvent<Element>, folder: FolderNode) => void
+export type BaseNodeProps<T = object> = BaseNode<T> & {
+  depth: Depth
+}
+
+export type FolderProps<T = object> = FolderNode<T> & {
+  depth: Depth
+  onToggleOpen: (event: MouseEvent<Element>) => void
 }

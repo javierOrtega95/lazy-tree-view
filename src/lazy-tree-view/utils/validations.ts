@@ -17,7 +17,7 @@ export function isValidMove({
     return false
   }
 
-  const isOrderingSameParent = position !== DropPosition.Inside && prevParent.id === nextParent.id
+  const isOrderingSameParent = position !== DropPosition.Inside && prevParent?.id === nextParent?.id
 
   if (isOrderingSameParent && isSamePosition({ source, target, position, prevParent })) {
     return false
@@ -38,7 +38,7 @@ function isDescendant(source: TreeNode, target: TreeNode, nodeParents: NodeParen
   return false
 }
 
-function isMovingFolderIntoDescendant(
+export function isMovingFolderIntoDescendant(
   source: FolderNode,
   target: TreeNode,
   nodeParents: NodeParents
@@ -68,7 +68,9 @@ function isSamePosition({
   position,
   prevParent,
 }: Omit<MoveData, 'tree' | 'nextParent'>): boolean {
-  const { children } = prevParent
+  if (!prevParent) return false
+
+  const { children = [] } = prevParent
 
   const sourceIndex = children.findIndex((child) => child.id === source.id)
   const targetIndex = children.findIndex((child) => child.id === target.id)
@@ -85,9 +87,9 @@ function isSamePosition({
 }
 
 export function isFolderNode(node: TreeNode): node is FolderNode {
-  return 'children' in (node as FolderNode)
+  return 'children' in node
 }
 
 export function isBaseNode(node: TreeNode): node is BaseNode {
-  return !('children' in (node as FolderNode))
+  return !isFolderNode(node)
 }

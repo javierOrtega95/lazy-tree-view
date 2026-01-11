@@ -1,92 +1,66 @@
+import { useCallback } from 'react'
 import './App.css'
 import LazyTreeView from './lazy-tree-view/LazyTreeView'
-import type { TreeNode } from './types/tree'
-
-const initialTree: TreeNode[] = [
-  {
-    id: crypto.randomUUID(),
-    name: 'Projects',
-    children: [
-      {
-        id: crypto.randomUUID(),
-        name: 'Website Redesign',
-        children: [
-          { id: crypto.randomUUID(), name: 'wireframes.pdf' },
-          { id: crypto.randomUUID(), name: 'colors.png' },
-        ],
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Mobile App',
-        children: [],
-      },
-    ],
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'Personal',
-    children: [],
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'Photos',
-    children: [],
-  },
-]
+import {
+  CHILDREN_BY_FOLDER,
+  LAZY_TREE_EXAMPLE,
+  mockLoadChildren,
+} from './mocks/storybook/storybook'
+import type { DropData } from './types/dnd'
+import type { FolderNode, TreeNode } from './types/tree'
 
 function App() {
-  const loadChildren = async (folder: TreeNode): Promise<TreeNode[]> => {
-    console.info(`Fetching children of folder "${folder.name}" (${folder.id})`)
+  const loadChildren = useCallback(async (folder: FolderNode): Promise<TreeNode[]> => {
+    console.log(`Loading children for: ${folder.name}`)
 
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    const children = CHILDREN_BY_FOLDER[folder.name]
 
-    if (folder.name === 'Mobile App') {
-      return [
-        { id: crypto.randomUUID(), name: 'design.sketch' },
-        { id: crypto.randomUUID(), name: 'api-specs.yaml' },
-      ]
+    if (!children) {
+      throw new Error(`No children found for folder: ${folder.name}`)
     }
 
-    if (folder.name === 'Photos') {
-      return [
-        {
-          id: crypto.randomUUID(),
-          name: 'Vacation 2024',
-          children: [
-            { id: crypto.randomUUID(), name: 'beach.jpg' },
-            { id: crypto.randomUUID(), name: 'mountains.jpg' },
-          ],
-        },
-        { id: crypto.randomUUID(), name: 'profile.jpg' },
-      ]
-    }
+    return mockLoadChildren(children)
+  }, [])
 
-    if (folder.name === 'Personal') {
-      return [
-        { id: crypto.randomUUID(), name: 'Resume.docx' },
-        { id: crypto.randomUUID(), name: 'Taxes.xlsx' },
-      ]
-    }
+  const handleLoadStart = useCallback((folder: FolderNode) => {
+    console.log(`🔄 Loading started for: ${folder.name}`)
+  }, [])
 
-    return [
-      {
-        id: crypto.randomUUID(),
-        name: 'New Folder',
-        children: [],
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'note.txt',
-      },
-    ]
-  }
+  const handleLoadSuccess = useCallback((folder: FolderNode, children: TreeNode[]) => {
+    console.log(`✅ Successfully loaded ${children.length} items for: ${folder.name}`)
+  }, [])
+
+  const handleLoadError = useCallback((folder: FolderNode, error: unknown) => {
+    console.error(
+      `❌ Error loading ${folder.name}:`,
+      error instanceof Error ? error.message : error
+    )
+  }, [])
+
+  const handleDrop = useCallback(
+    ({ source, target, position, prevParent, nextParent }: DropData) => {
+      console.log(`Dropping node ${source.name} ${position} node ${target.name}`)
+
+      console.log(
+        `Prev Parent of ${source.name}: ${prevParent?.name} and Next Parent: ${nextParent?.name}`
+      )
+    },
+    []
+  )
 
   return (
     <>
-      <h1>Async Tree Demo</h1>
+      <h1>Lazy Tree View Demo</h1>
 
       <main className='tree-container'>
-        <LazyTreeView initialTree={initialTree} loadChildren={loadChildren} />
+        <LazyTreeView
+          initialTree={LAZY_TREE_EXAMPLE}
+          loadChildren={loadChildren}
+          onLoadStart={handleLoadStart}
+          onLoadSuccess={handleLoadSuccess}
+          onLoadError={handleLoadError}
+          onDrop={handleDrop}
+        />
       </main>
     </>
   )

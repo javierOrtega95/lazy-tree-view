@@ -1,15 +1,15 @@
 export type NodeId = string
 
-export type BaseNode = {
-  id: NodeId
-  name: string
-}
+export type BaseNode<T = object> = { id: NodeId; name: string } & T
 
-export type TreeNode<T = object> = (FolderNode | BaseNode) & T
+export type FolderNode<T = object> = BaseNode & {
+  children: TreeNode<T>[]
+} & T &
+  FolderState
 
-export interface FolderNode extends BaseNode {
-  children: TreeNode[]
-}
+export type TreeNode<T = object> = BaseNode<T> | FolderNode<T>
+
+export type TreeWithRoot = [root: FolderNode, ...children: TreeNode[]]
 
 export type FolderState = {
   isOpen?: boolean
@@ -18,5 +18,6 @@ export type FolderState = {
   error?: unknown
 }
 
-export type FoldersState = Record<NodeId, FolderState>
-export type NodeParents = Record<NodeId, FolderNode | null>
+export type LoadChildrenFn = (folder: FolderNode) => Promise<TreeNode[]>
+
+export type NodeParents = Record<NodeId, FolderNode>

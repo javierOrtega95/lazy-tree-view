@@ -1,22 +1,54 @@
-import { FolderNode, FoldersState, NodeParents, TreeNode } from '../../types/tree'
+import { FolderNode, NodeParents, TreeNode, TreeWithRoot } from '../../types/tree'
 import { isFolderNode } from './validations'
+import { ROOT_NODE } from '../constants'
 
-export function recursiveTreeMap(tree: TreeNode[], fn: (item: TreeNode) => TreeNode): TreeNode[] {
-  return tree.map((item) => {
+export function recursiveTreeMap(
+  tree: TreeWithRoot,
+  fn: (item: TreeNode) => TreeNode
+): TreeWithRoot {
+  // TreeWithRoot has an invisible root [root] where only root.children are visible/rendered
+  if (tree.length === 0) return tree
+
+  const [root] = tree
+
+  // Do NOT apply fn to the invisible root - only to its visible children
+  const processedRoot = { ...root }
+
+  // Process only the visible children recursively
+  if (root.children.length > 0) {
+    processedRoot.children = processChildren(root.children, fn)
+  }
+
+  return [processedRoot]
+}
+
+// Helper function to process regular TreeNode arrays (not TreeWithRoot)
+function processChildren(children: TreeNode[], fn: (item: TreeNode) => TreeNode): TreeNode[] {
+  return children.map((item) => {
     const newNode = fn({ ...item })
 
     if (isFolderNode(newNode) && newNode.children.length > 0) {
-      newNode.children = recursiveTreeMap(newNode.children, fn)
+      newNode.children = processChildren(newNode.children, fn)
     }
 
     return newNode
   })
 }
 
-export function getNodeParents(tree: TreeNode[]): NodeParents {
-  const nodeParents: NodeParents = {}
+export function editRecursive(tree: TreeWithRoot, newNode: TreeNode): TreeWithRoot {
+  const newTree = recursiveTreeMap(tree, (node) => {
+    if (node.id === newNode.id) return { ...node, ...newNode }
+    return node
+  })
 
-  initializeNodeParents(tree, null)
+  return newTree
+}
+
+export function indexNodeParents(tree: TreeWithRoot): NodeParents {
+  const nodeParents: NodeParents = {}
+  const [root] = tree
+
+  initializeNodeParents(root.children, ROOT_NODE)
 
   function initializeNodeParents(nodes: TreeNode[], parent: FolderNode | null) {
     for (const node of nodes) {
@@ -29,26 +61,4 @@ export function getNodeParents(tree: TreeNode[]): NodeParents {
   }
 
   return nodeParents
-}
-
-export function getFoldersState(tree: TreeNode[], initialState: FoldersState = {}): FoldersState {
-  const foldersState: FoldersState = { ...initialState }
-
-  initializeFoldersState(tree)
-
-  function initializeFoldersState(nodes: TreeNode[]) {
-    for (const node of nodes) {
-      if (isFolderNode(node)) {
-        const hasChildren = node.children.length > 0
-
-        const { isOpen = hasChildren, hasFetched = false } = foldersState[node.id] || {}
-
-        foldersState[node.id] = { isOpen, isLoading: false, hasFetched }
-
-        if (hasChildren) initializeFoldersState(node.children)
-      }
-    }
-  }
-
-  return foldersState
 }

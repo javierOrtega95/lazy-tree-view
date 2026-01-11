@@ -1,144 +1,174 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { MoveData } from '../types/dnd'
-import type { FolderNode, FoldersState, FolderState, TreeNode as Node, NodeId } from '../types/tree'
+import { FolderNode, TreeNode as Node, NodeId, NodeParents, TreeWithRoot } from '../types/tree'
 import { defaultDnDclassNames, ROOT_NODE } from './constants'
 import { LazyTreeViewContext } from './context/LazyTreeViewContext'
 import './LazyTreeView.css'
 import { default as DefaultFolder } from './tree-folder/TreeFolder'
 import { default as DefaultItem } from './tree-item/TreeItem'
 import TreeNode from './tree-node/TreeNode'
-import type { LazyTreeViewProps } from './types'
-import { moveNode, normalizeNewParent } from './utils/tree-operations'
-import { getFoldersState, getNodeParents, recursiveTreeMap } from './utils/tree-recursive'
+import type { LazyTreeViewProps, TreeNodeProps } from './types'
+import { editRecursive, indexNodeParents } from './utils/tree-recursive'
+import { moveNode, normalizeNewParent } from './utils/TreeOperations'
 import { isFolderNode } from './utils/validations'
 
 export default function LazyTreeView({
   initialTree,
-  folder: Folder = DefaultFolder,
-  item: Item = DefaultItem,
-  fetchOnce = true,
-  dragClassNames = defaultDnDclassNames,
   loadChildren,
+  folder = DefaultFolder,
+  item = DefaultItem,
+  allowDragAndDrop = true,
+  dragClassNames = defaultDnDclassNames,
+  className = '',
+  style = {},
+  onLoadStart,
+  onLoadSuccess,
+  onLoadError,
   canDrop = () => true,
   onDrop,
-  onChange,
-  onError,
+  onTreeChange,
 }: LazyTreeViewProps): JSX.Element {
-  const firstRenderRef = useRef<boolean>(true)
+  const [tree, setTree] = useState<TreeWithRoot>(() => {
+    return [{ ...ROOT_NODE, children: initialTree }]
+  })
 
-  const [treeData, setTreeData] = useState<Node[]>(initialTree)
-  const [foldersState, setFoldersState] = useState<FoldersState>(() => getFoldersState(initialTree))
+  const [draggingNode, setDraggingNode] = useState<Node | null>(null)
+  const [hoveredNodeId, setHoveredNodeId] = useState<NodeId | null>(null)
 
-  useEffect(() => {
-    if (firstRenderRef.current) {
-      firstRenderRef.current = false
+  const nodeParents: NodeParents = useMemo(() => indexNodeParents(tree), [tree])
+
+  const updateTree = useCallback(
+    (updater: (prev: TreeWithRoot) => TreeWithRoot) => {
+      setTree((prev) => {
+        const newTree = updater(prev)
+        onTreeChange?.(newTree[0].children)
+
+        return newTree
+      })
+    },
+    [onTreeChange]
+  )
+
+  const handleToggleOpen = async (folder: FolderNode) => {
+    // if currently open, close it
+    if (folder.isOpen) {
+      updateTree((prev) => {
+        const newTree = editRecursive(prev, { ...folder, isOpen: false })
+
+        return newTree
+      })
+
       return
     }
 
-    setFoldersState((prev) => getFoldersState(treeData, prev))
-  }, [treeData])
+    // if currently closed and doesn't have children loaded, load them
+    if (!folder.isOpen && !folder.hasFetched) {
+      updateTree((prev) => {
+        const newTree = editRecursive(prev, { ...folder, isLoading: true, error: undefined })
 
-  const tree = useMemo(() => [{ ...ROOT_NODE, children: treeData }], [treeData])
+        onTreeChange?.(newTree[0].children)
 
-  const nodeParents = useMemo(() => getNodeParents(tree), [tree])
+        return newTree
+      })
 
-  const updateFolderState = (folderId: NodeId, newFolderState: Partial<FolderState>) => {
-    setFoldersState((prev) => {
-      const updatedFolderState = { ...prev[folderId], ...newFolderState }
+      try {
+        onLoadStart?.(folder)
 
-      return { ...prev, [folderId]: updatedFolderState }
-    })
-  }
+        const children = await loadChildren(folder)
 
-  const updateFolderChildren = (tree: Node[], folderId: NodeId, updatedChildren: Node[]) => {
-    return recursiveTreeMap(tree, (node) => {
-      if (isFolderNode(node) && node.id === folderId) {
-        return { ...node, children: updatedChildren }
+        const newFolder: FolderNode = {
+          ...folder,
+          isOpen: true,
+          isLoading: false,
+          hasFetched: true,
+          error: undefined,
+          children,
+        }
+
+        onLoadSuccess?.(newFolder, children)
+
+        updateTree((prev) => {
+          const newTree = editRecursive(prev, newFolder)
+
+          onTreeChange?.(newTree[0].children)
+
+          return newTree
+        })
+      } catch (error) {
+        onLoadError?.(folder, error)
+
+        updateTree((prev) => {
+          const newTree = editRecursive(prev, { ...folder, isLoading: false, error })
+
+          return newTree
+        })
       }
 
-      return node
-    })
-  }
-
-  const handleToggleOpen = async (folder: FolderNode) => {
-    const { id } = folder
-    const { isOpen = false, hasFetched = false } = foldersState[id] ?? {}
-
-    if (isOpen) return updateFolderState(id, { isOpen: false })
-
-    if (fetchOnce && hasFetched) return updateFolderState(id, { isOpen: true })
-
-    try {
-      updateFolderState(id, { isLoading: true })
-
-      const children = await loadChildren(folder)
-
-      setTreeData((prevData) => {
-        const prevTree = [{ ...ROOT_NODE, children: prevData }]
-        const newTree = updateFolderChildren(prevTree, id, children)
-        const { children: rootChildren } = newTree[0] as FolderNode
-
-        onChange?.(rootChildren)
-
-        return rootChildren
-      })
-
-      updateFolderState(id, { isOpen: true, isLoading: false, hasFetched: true })
-    } catch (error) {
-      updateFolderState(id, { isOpen: false, isLoading: false, error })
-      onError?.(error, folder)
+      return
     }
-  }
 
-  const handleDrop = (dropData: MoveData) => {
-    const { source, target, position, prevParent, nextParent } = dropData
+    // if currently closed and has children loaded, just open it
+    updateTree((prev) => {
+      const newTree = editRecursive(prev, { ...folder, isOpen: true })
 
-    setTreeData((prevData) => {
-      const prevTree = [{ ...ROOT_NODE, children: prevData }]
-      const newTree = moveNode({ tree: prevTree, ...dropData })
+      onTreeChange?.(newTree[0].children)
 
-      const { children: rootChildren } = newTree[0] as FolderNode
-
-      onDrop?.({
-        source,
-        target,
-        position,
-        prevParent: normalizeNewParent(prevParent),
-        nextParent: normalizeNewParent(nextParent),
-      })
-
-      onChange?.(rootChildren)
-
-      return rootChildren
+      return newTree
     })
   }
+
+  const handleDrop = useCallback(
+    (moveData: MoveData) => {
+      onDrop?.({
+        ...moveData,
+        prevParent: normalizeNewParent(moveData.prevParent),
+        nextParent: normalizeNewParent(moveData.nextParent),
+      })
+
+      setTree((prevTree) => {
+        const newTree = moveNode(prevTree, moveData)
+
+        onTreeChange?.(newTree[0].children)
+
+        return newTree
+      })
+    },
+    [onDrop, onTreeChange]
+  )
 
   const renderNode = (node: Node, depth: number = 0) => {
-    const { isOpen = false, isLoading = false, error } = foldersState[node.id] ?? {}
+    const commonProps: TreeNodeProps = {
+      node,
+      depth,
+      item,
+      folder,
+      allowDragAndDrop,
+      dragClassNames,
+      canDrop,
+      onDrop: handleDrop,
+      onToggleOpen: handleToggleOpen,
+    }
+
+    if (!isFolderNode(node)) return <TreeNode key={node.id} {...commonProps} />
 
     return (
-      <TreeNode
-        key={node.id}
-        node={node}
-        depth={depth}
-        isOpen={isOpen}
-        isLoading={isLoading}
-        error={error}
-        folder={Folder}
-        item={Item}
-        dragClassNames={dragClassNames}
-        onToggleOpen={handleToggleOpen}
-        canDrop={canDrop}
-        onDrop={handleDrop}
-      >
-        {isFolderNode(node) && isOpen && node.children.map((child) => renderNode(child, depth + 1))}
+      <TreeNode key={node.id} {...commonProps}>
+        {node.children.map((child) => renderNode(child, depth + 1))}
       </TreeNode>
     )
   }
 
   return (
-    <LazyTreeViewContext.Provider value={{ nodeParents }}>
-      <ul role='tree' className='lazy-tree-view'>
+    <LazyTreeViewContext.Provider
+      value={{
+        nodeParents,
+        draggingNode,
+        hoveredNodeId,
+        setDraggingNode,
+        setHoveredNodeId,
+      }}
+    >
+      <ul role='tree' className={`lazy-tree-view ${className}`} style={style}>
         {tree[0].children.map((node) => renderNode(node))}
       </ul>
     </LazyTreeViewContext.Provider>

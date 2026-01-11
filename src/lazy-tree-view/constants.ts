@@ -1,13 +1,7 @@
 import type { DragClassNames } from '../types/dnd'
-import type { FolderNode } from '../types/tree'
 
-const ROOT_ID = crypto.randomUUID()
-
-export const ROOT_NODE: FolderNode = {
-  id: ROOT_ID,
-  name: 'root',
-  children: [],
-}
+const ROOT_NODE_ID = crypto.randomUUID()
+export const ROOT_NODE = { id: ROOT_NODE_ID, name: 'root', children: [] }
 
 export const defaultDnDclassNames: DragClassNames = {
   dragOver: 'drag-over',
@@ -18,5 +12,5 @@ export const defaultDnDclassNames: DragClassNames = {
 
 export const BASE_NODE_INDENTATION = 28
 
-export const DROP_BEFORE_FOLDER_PERCENT = 0.1
-export const DROP_MID_PERCENT = 0.5
+export const DROP_BEFORE_FOLDER_PERCENT = 0.25
+export const DROP_AFTER_FOLDER_PERCENT = 0.75

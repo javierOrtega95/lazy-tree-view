@@ -10,12 +10,10 @@ import './TreeNode.css'
 export default function TreeNode({
   node,
   depth,
-  isOpen,
-  isLoading,
-  error,
   folder: Folder,
   item: Item,
   children,
+  // allowDragAndDrop,
   dragClassNames,
   onToggleOpen,
   canDrop,
@@ -28,7 +26,11 @@ export default function TreeNode({
     handleDragLeave,
     handleDragOver,
     handleDrop,
+    handleDragEnd,
   } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
+
+  const isFolder = isFolderNode(node)
+  const isItem = isBaseNode(node)
 
   const nodeId = `tree-node-${node.id}`
 
@@ -50,10 +52,11 @@ export default function TreeNode({
     if (!dragPosition) return ''
 
     const { dragBefore, dragAfter, dropNotAllowed } = dragClassNames
-    const className = isDroppingBefore ? dragBefore : dragAfter
+    const positionClass = isDroppingBefore ? dragBefore : dragAfter
+    const allowedClass = isDropAllowed ? '' : dropNotAllowed
 
-    return `${className} ${dropNotAllowed}`
-  }, [dragPosition, dragClassNames, isDroppingBefore])
+    return `${positionClass} ${allowedClass}`
+  }, [dragPosition, isDropAllowed, dragClassNames, isDroppingBefore])
 
   const handleToggleOpen = (event: MouseEvent, folder: FolderNode) => {
     event.stopPropagation()
@@ -72,32 +75,39 @@ export default function TreeNode({
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onDragEnd={handleDragEnd}
     >
       {isDroppingBefore && (
-        <DropIndicator id={`drop-indicator-before-${node.id}`} className={indicatorClassName} />
+        <DropIndicator id={`indicator-before-${node.id}`} className={indicatorClassName} />
       )}
 
-      {isFolderNode(node) && (
+      {isFolder && (
         <Folder
-          node={node}
+          {...node}
+          isOpen={node.isOpen ?? false}
+          isLoading={node.isLoading ?? false}
           depth={depth}
-          isLoading={isLoading}
-          isOpen={isOpen}
-          error={error}
-          onToggleOpen={handleToggleOpen}
+          onToggleOpen={(event) => handleToggleOpen(event, node)}
         />
       )}
 
-      {isBaseNode(node) && <Item node={node} depth={depth} />}
+      {isItem && <Item {...node} depth={depth} />}
 
-      {isDroppingAfter && (
-        <DropIndicator id={`drop-indicator-after-${node.id}`} className={indicatorClassName} />
-      )}
-
-      {children && (
-        <ul role='group' className='tree-group'>
+      {isFolder && (
+        <ul
+          role='group'
+          className={`tree-group ${node.isOpen ? 'open' : ''}`}
+          onDragOver={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+          }}
+        >
           {children}
         </ul>
+      )}
+
+      {isDroppingAfter && (
+        <DropIndicator id={`indicator-after-${node.id}`} className={indicatorClassName} />
       )}
     </li>
   )
