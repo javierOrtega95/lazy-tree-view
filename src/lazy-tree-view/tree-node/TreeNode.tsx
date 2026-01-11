@@ -13,7 +13,7 @@ export default function TreeNode({
   folder: Folder,
   item: Item,
   children,
-  // allowDragAndDrop,
+  allowDragAndDrop = true,
   dragClassNames,
   onToggleOpen,
   canDrop,
@@ -34,11 +34,11 @@ export default function TreeNode({
 
   const nodeId = `tree-node-${node.id}`
 
-  const isDroppingBefore = dragPosition === DropPosition.Before
-  const isDroppingAfter = dragPosition === DropPosition.After
+  const isDroppingBefore = allowDragAndDrop && dragPosition === DropPosition.Before
+  const isDroppingAfter = allowDragAndDrop && dragPosition === DropPosition.After
 
   const DnDClassName = useMemo(() => {
-    if (!dragPosition) return ''
+    if (!allowDragAndDrop || !dragPosition) return ''
 
     const isDroppingInside = dragPosition === DropPosition.Inside
 
@@ -46,17 +46,36 @@ export default function TreeNode({
     const dropAllowedClassName = isDropAllowed ? '' : dropNotAllowed
 
     return isDroppingInside ? `${dragOver} ${dropAllowedClassName}` : ''
-  }, [dragPosition, isDropAllowed, dragClassNames])
+  }, [allowDragAndDrop, dragPosition, isDropAllowed, dragClassNames])
 
   const indicatorClassName = useMemo(() => {
-    if (!dragPosition) return ''
+    if (!allowDragAndDrop || !dragPosition) return ''
 
     const { dragBefore, dragAfter, dropNotAllowed } = dragClassNames
     const positionClass = isDroppingBefore ? dragBefore : dragAfter
     const allowedClass = isDropAllowed ? '' : dropNotAllowed
 
     return `${positionClass} ${allowedClass}`
-  }, [dragPosition, isDropAllowed, dragClassNames, isDroppingBefore])
+  }, [allowDragAndDrop, dragPosition, isDropAllowed, dragClassNames, isDroppingBefore])
+
+  const dragAndDropHandlers = useMemo(() => {
+    if (!allowDragAndDrop) return {}
+
+    return {
+      onDragStart: handleDragStart,
+      onDragLeave: handleDragLeave,
+      onDragOver: handleDragOver,
+      onDrop: handleDrop,
+      onDragEnd: handleDragEnd,
+    }
+  }, [
+    allowDragAndDrop,
+    handleDragStart,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    handleDragEnd,
+  ])
 
   const handleToggleOpen = (event: MouseEvent, folder: FolderNode) => {
     event.stopPropagation()
@@ -69,13 +88,9 @@ export default function TreeNode({
       id={nodeId}
       data-testid={nodeId}
       role='treeitem'
-      draggable={true}
-      className={`tree-node ${DnDClassName}`}
-      onDragStart={handleDragStart}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onDragEnd={handleDragEnd}
+      draggable={allowDragAndDrop}
+      className={`tree-node ${DnDClassName} ${allowDragAndDrop ? 'draggable' : ''}`}
+      {...dragAndDropHandlers}
     >
       {isDroppingBefore && (
         <DropIndicator id={`indicator-before-${node.id}`} className={indicatorClassName} />
@@ -98,6 +113,8 @@ export default function TreeNode({
           role='group'
           className={`tree-group ${node.isOpen ? 'open' : ''}`}
           onDragOver={(e) => {
+            if (!allowDragAndDrop) return
+
             e.stopPropagation()
             e.preventDefault()
           }}

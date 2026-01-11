@@ -24,17 +24,15 @@ export interface LazyTreeViewProps {
   onDrop?: (data: DropData) => void
 }
 
-type CommonTreeProps = Pick<LazyTreeViewProps, 'allowDragAndDrop' | 'dragClassNames'>
-
 type Depth = number
 
-export interface TreeNodeProps extends CommonTreeProps {
+export interface TreeNodeProps {
   node: TreeNode
   depth: Depth
   folder: FC<FolderProps>
   item: FC<BaseNodeProps>
-  dragClassNames: DragClassNames
   allowDragAndDrop: boolean
+  dragClassNames: DragClassNames
   children?: ReactNode
   onToggleOpen: (folder: FolderNode) => void
   canDrop: CanDropFn
