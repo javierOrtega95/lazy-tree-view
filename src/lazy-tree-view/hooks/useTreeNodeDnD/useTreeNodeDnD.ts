@@ -3,7 +3,7 @@ import { DropPosition, type MoveData } from '../../../types/dnd'
 import type { TreeNode } from '../../../types/tree'
 import { useLazyTreeView } from '../../context/LazyTreeViewContext'
 import type { CanDropFn } from '../../types'
-import { calculateDragPosition } from '../../utils/TreeOperations'
+import { calculateDragPosition } from '../../utils/tree-operations'
 import { isFolderNode, isMovingFolderIntoDescendant, isValidMove } from '../../utils/validations'
 import type { TreeNodeDnDReturn } from './types'
 

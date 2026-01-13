@@ -50,7 +50,7 @@ export function indexNodeParents(tree: TreeWithRoot): NodeParents {
 
   initializeNodeParents(root.children, ROOT_NODE)
 
-  function initializeNodeParents(nodes: TreeNode[], parent: FolderNode | null) {
+  function initializeNodeParents(nodes: TreeNode[], parent: FolderNode) {
     for (const node of nodes) {
       nodeParents[node.id] = parent
 
