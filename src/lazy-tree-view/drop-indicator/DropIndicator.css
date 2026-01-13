@@ -1,13 +1,13 @@
 .drop-indicator {
   position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  pointer-events: none;
 
   &.drag-before,
   &.drag-after {
-    z-index: 1;
-    left: 0;
-    right: 0;
     height: 2px;
     background-color: #3b82f6;
-    pointer-events: none;
   }
 }
