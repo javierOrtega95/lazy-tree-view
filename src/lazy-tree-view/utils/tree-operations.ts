@@ -1,7 +1,7 @@
 import { DragEvent } from 'react'
 import { DropPosition, MoveData } from '../../types/dnd'
 import { FolderNode, NodeId, TreeNode, TreeWithRoot } from '../../types/tree'
-import { DROP_AFTER_FOLDER_PERCENT, DROP_BEFORE_FOLDER_PERCENT, ROOT_NODE } from '../constants'
+import { ROOT_NODE } from '../constants'
 import { isFolderNode } from './validations'
 
 // ===== UTILITY FUNCTIONS =====
@@ -215,22 +215,27 @@ function removeFromContainer(
  * For folders: top 15% = Before, bottom 15% = After, middle 70% = Inside
  * For non-folders: top 50% = Before, bottom 50% = After
  */
-export function calculateDragPosition(event: DragEvent, isFolder: boolean): DropPosition {
+export function calculateDragPosition(event: DragEvent): DropPosition {
   const target = event.currentTarget as HTMLElement
-  const offsetY = event.nativeEvent.offsetY
-  const height = target.offsetHeight
+  const targetType = target.getAttribute('data-type') ?? 'item'
 
-  if (!isFolder) {
+  if (targetType === 'item') {
+    const height = target.offsetHeight
+    const { offsetY } = event.nativeEvent
+
     const threshold = height * 0.5
 
     return offsetY <= threshold ? DropPosition.Before : DropPosition.After
   }
 
-  const beforeThreshold = height * DROP_BEFORE_FOLDER_PERCENT
-  const afterThreshold = height * DROP_AFTER_FOLDER_PERCENT
+  const folderElement = target.firstElementChild as HTMLElement
+  const folderRect = folderElement.getBoundingClientRect()
 
-  if (offsetY < beforeThreshold) return DropPosition.Before
-  if (offsetY > afterThreshold) return DropPosition.After
+  const { clientY } = event.nativeEvent
+
+  if (clientY <= folderRect.top) return DropPosition.Before
+
+  if (clientY >= folderRect.bottom) return DropPosition.After
 
   return DropPosition.Inside
 }

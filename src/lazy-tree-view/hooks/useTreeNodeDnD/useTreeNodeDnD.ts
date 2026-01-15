@@ -65,7 +65,7 @@ export default function useTreeNodeDnD(
 
     setHoveredNodeId(node.id)
 
-    const position = calculateDragPosition(event, isFolderNode(node))
+    const position = calculateDragPosition(event)
 
     const moveData = buildMoveData(draggingNode, node, position)
     const { source, target } = moveData

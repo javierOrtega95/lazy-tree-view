@@ -87,6 +87,7 @@ export default function TreeNode({
     <li
       id={nodeId}
       data-testid={nodeId}
+      data-type={isFolder ? 'folder' : 'item'}
       role='treeitem'
       draggable={allowDragAndDrop}
       className={`tree-node ${DnDClassName} ${allowDragAndDrop ? 'draggable' : ''}`}
@@ -112,11 +113,11 @@ export default function TreeNode({
         <ul
           role='group'
           className={`tree-group ${node.isOpen ? 'open' : ''}`}
-          onDragOver={(e) => {
+          onDragOver={(event) => {
             if (!allowDragAndDrop) return
 
-            e.stopPropagation()
-            e.preventDefault()
+            event.stopPropagation()
+            event.preventDefault()
           }}
         >
           {children}
