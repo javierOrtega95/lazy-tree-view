@@ -1,10 +1,10 @@
-import { type DragEvent, useEffect, useState } from 'react'
+import { type DragEvent, useCallback, useEffect, useState } from 'react'
 import { DropPosition, type MoveData } from '../../../types/dnd'
 import type { TreeNode } from '../../../types/tree'
 import { useLazyTreeView } from '../../context/LazyTreeViewContext'
 import type { CanDropFn } from '../../types'
 import { calculateDragPosition } from '../../utils/tree-operations'
-import { isFolderNode, isMovingFolderIntoDescendant, isValidMove } from '../../utils/validations'
+import { isFolderNode, isMovingFolderIntoDescendant } from '../../utils/validations'
 import type { TreeNodeDnDReturn } from './types'
 
 export default function useTreeNodeDnD(
@@ -27,115 +27,108 @@ export default function useTreeNodeDnD(
     }
   }, [hoveredNodeId, node.id, dragPosition])
 
-  const handleDragStart = (event: DragEvent) => {
-    event.stopPropagation()
-    event.dataTransfer.effectAllowed = 'move'
+  const buildMoveData = useCallback(
+    (source: TreeNode, target: TreeNode, position: DropPosition): MoveData => {
+      const prevParent = nodeParents[source.id]
 
-    setDraggingNode(node)
-  }
+      const droppingInsideFolder = isFolderNode(target) && position === DropPosition.Inside
+      const nextParent = droppingInsideFolder ? target : nodeParents[target.id]
 
-  const handleDragLeave = (event: DragEvent) => {
-    event.stopPropagation()
+      return { source, target, position, prevParent, nextParent }
+    },
+    [nodeParents]
+  )
 
-    const relatedTarget = event.relatedTarget as HTMLElement
-    const currentTarget = event.currentTarget as HTMLElement
+  const validateMove = useCallback(
+    (moveData: MoveData): boolean => {
+      const { source, target } = moveData
 
-    if (!currentTarget.contains(relatedTarget)) {
-      setDragPosition(null)
-      setIsDropAllowed(true)
+      if (source.id === target.id) return false
 
-      if (hoveredNodeId === node.id) {
-        setHoveredNodeId(null)
+      const isFolderIntoDescendant =
+        isFolderNode(source) && isMovingFolderIntoDescendant(source, target, nodeParents)
+
+      if (isFolderIntoDescendant) return false
+
+      return canDrop(moveData)
+    },
+    [nodeParents, canDrop]
+  )
+
+  const handleDragStart = useCallback(
+    (event: DragEvent) => {
+      event.stopPropagation()
+      event.dataTransfer.effectAllowed = 'move'
+
+      setDraggingNode(node)
+    },
+    [node, setDraggingNode]
+  )
+
+  const handleDragLeave = useCallback(
+    (event: DragEvent) => {
+      event.stopPropagation()
+
+      const relatedTarget = event.relatedTarget as HTMLElement
+      const currentTarget = event.currentTarget as HTMLElement
+
+      if (!currentTarget.contains(relatedTarget)) {
+        setDragPosition(null)
+        setIsDropAllowed(true)
+
+        if (hoveredNodeId === node.id) {
+          setHoveredNodeId(null)
+        }
       }
-    }
-  }
+    },
+    [hoveredNodeId, node.id, setHoveredNodeId]
+  )
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setDraggingNode(null)
     setDragPosition(null)
     setIsDropAllowed(true)
     setHoveredNodeId(null)
-  }
+  }, [setDraggingNode, setHoveredNodeId])
 
-  const handleDragOver = (event: DragEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
+  const handleDragOver = useCallback(
+    (event: DragEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
 
-    if (!draggingNode) return
+      if (!draggingNode) return
 
-    setHoveredNodeId(node.id)
+      setHoveredNodeId(node.id)
 
-    const position = calculateDragPosition(event)
+      const position = calculateDragPosition(event)
+      const moveData = buildMoveData(draggingNode, node, position)
+      const dropAllowed = validateMove(moveData)
 
-    const moveData = buildMoveData(draggingNode, node, position)
-    const { source, target } = moveData
+      event.dataTransfer.dropEffect = dropAllowed ? 'move' : 'none'
 
-    const isFolderIntoDescendant =
-      isFolderNode(source) && isMovingFolderIntoDescendant(source, target, nodeParents)
+      setIsDropAllowed(dropAllowed)
+      setDragPosition(position)
+    },
+    [draggingNode, node, setHoveredNodeId, buildMoveData, validateMove]
+  )
 
-    const isInvalidMove = source.id === target.id || isFolderIntoDescendant
+  const handleDrop = useCallback(
+    (event: DragEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
 
-    const dropAllowed = !isInvalidMove && canDrop(moveData)
+      if (!draggingNode || !dragPosition || !isDropAllowed) {
+        handleDragEnd()
 
-    event.dataTransfer.dropEffect = dropAllowed ? 'move' : 'none'
+        return
+      }
 
-    setIsDropAllowed(dropAllowed)
-    setDragPosition(position)
-  }
-
-  const handleDrop = (event: DragEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
-
-    if (!draggingNode) {
+      const moveData = buildMoveData(draggingNode, node, dragPosition)
+      onDrop(moveData)
       handleDragEnd()
-
-      return
-    }
-
-    const source = { ...draggingNode }
-    const target = { ...node }
-
-    const isSameNodeDrop = source?.id === target.id
-
-    if (!dragPosition || !source || isSameNodeDrop) {
-      handleDragEnd()
-
-      return
-    }
-
-    const moveData = buildMoveData(draggingNode, node, dragPosition)
-
-    if (!isValidMove({ ...moveData, nodeParents }) || !isDropAllowed) {
-      handleDragEnd()
-
-      return
-    }
-
-    onDrop(moveData)
-
-    handleDragEnd()
-  }
-
-  const buildMoveData = (source: TreeNode, target: TreeNode, position: DropPosition): MoveData => {
-    const prevParent = nodeParents[source.id]
-    const nextParent = calculateNextParent(target, position)
-
-    return { source, target, position, prevParent, nextParent }
-  }
-
-  const calculateNextParent = (target: TreeNode, position: DropPosition) => {
-    if (!isFolderNode(target)) return nodeParents[target.id]
-
-    const isDroppingInside = position === DropPosition.Inside
-    const isDroppingBefore = position === DropPosition.Before
-
-    if (isDroppingInside) return target
-
-    if (isDroppingBefore) return nodeParents[target.id]
-
-    return nodeParents[target.id]
-  }
+    },
+    [draggingNode, dragPosition, isDropAllowed, node, buildMoveData, onDrop, handleDragEnd]
+  )
 
   return {
     dragPosition,
