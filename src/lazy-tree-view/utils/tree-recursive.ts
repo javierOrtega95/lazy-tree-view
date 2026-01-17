@@ -6,12 +6,11 @@ export function recursiveTreeMap(
   tree: TreeWithRoot,
   fn: (item: TreeNode) => TreeNode
 ): TreeWithRoot {
-  // TreeWithRoot has an invisible root [root] where only root.children are visible/rendered
   if (tree.length === 0) return tree
 
   const [root] = tree
 
-  // Do NOT apply fn to the invisible root - only to its visible children
+  // apply only to its visible children
   const processedRoot = { ...root }
 
   // Process only the visible children recursively
@@ -38,6 +37,7 @@ function processChildren(children: TreeNode[], fn: (item: TreeNode) => TreeNode)
 export function editRecursive(tree: TreeWithRoot, newNode: TreeNode): TreeWithRoot {
   const newTree = recursiveTreeMap(tree, (node) => {
     if (node.id === newNode.id) return { ...node, ...newNode }
+
     return node
   })
 
