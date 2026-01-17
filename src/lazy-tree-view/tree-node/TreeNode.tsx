@@ -120,7 +120,7 @@ export default function TreeNode({
             event.preventDefault()
           }}
         >
-          {children}
+          {node.isOpen && children}
         </ul>
       )}
 
