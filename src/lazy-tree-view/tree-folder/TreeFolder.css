@@ -1,5 +1,6 @@
 .tree-node.drag-over {
   outline: #3b82f6 solid 2px;
+  outline-offset: -2px;
   border-radius: 0.25rem;
 
   > .tree-folder .folder-name {
