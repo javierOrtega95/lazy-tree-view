@@ -41,7 +41,9 @@ export default function LazyTreeView({
     (updater: (prev: TreeWithRoot) => TreeWithRoot) => {
       setTree((prev) => {
         const newTree = updater(prev)
-        onTreeChange?.(newTree[0].children)
+        const [root] = newTree
+
+        onTreeChange?.(root.children)
 
         return newTree
       })
@@ -66,8 +68,6 @@ export default function LazyTreeView({
       updateTree((prev) => {
         const newTree = editRecursive(prev, { ...folder, isLoading: true, error: undefined })
 
-        onTreeChange?.(newTree[0].children)
-
         return newTree
       })
 
@@ -81,7 +81,6 @@ export default function LazyTreeView({
           isOpen: true,
           isLoading: false,
           hasFetched: true,
-          error: undefined,
           children,
         }
 
@@ -89,8 +88,6 @@ export default function LazyTreeView({
 
         updateTree((prev) => {
           const newTree = editRecursive(prev, newFolder)
-
-          onTreeChange?.(newTree[0].children)
 
           return newTree
         })
@@ -111,8 +108,6 @@ export default function LazyTreeView({
     updateTree((prev) => {
       const newTree = editRecursive(prev, { ...folder, isOpen: true })
 
-      onTreeChange?.(newTree[0].children)
-
       return newTree
     })
   }
@@ -125,15 +120,13 @@ export default function LazyTreeView({
         nextParent: normalizeNewParent(moveData.nextParent),
       })
 
-      setTree((prevTree) => {
+      updateTree((prevTree) => {
         const newTree = moveNode(prevTree, moveData)
-
-        onTreeChange?.(newTree[0].children)
 
         return newTree
       })
     },
-    [onDrop, onTreeChange]
+    [onDrop, updateTree]
   )
 
   const renderNode = (node: Node, depth: number = 0) => {
