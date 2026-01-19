@@ -18,6 +18,7 @@ export default function LazyTreeView({
   folder = DefaultFolder,
   item = DefaultItem,
   allowDragAndDrop = true,
+  useDragHandle = false,
   dragClassNames = defaultDnDclassNames,
   className = '',
   style = {},
@@ -48,7 +49,7 @@ export default function LazyTreeView({
         return newTree
       })
     },
-    [onTreeChange]
+    [onTreeChange],
   )
 
   const handleToggleOpen = async (folder: FolderNode) => {
@@ -126,7 +127,7 @@ export default function LazyTreeView({
         return newTree
       })
     },
-    [onDrop, updateTree]
+    [onDrop, updateTree],
   )
 
   const renderNode = (node: Node, depth: number = 0) => {
@@ -136,6 +137,7 @@ export default function LazyTreeView({
       item,
       folder,
       allowDragAndDrop,
+      useDragHandle,
       dragClassNames,
       canDrop,
       onDrop: handleDrop,

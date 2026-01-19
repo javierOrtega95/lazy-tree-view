@@ -1,4 +1,4 @@
-import { type FC, type MouseEvent, type ReactNode, CSSProperties } from 'react'
+import { type FC, type MouseEvent, type ReactNode, CSSProperties, DragEvent } from 'react'
 import { type DragClassNames, DropData, MoveData } from '../types/dnd'
 import type { BaseNode, TreeNode, LoadChildrenFn, FolderNode } from '../types/tree'
 
@@ -13,6 +13,7 @@ export interface LazyTreeViewProps {
   folder?: CustomFolderFC
   item?: CustomItemFC
   allowDragAndDrop?: boolean
+  useDragHandle?: boolean
   dragClassNames?: DragClassNames
   className?: string
   style?: CSSProperties
@@ -32,6 +33,7 @@ export interface TreeNodeProps {
   folder: FC<FolderProps>
   item: FC<BaseNodeProps>
   allowDragAndDrop: boolean
+  useDragHandle: boolean
   dragClassNames: DragClassNames
   children?: ReactNode
   onToggleOpen: (folder: FolderNode) => void
@@ -39,11 +41,15 @@ export interface TreeNodeProps {
   onDrop: (data: MoveData) => void
 }
 
+type OnDragStartFn = (event: DragEvent) => void
+
 export type BaseNodeProps<T = object> = BaseNode<T> & {
   depth: Depth
+  onDragStart?: OnDragStartFn
 }
 
 export type FolderProps<T = object> = FolderNode<T> & {
   depth: Depth
   onToggleOpen: (event: MouseEvent<Element>) => void
+  onDragStart?: OnDragStartFn
 }

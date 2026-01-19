@@ -14,6 +14,7 @@ export default function TreeNode({
   item: Item,
   children,
   allowDragAndDrop = true,
+  useDragHandle,
   dragClassNames,
   onToggleOpen,
   canDrop,
@@ -59,7 +60,7 @@ export default function TreeNode({
   }, [allowDragAndDrop, dragPosition, isDropAllowed, dragClassNames, isDroppingBefore])
 
   const dragAndDropHandlers = useMemo(() => {
-    if (!allowDragAndDrop) return {}
+    if (!allowDragAndDrop || !useDragHandle) return {}
 
     return {
       onDragStart: handleDragStart,
@@ -70,6 +71,7 @@ export default function TreeNode({
     }
   }, [
     allowDragAndDrop,
+    useDragHandle,
     handleDragStart,
     handleDragLeave,
     handleDragOver,
@@ -89,8 +91,8 @@ export default function TreeNode({
       data-testid={nodeId}
       data-type={isFolder ? 'folder' : 'item'}
       role='treeitem'
-      draggable={allowDragAndDrop}
-      className={`tree-node ${DnDClassName} ${allowDragAndDrop ? 'draggable' : ''}`}
+      draggable={allowDragAndDrop && !useDragHandle}
+      className={`tree-node ${DnDClassName}`}
       {...dragAndDropHandlers}
     >
       {isDroppingBefore && (
@@ -103,11 +105,14 @@ export default function TreeNode({
           isOpen={node.isOpen ?? false}
           isLoading={node.isLoading ?? false}
           depth={depth}
+          onDragStart={useDragHandle ? handleDragStart : undefined}
           onToggleOpen={(event) => handleToggleOpen(event, node)}
         />
       )}
 
-      {isItem && <Item {...node} depth={depth} />}
+      {isItem && (
+        <Item {...node} depth={depth} onDragStart={useDragHandle ? handleDragStart : undefined} />
+      )}
 
       {isFolder && (
         <ul
