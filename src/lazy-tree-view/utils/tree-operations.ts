@@ -21,7 +21,7 @@ function isDroppingInsideFolder(target: TreeNode, position: DropPosition): boole
 function calculateInsertPosition(
   sourceIndex: number,
   targetIndex: number,
-  position: DropPosition
+  position: DropPosition,
 ): number {
   const adjustedTargetIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex
   return position === DropPosition.Before ? adjustedTargetIndex : adjustedTargetIndex + 1
@@ -60,7 +60,7 @@ function addNode(
   tree: TreeWithRoot,
   parentId: NodeId,
   node: TreeNode,
-  position: number = -1
+  position: number = -1,
 ): TreeWithRoot {
   if (parentId === ROOT_NODE.id) return addToContainer(tree, null, node, position)
 
@@ -82,7 +82,7 @@ function addNode(
 function updateNode(
   tree: TreeWithRoot,
   nodeId: NodeId,
-  updater: (node: TreeNode) => TreeNode
+  updater: (node: TreeNode) => TreeNode,
 ): TreeWithRoot {
   if (nodeId === ROOT_NODE.id) {
     const updatedRoot = updater(tree[0])
@@ -147,7 +147,7 @@ function moveBetweenContainers(tree: TreeWithRoot, moveData: MoveData): TreeWith
 function reorderInContainer(
   tree: TreeWithRoot,
   container: FolderNode | null,
-  moveData: MoveData
+  moveData: MoveData,
 ): TreeWithRoot {
   const { source, target, position } = moveData
   const [root] = tree
@@ -171,7 +171,7 @@ function addToContainer(
   tree: TreeWithRoot,
   container: FolderNode | null,
   node: TreeNode,
-  position: number
+  position: number,
 ): TreeWithRoot {
   const [root] = tree
   const children = container ? container.children : root.children
@@ -187,7 +187,7 @@ function addToContainer(
 function removeFromContainer(
   tree: TreeWithRoot,
   nodeId: NodeId,
-  container?: FolderNode | null
+  container?: FolderNode | null,
 ): TreeWithRoot {
   if (isMovingFromRoot(container)) {
     const [root] = tree
@@ -211,9 +211,7 @@ function removeFromContainer(
 // ===== PUBLIC API FUNCTIONS =====
 
 /**
- * Calculate drag position based on mouse event and whether the node is a folder
- * For folders: top 15% = Before, bottom 15% = After, middle 70% = Inside
- * For non-folders: top 50% = Before, bottom 50% = After
+ * Calculate drag position based on mouse event
  */
 export function calculateDragPosition(event: DragEvent): DropPosition {
   const target = event.currentTarget as HTMLElement
