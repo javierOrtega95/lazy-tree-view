@@ -82,6 +82,7 @@ export default function LazyTreeView({
           isOpen: true,
           isLoading: false,
           hasFetched: true,
+          error: undefined,
           children,
         }
 
