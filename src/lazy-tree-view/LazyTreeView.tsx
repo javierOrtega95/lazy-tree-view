@@ -8,8 +8,8 @@ import { default as DefaultFolder } from './tree-folder/TreeFolder'
 import { default as DefaultItem } from './tree-item/TreeItem'
 import TreeNode from './tree-node/TreeNode'
 import type { LazyTreeViewProps, TreeNodeProps } from './types'
-import { editRecursive, indexNodeParents } from './utils/tree-recursive'
 import { moveNode, normalizeNewParent } from './utils/tree-operations'
+import { editRecursive, indexNodeParents } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'
 
 export default function LazyTreeView({

@@ -10,7 +10,7 @@ import type { TreeNodeDnDReturn } from './types'
 export default function useTreeNodeDnD(
   node: TreeNode,
   onDrop: (data: MoveData) => void,
-  canDrop: CanDropFn = () => true
+  canDrop: CanDropFn = () => true,
 ): TreeNodeDnDReturn {
   const { nodeParents, draggingNode, hoveredNodeId, setDraggingNode, setHoveredNodeId } =
     useLazyTreeView()
@@ -36,7 +36,7 @@ export default function useTreeNodeDnD(
 
       return { source, target, position, prevParent, nextParent }
     },
-    [nodeParents]
+    [nodeParents],
   )
 
   const validateMove = useCallback(
@@ -52,7 +52,7 @@ export default function useTreeNodeDnD(
 
       return canDrop(moveData)
     },
-    [nodeParents, canDrop]
+    [nodeParents, canDrop],
   )
 
   const handleDragStart = useCallback(
@@ -62,7 +62,7 @@ export default function useTreeNodeDnD(
 
       setDraggingNode(node)
     },
-    [node, setDraggingNode]
+    [node, setDraggingNode],
   )
 
   const handleDragLeave = useCallback(
@@ -81,7 +81,7 @@ export default function useTreeNodeDnD(
         }
       }
     },
-    [hoveredNodeId, node.id, setHoveredNodeId]
+    [hoveredNodeId, node.id, setHoveredNodeId],
   )
 
   const handleDragEnd = useCallback(() => {
@@ -109,7 +109,7 @@ export default function useTreeNodeDnD(
       setIsDropAllowed(dropAllowed)
       setDragPosition(position)
     },
-    [draggingNode, node, setHoveredNodeId, buildMoveData, validateMove]
+    [draggingNode, node, setHoveredNodeId, buildMoveData, validateMove],
   )
 
   const handleDrop = useCallback(
@@ -127,7 +127,7 @@ export default function useTreeNodeDnD(
       onDrop(moveData)
       handleDragEnd()
     },
-    [draggingNode, dragPosition, isDropAllowed, node, buildMoveData, onDrop, handleDragEnd]
+    [draggingNode, dragPosition, isDropAllowed, node, buildMoveData, onDrop, handleDragEnd],
   )
 
   return {
