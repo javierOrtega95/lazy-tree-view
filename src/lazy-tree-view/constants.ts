@@ -11,6 +11,3 @@ export const defaultDnDclassNames: DragClassNames = {
 }
 
 export const BASE_NODE_INDENTATION = 28
-
-export const DROP_BEFORE_FOLDER_PERCENT = 0.25
-export const DROP_AFTER_FOLDER_PERCENT = 0.75
