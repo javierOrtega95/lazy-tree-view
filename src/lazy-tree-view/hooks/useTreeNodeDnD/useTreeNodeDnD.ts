@@ -41,9 +41,14 @@ export default function useTreeNodeDnD(
 
   const validateMove = useCallback(
     (moveData: MoveData): boolean => {
-      const { source, target } = moveData
+      const { source, target, position, prevParent, nextParent } = moveData
 
       if (source.id === target.id) return false
+
+      const isDroppingInsideFolder = position === DropPosition.Inside && isFolderNode(target)
+      const isDroppingIntoSameParent = isDroppingInsideFolder && prevParent.id === nextParent.id
+
+      if (isDroppingIntoSameParent) return false
 
       const isFolderIntoDescendant =
         isFolderNode(source) && isMovingFolderIntoDescendant(source, target, nodeParents)
@@ -124,6 +129,7 @@ export default function useTreeNodeDnD(
       }
 
       const moveData = buildMoveData(draggingNode, node, dragPosition)
+
       onDrop(moveData)
       handleDragEnd()
     },
