@@ -218,22 +218,24 @@ export function calculateDragPosition(event: DragEvent): DropPosition {
   const targetType = target.getAttribute('data-type') ?? 'item'
 
   if (targetType === 'item') {
-    const height = target.offsetHeight
     const { offsetY } = event.nativeEvent
 
-    const threshold = height * 0.5
+    const threshold = target.offsetHeight * 0.5
 
     return offsetY <= threshold ? DropPosition.Before : DropPosition.After
   }
+  // For folders, find the actual folder element (excluding drop indicators)
+  const children = Array.from(target.children)
+  const folderElement = children.find((child) => !child.classList.contains('drop-indicator'))
 
-  const folderElement = target.firstElementChild as HTMLElement
-  const folderRect = folderElement.getBoundingClientRect()
+  if (!folderElement) return DropPosition.Inside
 
   const { clientY } = event.nativeEvent
+  const { top, bottom } = folderElement.getBoundingClientRect()
 
-  if (clientY <= folderRect.top) return DropPosition.Before
+  if (clientY <= top) return DropPosition.Before
 
-  if (clientY >= folderRect.bottom) return DropPosition.After
+  if (clientY >= bottom) return DropPosition.After
 
   return DropPosition.Inside
 }
