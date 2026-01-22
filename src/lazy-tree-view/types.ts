@@ -1,6 +1,6 @@
 import { type FC, type MouseEvent, type ReactNode, CSSProperties, DragEvent } from 'react'
 import { type DragClassNames, DropData, MoveData } from '../types/dnd'
-import type { BaseNode, TreeNode, LoadChildrenFn, FolderNode } from '../types/tree'
+import type { BaseNode, FolderNode, LoadChildrenFn, TreeNode } from '../types/tree'
 
 type CustomFolderFC = FC<FolderProps>
 type CustomItemFC = FC<BaseNodeProps>
@@ -14,7 +14,7 @@ export interface LazyTreeViewProps {
   item?: CustomItemFC
   allowDragAndDrop?: boolean
   useDragHandle?: boolean
-  dragClassNames?: DragClassNames
+  dragClassNames?: Partial<DragClassNames>
   className?: string
   style?: CSSProperties
   onLoadStart?: (folder: FolderNode) => void
