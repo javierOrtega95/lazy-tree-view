@@ -2,6 +2,7 @@ import { type MouseEvent, useMemo } from 'react'
 import { DropPosition } from '../../types/dnd'
 import type { FolderNode } from '../../types/tree'
 import DropIndicator from '../drop-indicator/DropIndicator'
+import { useExpandTransition } from '../hooks/useExpandTransition/useExpandTransition'
 import useTreeNodeDragAndDrop from '../hooks/useTreeNodeDnD/useTreeNodeDnD'
 import type { TreeNodeProps } from '../types'
 import { isBaseNode, isFolderNode } from '../utils/validations'
@@ -31,6 +32,12 @@ export default function TreeNode({
   } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
 
   const isFolder = isFolderNode(node)
+
+  // Handle expand/collapse transitions for folders
+  const { shouldRender, className: transitionClassName } = useExpandTransition({
+    isOpen: isFolder ? (node.isOpen ?? false) : false,
+    transitionDuration: 300,
+  })
 
   const isDroppingBefore = allowDragAndDrop && dragPosition === DropPosition.Before
   const isDroppingAfter = allowDragAndDrop && dragPosition === DropPosition.After
@@ -110,10 +117,10 @@ export default function TreeNode({
         <Item {...node} depth={depth} onDragStart={useDragHandle ? handleDragStart : undefined} />
       )}
 
-      {isFolder && (
+      {isFolder && shouldRender && (
         <ul
           role='group'
-          className={`tree-group ${node.isOpen ? 'open' : ''}`}
+          className={`tree-group ${transitionClassName}`}
           onDragOver={(event) => {
             if (!allowDragAndDrop) return
 
@@ -121,7 +128,7 @@ export default function TreeNode({
             event.preventDefault()
           }}
         >
-          {node.isOpen && children}
+          {children}
         </ul>
       )}
 
