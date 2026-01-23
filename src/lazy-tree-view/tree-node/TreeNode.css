@@ -4,11 +4,14 @@
   margin: 0;
   padding: 2px;
   outline: 0;
+  user-select: none;
 
   > .tree-group {
     height: 0px;
+    padding: 2px;
     interpolate-size: allow-keywords;
     transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    overflow: hidden;
 
     &.open {
       height: auto;
