@@ -11,6 +11,7 @@ const OPEN_DELAY_MS = 10
 export function useExpandTransition({
   isOpen,
   transitionDuration = 300,
+  disableAnimations = false,
 }: UseExpandTransitionOptions): UseExpandTransitionReturn {
   const [shouldRender, setShouldRender] = useState(isOpen)
   const [showOpen, setShowOpen] = useState(isOpen)
@@ -27,16 +28,28 @@ export function useExpandTransition({
 
   const startOpeningTransition = useCallback(() => {
     setShouldRender(true)
-    setShowOpen(false)
 
+    if (disableAnimations) {
+      setShowOpen(true)
+
+      return
+    }
+
+    setShowOpen(false)
     timeoutRef.current = setTimeout(() => setShowOpen(true), OPEN_DELAY_MS)
-  }, [])
+  }, [disableAnimations])
 
   const startClosingTransition = useCallback(() => {
     setShowOpen(false)
 
+    if (disableAnimations) {
+      setShouldRender(false)
+
+      return
+    }
+
     timeoutRef.current = setTimeout(() => setShouldRender(false), transitionDuration)
-  }, [transitionDuration])
+  }, [disableAnimations, transitionDuration])
 
   useEffect(() => {
     cleanupTimeout()

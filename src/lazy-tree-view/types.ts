@@ -2,44 +2,57 @@ import { type FC, type MouseEvent, type ReactNode, CSSProperties, DragEvent } fr
 import { type DragClassNames, DropData, MoveData } from '../types/dnd'
 import type { BaseNode, FolderNode, LoadChildrenFn, TreeNode } from '../types/tree'
 
-type CustomFolderFC = FC<FolderProps>
-type CustomItemFC = FC<BaseNodeProps>
-
 export type CanDropFn = (data: DropData) => boolean
 
-export interface LazyTreeViewProps {
-  initialTree: TreeNode[]
-  loadChildren: LoadChildrenFn
-  folder?: CustomFolderFC
-  item?: CustomItemFC
-  allowDragAndDrop?: boolean
-  useDragHandle?: boolean
+interface DragAndDropConfig {
+  allowDragAndDrop: boolean
+  useDragHandle: boolean
   dragClassNames?: Partial<DragClassNames>
-  className?: string
-  style?: CSSProperties
+  canDrop: CanDropFn
+}
+
+interface CustomComponents {
+  folder: FC<FolderProps>
+  item: FC<BaseNodeProps>
+}
+
+interface LoadCallbacks {
   onLoadStart?: (folder: FolderNode) => void
   onLoadSuccess?: (folder: FolderNode, children: TreeNode[]) => void
   onLoadError?: (folder: FolderNode, error: unknown) => void
+}
+
+interface AnimationConfig {
+  disableAnimations?: boolean
+  animationDuration?: number
+}
+
+export interface LazyTreeViewProps
+  extends Partial<DragAndDropConfig>, Partial<CustomComponents>, LoadCallbacks, AnimationConfig {
+  initialTree: TreeNode[]
+  loadChildren: LoadChildrenFn
+  className?: string
+  style?: CSSProperties
   onTreeChange?: (newTree: TreeNode[]) => void
-  canDrop?: CanDropFn
   onDrop?: (data: DropData) => void
 }
 
-type Depth = number
-
-export interface TreeNodeProps {
+export interface TreeNodeProps
+  extends
+    Required<Pick<DragAndDropConfig, 'allowDragAndDrop' | 'useDragHandle' | 'canDrop'>>,
+    Required<Pick<CustomComponents, 'folder' | 'item'>>,
+    Required<AnimationConfig> {
   node: TreeNode
   depth: Depth
-  folder: FC<FolderProps>
-  item: FC<BaseNodeProps>
-  allowDragAndDrop: boolean
-  useDragHandle: boolean
+  disableAnimations: boolean
+  animationDuration: number
   dragClassNames: DragClassNames
   children?: ReactNode
   onToggleOpen: (folder: FolderNode) => void
-  canDrop: CanDropFn
   onDrop: (data: MoveData) => void
 }
+
+type Depth = number
 
 type OnDragStartFn = (event: DragEvent) => void
 

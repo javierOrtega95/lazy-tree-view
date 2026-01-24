@@ -1,4 +1,4 @@
-import { type MouseEvent, useMemo } from 'react'
+import { type CSSProperties, type MouseEvent, useMemo } from 'react'
 import { DropPosition } from '../../types/dnd'
 import type { FolderNode } from '../../types/tree'
 import DropIndicator from '../drop-indicator/DropIndicator'
@@ -14,9 +14,11 @@ export default function TreeNode({
   folder: Folder,
   item: Item,
   children,
-  allowDragAndDrop = true,
+  allowDragAndDrop,
   useDragHandle,
   dragClassNames,
+  disableAnimations,
+  animationDuration,
   onToggleOpen,
   canDrop,
   onDrop,
@@ -36,7 +38,8 @@ export default function TreeNode({
   // Handle expand/collapse transitions for folders
   const { shouldRender, className: transitionClassName } = useExpandTransition({
     isOpen: isFolder ? (node.isOpen ?? false) : false,
-    transitionDuration: 300,
+    transitionDuration: animationDuration,
+    disableAnimations,
   })
 
   const isDroppingBefore = allowDragAndDrop && dragPosition === DropPosition.Before
@@ -82,6 +85,12 @@ export default function TreeNode({
     handleDragEnd,
   ])
 
+  const animationStyle = useMemo(() => {
+    const duration = disableAnimations ? 0 : animationDuration
+
+    return { '--animation-duration': `${duration}ms` } as CSSProperties
+  }, [disableAnimations, animationDuration])
+
   const handleToggleOpen = (event: MouseEvent, folder: FolderNode) => {
     event.stopPropagation()
 
@@ -96,6 +105,7 @@ export default function TreeNode({
       role='treeitem'
       draggable={allowDragAndDrop && !useDragHandle}
       className={`tree-node ${DnDClassName}`}
+      style={animationStyle}
       {...dragAndDropHandlers}
     >
       {isDroppingBefore && (
