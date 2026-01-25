@@ -4,6 +4,8 @@ import { UseExpandTransitionOptions, UseExpandTransitionReturn } from './types'
 // Delay to ensure DOM update before CSS transition
 const OPEN_DELAY_MS = 10
 
+type TransitionState = 'closed' | 'opening' | 'open' | 'closing'
+
 /**
  * Hook that manages expand/collapse transitions while optimizing performance
  * by conditionally rendering content only when needed.
@@ -13,11 +15,15 @@ export function useExpandTransition({
   transitionDuration = 300,
   disableAnimations = false,
 }: UseExpandTransitionOptions): UseExpandTransitionReturn {
-  const [shouldRender, setShouldRender] = useState(isOpen)
-  const [showOpen, setShowOpen] = useState(isOpen)
+  const [transitionState, setTransitionState] = useState<TransitionState>(
+    isOpen ? 'open' : 'closed',
+  )
 
   const timeoutRef = useRef<number | null>(null)
   const prevIsOpen = useRef(isOpen)
+
+  const shouldRender = transitionState !== 'closed'
+  const className = transitionState === 'open' ? 'open' : ''
 
   const cleanupTimeout = useCallback(() => {
     if (!timeoutRef.current) return
@@ -25,31 +31,6 @@ export function useExpandTransition({
     window.clearTimeout(timeoutRef.current)
     timeoutRef.current = null
   }, [])
-
-  const startOpeningTransition = useCallback(() => {
-    setShouldRender(true)
-
-    if (disableAnimations) {
-      setShowOpen(true)
-
-      return
-    }
-
-    setShowOpen(false)
-    timeoutRef.current = setTimeout(() => setShowOpen(true), OPEN_DELAY_MS)
-  }, [disableAnimations])
-
-  const startClosingTransition = useCallback(() => {
-    setShowOpen(false)
-
-    if (disableAnimations) {
-      setShouldRender(false)
-
-      return
-    }
-
-    timeoutRef.current = setTimeout(() => setShouldRender(false), transitionDuration)
-  }, [disableAnimations, transitionDuration])
 
   useEffect(() => {
     cleanupTimeout()
@@ -59,14 +40,35 @@ export function useExpandTransition({
 
     if (!wasOpening && !wasClosing) {
       prevIsOpen.current = isOpen
-
       return
+    }
+
+    const startOpeningTransition = () => {
+      setTransitionState('opening')
+
+      if (disableAnimations) {
+        setTransitionState('open')
+        return
+      }
+
+      timeoutRef.current = setTimeout(() => setTransitionState('open'), OPEN_DELAY_MS)
+    }
+
+    const startClosingTransition = () => {
+      setTransitionState('closing')
+
+      if (disableAnimations) {
+        setTransitionState('closed')
+        return
+      }
+
+      timeoutRef.current = setTimeout(() => setTransitionState('closed'), transitionDuration)
     }
 
     void (wasOpening ? startOpeningTransition() : startClosingTransition())
 
     prevIsOpen.current = isOpen
-  }, [isOpen, cleanupTimeout, startOpeningTransition, startClosingTransition])
+  }, [isOpen, disableAnimations, transitionDuration, cleanupTimeout])
 
   useEffect(() => {
     return () => {
@@ -74,8 +76,5 @@ export function useExpandTransition({
     }
   }, [cleanupTimeout])
 
-  return {
-    shouldRender,
-    className: shouldRender && showOpen ? 'open' : '',
-  }
+  return { shouldRender, className }
 }
