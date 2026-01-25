@@ -3,7 +3,7 @@ import { DropPosition, type MoveData } from '../../../types/dnd'
 import type { TreeNode } from '../../../types/tree'
 import { useLazyTreeView } from '../../context/LazyTreeViewContext'
 import type { CanDropFn } from '../../types'
-import { calculateDragPosition } from '../../utils/tree-operations'
+import { calculateDragPosition, calculateMoveIndices } from '../../utils/tree-operations'
 import { isFolderNode, isMovingFolderIntoDescendant } from '../../utils/validations'
 import type { TreeNodeDnDReturn } from './types'
 
@@ -34,7 +34,15 @@ export default function useTreeNodeDnD(
       const droppingInsideFolder = isFolderNode(target) && position === DropPosition.Inside
       const nextParent = droppingInsideFolder ? target : nodeParents[target.id]
 
-      return { source, target, position, prevParent, nextParent }
+      const { prevIndex, nextIndex } = calculateMoveIndices({
+        source,
+        target,
+        position,
+        prevParent,
+        nextParent,
+      })
+
+      return { source, target, position, prevParent, nextParent, prevIndex, nextIndex }
     },
     [nodeParents],
   )
@@ -46,7 +54,8 @@ export default function useTreeNodeDnD(
       if (source.id === target.id) return false
 
       const isDroppingInsideFolder = position === DropPosition.Inside && isFolderNode(target)
-      const isDroppingIntoSameParent = isDroppingInsideFolder && prevParent.id === nextParent.id
+      const isDroppingIntoSameParent = isDroppingInsideFolder && prevParent.id === nextParent.id // TODO: review logic
+      // TODO:  isDroppingIntoSameParent logic; should also consider Before/After cases
 
       if (isDroppingIntoSameParent) return false
 

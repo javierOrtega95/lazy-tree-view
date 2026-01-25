@@ -17,6 +17,8 @@ export type TreeMove = {
   source: TreeNode
   target: TreeNode
   position: DropPosition
+  prevIndex: number
+  nextIndex: number
 }
 
 export type MoveData = TreeMove & {

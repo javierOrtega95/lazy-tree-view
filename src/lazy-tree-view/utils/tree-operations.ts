@@ -221,6 +221,42 @@ function removeFromContainer(
 // ===== PUBLIC API FUNCTIONS =====
 
 /**
+ * Calculate the prev and next indices for a drag and drop operation
+ */
+export function calculateMoveIndices({
+  source,
+  target,
+  position,
+  prevParent,
+  nextParent,
+}: Omit<MoveData, 'prevIndex' | 'nextIndex'>): { prevIndex: number; nextIndex: number } {
+  const prevIndex = prevParent.children.findIndex((child) => child.id === source.id)
+
+  const droppingInsideFolder = isFolderNode(target) && position === DropPosition.Inside
+
+  if (droppingInsideFolder) return { prevIndex, nextIndex: nextParent.children.length }
+
+  const targetIndex = nextParent.children.findIndex((child) => child.id === target.id)
+  const isSameContainer = prevParent.id === nextParent.id
+
+  const isDroppingBefore = position === DropPosition.Before
+
+  if (isSameContainer) {
+    // Same container - need to adjust for the removal of source
+    const adjustedTargetIndex = prevIndex < targetIndex ? targetIndex - 1 : targetIndex
+
+    const nextIndex = isDroppingBefore ? adjustedTargetIndex : adjustedTargetIndex + 1
+
+    return { prevIndex, nextIndex }
+  }
+
+  // Different container - position relative to target
+  const nextIndex = isDroppingBefore ? targetIndex : targetIndex + 1
+
+  return { prevIndex, nextIndex }
+}
+
+/**
  * Calculate drag position based on mouse event
  */
 export function calculateDragPosition(event: DragEvent): DropPosition {
