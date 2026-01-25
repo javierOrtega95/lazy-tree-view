@@ -1,13 +1,13 @@
 .tree-item {
   display: flex;
   align-items: center;
-  border-radius: 0.3rem;
-  gap: 0.5rem;
-  padding: 4px 8px;
+  border-radius: var(--border-radius);
+  gap: var(--gap);
+  padding: var(--padding-item);
   padding-left: calc(var(--tree-item-indentation) + 8px);
   cursor: pointer;
 
   &:hover {
-    background-color: #f3f4f6;
+    background-color: var(--color-hover-bg);
   }
 }

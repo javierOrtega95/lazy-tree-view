@@ -1,4 +1,27 @@
 .lazy-tree-view {
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-hover-bg: #f3f4f6;
+  --color-error: #ef4444;
+  --color-white: white;
+
+  /* Spacing */
+  --border-radius: 0.3rem;
+  --border-radius-sm: 0.25rem;
+  --padding-item: 4px 8px;
+  --gap: 0.5rem;
+  --spacing-xs: 2px;
+
+  /* Transitions */
+  --transition-fast: 0.2s;
+  --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Sizes */
+  --icon-size: 1rem;
+  --icon-size-sm: 16px;
+  --icon-size-md: 24px;
+  --error-icon-size: 6px;
+
   position: relative;
 }
 

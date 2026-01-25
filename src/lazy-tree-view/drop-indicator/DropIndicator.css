@@ -15,7 +15,7 @@
 
 /* Default styles that can be overridden */
 :where(.drop-indicator) {
-  height: 2px;
-  background-color: #3b82f6;
+  height: var(--spacing-xs);
+  background-color: var(--color-primary);
   border-radius: 0;
 }
