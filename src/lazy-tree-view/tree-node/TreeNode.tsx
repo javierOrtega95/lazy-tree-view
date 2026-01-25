@@ -25,6 +25,14 @@ export default function TreeNode({
 }: TreeNodeProps): JSX.Element {
   const isFolder = isFolderNode(node)
 
+  const { shouldRender, className: transitionClassName } = useExpandTransition({
+    isOpen: isFolder && (node.isOpen ?? false),
+    transitionDuration: animationDuration,
+    disableAnimations,
+  })
+
+  const renderFolderContent = shouldRender && Array.isArray(children) && children.length > 0
+
   const {
     dragPosition,
     isDropAllowed,
@@ -34,12 +42,6 @@ export default function TreeNode({
     handleDrop,
     handleDragEnd,
   } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
-
-  const { shouldRender, className: transitionClassName } = useExpandTransition({
-    isOpen: isFolder && (node.isOpen ?? false),
-    transitionDuration: animationDuration,
-    disableAnimations,
-  })
 
   const { isDroppingBefore, isDroppingAfter } = useMemo(() => {
     if (!allowDragAndDrop || !dragPosition) {
@@ -134,7 +136,7 @@ export default function TreeNode({
         <Item {...node} depth={depth} onDragStart={useDragHandle ? handleDragStart : undefined} />
       )}
 
-      {isFolder && shouldRender && (
+      {isFolder && renderFolderContent && (
         <ul
           role='group'
           className={`tree-group ${transitionClassName}`}

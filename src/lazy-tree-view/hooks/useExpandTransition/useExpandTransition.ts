@@ -68,7 +68,6 @@ export function useExpandTransition({
     prevIsOpen.current = isOpen
   }, [isOpen, cleanupTimeout, startOpeningTransition, startClosingTransition])
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       cleanupTimeout()
