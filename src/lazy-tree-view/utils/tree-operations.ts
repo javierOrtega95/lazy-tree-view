@@ -6,6 +6,16 @@ import { isFolderNode } from './validations'
 
 // ===== UTILITY FUNCTIONS =====
 
+/**
+ * Calculate indentation using logarithmic progression for better scalability
+ * depth=0→0px, depth=1→20px, depth=2→40px, depth=3→52px, depth=4→60px
+ */
+export function calculateIndentation(depth: number): number {
+  if (depth === 0) return 0
+
+  return Math.log2(depth + 1) * 20
+}
+
 function isMovingToRoot(nextParent?: FolderNode | null): boolean {
   return nextParent?.id === ROOT_NODE.id
 }

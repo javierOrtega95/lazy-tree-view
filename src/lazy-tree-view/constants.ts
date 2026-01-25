@@ -9,5 +9,3 @@ export const defaultDnDclassNames: DragClassNames = {
   dragAfter: 'drag-after',
   dropNotAllowed: 'drop-not-allowed',
 }
-
-export const BASE_NODE_INDENTATION = 28

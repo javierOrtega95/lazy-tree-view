@@ -1,6 +1,6 @@
 import { type CSSProperties } from 'react'
-import { BASE_NODE_INDENTATION } from '../constants'
 import type { FolderProps } from '../types'
+import { calculateIndentation } from '../utils/tree-operations'
 import './TreeFolder.css'
 
 export default function TreeFolder({
@@ -12,14 +12,12 @@ export default function TreeFolder({
   depth,
   onToggleOpen,
 }: FolderProps): JSX.Element {
-  const indentation = BASE_NODE_INDENTATION * depth
-
   return (
     <div
       id={id}
       data-testid={id}
       className='tree-folder'
-      style={{ '--tree-item-indentation': `${indentation}px` } as CSSProperties}
+      style={{ '--tree-item-indentation': `${calculateIndentation(depth)}px` } as CSSProperties}
       onClick={(event) => onToggleOpen(event)}
     >
       <div className='icon-wrapper'>
