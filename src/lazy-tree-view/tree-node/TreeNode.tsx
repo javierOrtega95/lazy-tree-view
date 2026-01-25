@@ -23,6 +23,8 @@ export default function TreeNode({
   canDrop,
   onDrop,
 }: TreeNodeProps): JSX.Element {
+  const isFolder = isFolderNode(node)
+
   const {
     dragPosition,
     isDropAllowed,
@@ -33,17 +35,22 @@ export default function TreeNode({
     handleDragEnd,
   } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
 
-  const isFolder = isFolderNode(node)
-
-  // Handle expand/collapse transitions for folders
   const { shouldRender, className: transitionClassName } = useExpandTransition({
-    isOpen: isFolder ? (node.isOpen ?? false) : false,
+    isOpen: isFolder && (node.isOpen ?? false),
     transitionDuration: animationDuration,
     disableAnimations,
   })
 
-  const isDroppingBefore = allowDragAndDrop && dragPosition === DropPosition.Before
-  const isDroppingAfter = allowDragAndDrop && dragPosition === DropPosition.After
+  const { isDroppingBefore, isDroppingAfter } = useMemo(() => {
+    if (!allowDragAndDrop || !dragPosition) {
+      return { isDroppingBefore: false, isDroppingAfter: false }
+    }
+
+    const isDroppingBefore = dragPosition === DropPosition.Before
+    const isDroppingAfter = dragPosition === DropPosition.After
+
+    return { isDroppingBefore, isDroppingAfter }
+  }, [allowDragAndDrop, dragPosition])
 
   const DnDClassName = useMemo(() => {
     if (!allowDragAndDrop || !dragPosition) return ''
@@ -60,11 +67,17 @@ export default function TreeNode({
     if (!allowDragAndDrop || !dragPosition) return ''
 
     const { dragBefore, dragAfter, dropNotAllowed } = dragClassNames
-    const positionClass = isDroppingBefore ? dragBefore : dragAfter
+    const positionClass = isDroppingBefore ? `before ${dragBefore}` : `after ${dragAfter}`
     const allowedClass = isDropAllowed ? '' : dropNotAllowed
 
     return `${positionClass} ${allowedClass}`
   }, [allowDragAndDrop, dragPosition, isDropAllowed, dragClassNames, isDroppingBefore])
+
+  const animationStyle = useMemo(() => {
+    const duration = disableAnimations ? 0 : animationDuration
+
+    return { '--animation-duration': `${duration}ms` } as CSSProperties
+  }, [disableAnimations, animationDuration])
 
   const dragAndDropHandlers = useMemo(() => {
     if (!allowDragAndDrop) return {}
@@ -84,12 +97,6 @@ export default function TreeNode({
     handleDrop,
     handleDragEnd,
   ])
-
-  const animationStyle = useMemo(() => {
-    const duration = disableAnimations ? 0 : animationDuration
-
-    return { '--animation-duration': `${duration}ms` } as CSSProperties
-  }, [disableAnimations, animationDuration])
 
   const handleToggleOpen = (event: MouseEvent, folder: FolderNode) => {
     event.stopPropagation()

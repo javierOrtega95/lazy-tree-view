@@ -2,15 +2,20 @@
   position: absolute;
   left: 0;
   right: 0;
+  pointer-events: none;
+}
+
+.drop-indicator.before {
+  top: -1px;
+}
+
+.drop-indicator.after {
+  bottom: -1px;
+}
+
+/* Default styles that can be overridden */
+:where(.drop-indicator) {
   height: 2px;
   background-color: #3b82f6;
-  pointer-events: none;
-
-  &.drag-before {
-    top: -1px;
-  }
-
-  &.drag-after {
-    bottom: -1px;
-  }
+  border-radius: 0;
 }
