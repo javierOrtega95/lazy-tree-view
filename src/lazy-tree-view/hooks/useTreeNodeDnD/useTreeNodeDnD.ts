@@ -49,15 +49,20 @@ export default function useTreeNodeDnD(
 
   const validateMove = useCallback(
     (moveData: MoveData): boolean => {
-      const { source, target, position, prevParent, nextParent } = moveData
+      const { source, target, position, prevParent, nextParent, prevIndex, nextIndex } = moveData
 
       if (source.id === target.id) return false
 
-      const isDroppingInsideFolder = position === DropPosition.Inside && isFolderNode(target)
-      const isDroppingIntoSameParent = isDroppingInsideFolder && prevParent.id === nextParent.id // TODO: review logic
-      // TODO:  isDroppingIntoSameParent logic; should also consider Before/After cases
+      const isDroppingIntoSameParent = prevParent.id === nextParent.id
 
-      if (isDroppingIntoSameParent) return false
+      if (isDroppingIntoSameParent) {
+        const isDroppingInsideFolder = position === DropPosition.Inside && isFolderNode(target)
+
+        if (isDroppingInsideFolder && isDroppingIntoSameParent) return false
+
+        // If moving within the same parent, check if indices are the same
+        if (prevIndex === nextIndex) return false
+      }
 
       const isFolderIntoDescendant =
         isFolderNode(source) && isMovingFolderIntoDescendant(source, target, nodeParents)
