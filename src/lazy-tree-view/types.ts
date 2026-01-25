@@ -14,6 +14,8 @@ interface DragAndDropConfig {
 interface CustomComponents {
   folder: FC<FolderProps>
   item: FC<BaseNodeProps>
+  folderProps?: Record<string, unknown>
+  itemProps?: Record<string, unknown>
 }
 
 interface LoadCallbacks {
@@ -38,15 +40,9 @@ export interface LazyTreeViewProps
 }
 
 export interface TreeNodeProps
-  extends
-    Required<Pick<DragAndDropConfig, 'allowDragAndDrop' | 'useDragHandle' | 'canDrop'>>,
-    Required<Pick<CustomComponents, 'folder' | 'item'>>,
-    Required<AnimationConfig> {
+  extends Required<DragAndDropConfig>, Required<CustomComponents>, Required<AnimationConfig> {
   node: TreeNode
   depth: Depth
-  disableAnimations: boolean
-  animationDuration: number
-  dragClassNames: DragClassNames
   children?: ReactNode
   onToggleOpen: (folder: FolderNode) => void
   onDrop: (data: MoveData) => void

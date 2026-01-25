@@ -13,6 +13,8 @@ export default function TreeNode({
   depth,
   folder: Folder,
   item: Item,
+  folderProps,
+  itemProps,
   children,
   allowDragAndDrop,
   useDragHandle,
@@ -123,6 +125,7 @@ export default function TreeNode({
 
       {isFolder && (
         <Folder
+          {...folderProps}
           {...node}
           isOpen={node.isOpen ?? false}
           isLoading={node.isLoading ?? false}
@@ -133,7 +136,12 @@ export default function TreeNode({
       )}
 
       {isBaseNode(node) && (
-        <Item {...node} depth={depth} onDragStart={useDragHandle ? handleDragStart : undefined} />
+        <Item
+          {...itemProps}
+          {...node}
+          depth={depth}
+          onDragStart={useDragHandle ? handleDragStart : undefined}
+        />
       )}
 
       {isFolder && renderFolderContent && (
