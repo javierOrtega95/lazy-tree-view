@@ -1,4 +1,4 @@
-.lazy-tree-view {
+.lazyTreeView {
   /* Colors */
   --color-primary: #3b82f6;
   --color-hover-bg: #f3f4f6;
@@ -25,8 +25,8 @@
   position: relative;
 }
 
-.lazy-tree-view,
-.tree-group {
+.lazyTreeView,
+.treeGroup {
   margin: 0;
   padding: 0;
   outline: 0;

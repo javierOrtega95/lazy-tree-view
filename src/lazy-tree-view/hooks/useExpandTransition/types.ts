@@ -6,5 +6,7 @@ export interface UseExpandTransitionOptions {
 
 export interface UseExpandTransitionReturn {
   shouldRender: boolean
-  className: string
+  transitionState: TransitionState
 }
+
+export type TransitionState = 'closed' | 'opening' | 'open' | 'closing'

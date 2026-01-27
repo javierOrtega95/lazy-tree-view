@@ -1,7 +1,7 @@
 import { type CSSProperties } from 'react'
 import type { FolderProps } from '../types'
 import { calculateIndentation } from '../utils/tree-operations'
-import './TreeFolder.css'
+import styles from './TreeFolder.module.css'
 
 export default function TreeFolder({
   id,
@@ -16,12 +16,14 @@ export default function TreeFolder({
     <div
       id={id}
       data-testid={id}
-      className='tree-folder'
+      className={styles.treeFolder}
       style={{ '--tree-item-indentation': `${calculateIndentation(depth)}px` } as CSSProperties}
       onClick={(event) => onToggleOpen(event)}
     >
-      <div className='icon-wrapper'>
-        {error !== undefined && <span data-testid={`${id}-error-icon`} className='error-icon' />}
+      <div className={styles.iconWrapper}>
+        {error !== undefined && (
+          <span data-testid={`${id}-error-icon`} className={styles.errorIcon} />
+        )}
 
         <svg
           data-testid={`${id}-${isLoading ? 'loading-icon' : 'chevron-icon'}`}
@@ -33,7 +35,7 @@ export default function TreeFolder({
           strokeWidth='2'
           strokeLinecap='round'
           strokeLinejoin='round'
-          className={`icon ${isLoading ? 'loading' : `chevron ${isOpen ? 'open' : ''}`}`}
+          className={`${styles.icon} ${isLoading ? styles.loading : `${styles.chevron} ${isOpen ? styles.open : ''}`}`}
         >
           {isLoading ? (
             <path d='M21 12a9 9 0 1 1-6.219-8.56'></path>
@@ -43,7 +45,7 @@ export default function TreeFolder({
         </svg>
       </div>
 
-      <span className='folder-name'>{name}</span>
+      <span>{name}</span>
     </div>
   )
 }

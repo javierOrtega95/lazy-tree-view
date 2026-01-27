@@ -6,7 +6,7 @@ import { useExpandTransition } from '../hooks/useExpandTransition/useExpandTrans
 import useTreeNodeDragAndDrop from '../hooks/useTreeNodeDnD/useTreeNodeDnD'
 import type { TreeNodeProps } from '../types'
 import { isBaseNode, isFolderNode } from '../utils/validations'
-import './TreeNode.css'
+import styles from './TreeNode.module.css'
 
 export default function TreeNode({
   node,
@@ -27,7 +27,7 @@ export default function TreeNode({
 }: TreeNodeProps): JSX.Element {
   const isFolder = isFolderNode(node)
 
-  const { shouldRender, className: transitionClassName } = useExpandTransition({
+  const { shouldRender, transitionState } = useExpandTransition({
     isOpen: isFolder && (node.isOpen ?? false),
     transitionDuration: animationDuration,
     disableAnimations,
@@ -61,17 +61,19 @@ export default function TreeNode({
 
     const isDroppingInside = dragPosition === DropPosition.Inside
 
-    const { dragOver, dropNotAllowed } = dragClassNames
-    const dropAllowedClassName = isDropAllowed ? '' : dropNotAllowed
+    const { dragOver = styles.dragOver, dropNotAllowed = '' } = dragClassNames
+    const allowedClass = isDropAllowed ? '' : dropNotAllowed
 
-    return isDroppingInside ? `${dragOver} ${dropAllowedClassName}` : ''
+    return isDroppingInside ? `${dragOver} ${allowedClass}` : ''
   }, [allowDragAndDrop, dragPosition, isDropAllowed, dragClassNames])
 
   const indicatorClassName = useMemo(() => {
     if (!allowDragAndDrop || !dragPosition) return ''
 
-    const { dragBefore, dragAfter, dropNotAllowed } = dragClassNames
-    const positionClass = isDroppingBefore ? `before ${dragBefore}` : `after ${dragAfter}`
+    const { dragBefore = 'before', dragAfter = 'after', dropNotAllowed = '' } = dragClassNames
+
+    const positionClass = isDroppingBefore ? dragBefore : dragAfter
+
     const allowedClass = isDropAllowed ? '' : dropNotAllowed
 
     return `${positionClass} ${allowedClass}`
@@ -115,7 +117,7 @@ export default function TreeNode({
       data-type={isFolder ? 'folder' : 'item'}
       role='treeitem'
       draggable={allowDragAndDrop && !useDragHandle}
-      className={`tree-node ${DnDClassName}`}
+      className={`${styles.treeNode} ${DnDClassName}`}
       style={animationStyle}
       {...dragAndDropHandlers}
     >
@@ -147,7 +149,7 @@ export default function TreeNode({
       {isFolder && renderFolderContent && (
         <ul
           role='group'
-          className={`tree-group ${transitionClassName}`}
+          className={`${styles.treeGroup} ${transitionState === 'open' ? styles.open : ''}`}
           onDragOver={(event) => {
             if (!allowDragAndDrop) return
 

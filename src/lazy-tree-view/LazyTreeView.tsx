@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { MoveData } from '../types/dnd'
 import { FolderNode, TreeNode as Node, NodeId, NodeParents, TreeWithRoot } from '../types/tree'
-import { defaultDnDclassNames, ROOT_NODE } from './constants'
+import { ROOT_NODE } from './constants'
 import { LazyTreeViewContext } from './context/LazyTreeViewContext'
-import './LazyTreeView.css'
+import styles from './LazyTreeView.module.css'
 import { default as DefaultFolder } from './tree-folder/TreeFolder'
 import { default as DefaultItem } from './tree-item/TreeItem'
 import TreeNode from './tree-node/TreeNode'
@@ -145,7 +145,7 @@ export default function LazyTreeView({
       folderProps,
       allowDragAndDrop,
       useDragHandle,
-      dragClassNames: { ...defaultDnDclassNames, ...dragClassNames },
+      dragClassNames,
       disableAnimations,
       animationDuration,
       canDrop,
@@ -172,7 +172,7 @@ export default function LazyTreeView({
         setHoveredNodeId,
       }}
     >
-      <ul role='tree' className={`lazy-tree-view ${className}`} style={style}>
+      <ul role='tree' className={`${styles.lazyTreeView} ${className}`} style={style}>
         {tree[0].children.map((node) => renderNode(node))}
       </ul>
     </LazyTreeViewContext.Provider>

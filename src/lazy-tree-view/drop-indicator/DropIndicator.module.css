@@ -1,20 +1,20 @@
-.drop-indicator {
+.dropIndicator {
   position: absolute;
   left: 0;
   right: 0;
   pointer-events: none;
 }
 
-.drop-indicator.before {
+.dropIndicator.before {
   top: -1px;
 }
 
-.drop-indicator.after {
+.dropIndicator.after {
   bottom: -1px;
 }
 
 /* Default styles that can be overridden */
-:where(.drop-indicator) {
+:where(.dropIndicator) {
   height: var(--spacing-xs);
   background-color: var(--color-primary);
   border-radius: 0;

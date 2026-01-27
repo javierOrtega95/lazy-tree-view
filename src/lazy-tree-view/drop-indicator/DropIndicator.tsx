@@ -1,5 +1,5 @@
 import { type HTMLAttributes } from 'react'
-import './DropIndicator.css'
+import styles from './DropIndicator.module.css'
 
 export default function DropIndicator({
   id,
@@ -12,7 +12,7 @@ export default function DropIndicator({
       data-testid={id}
       role='presentation'
       aria-hidden='true'
-      className={`drop-indicator ${className}`}
+      className={`${styles.dropIndicator} ${className}`}
       {...props}
     />
   )

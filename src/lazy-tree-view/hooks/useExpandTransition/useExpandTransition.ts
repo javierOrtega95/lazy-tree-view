@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { UseExpandTransitionOptions, UseExpandTransitionReturn } from './types'
+import type {
+  TransitionState,
+  UseExpandTransitionOptions,
+  UseExpandTransitionReturn,
+} from './types'
 
 // Delay to ensure DOM update before CSS transition
 const OPEN_DELAY_MS = 10
-
-type TransitionState = 'closed' | 'opening' | 'open' | 'closing'
 
 /**
  * Hook that manages expand/collapse transitions while optimizing performance
@@ -21,9 +23,6 @@ export function useExpandTransition({
 
   const timeoutRef = useRef<number | null>(null)
   const prevIsOpen = useRef(isOpen)
-
-  const shouldRender = transitionState !== 'closed'
-  const className = transitionState === 'open' ? 'open' : ''
 
   const cleanupTimeout = useCallback(() => {
     if (!timeoutRef.current) return
@@ -76,5 +75,5 @@ export function useExpandTransition({
     }
   }, [cleanupTimeout])
 
-  return { shouldRender, className }
+  return { shouldRender: transitionState !== 'closed', transitionState }
 }
