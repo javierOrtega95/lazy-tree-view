@@ -1,4 +1,4 @@
-import { type CSSProperties, type MouseEvent, useMemo } from 'react'
+import { memo, type CSSProperties, type MouseEvent, useMemo } from 'react'
 import { DropPosition } from '../../types/dnd'
 import type { FolderNode } from '../../types/tree'
 import DropIndicator from '../drop-indicator/DropIndicator'
@@ -8,7 +8,7 @@ import type { TreeNodeProps } from '../types'
 import { isBaseNode, isFolderNode } from '../utils/validations'
 import styles from './TreeNode.module.css'
 
-export default function TreeNode({
+function TreeNode({
   node,
   depth,
   folder: Folder,
@@ -167,3 +167,5 @@ export default function TreeNode({
     </li>
   )
 }
+
+export default memo(TreeNode)

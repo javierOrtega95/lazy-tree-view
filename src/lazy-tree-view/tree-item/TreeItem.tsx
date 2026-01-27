@@ -1,9 +1,9 @@
-import { type CSSProperties } from 'react'
+import { memo, type CSSProperties } from 'react'
 import type { BaseNodeProps } from '../types'
 import { calculateIndentation } from '../utils/tree-operations'
 import styles from './TreeItem.module.css'
 
-export default function TreeItem({ id, name, depth }: BaseNodeProps): JSX.Element {
+function TreeItem({ id, name, depth }: BaseNodeProps): JSX.Element {
   return (
     <div
       id={id}
@@ -15,3 +15,5 @@ export default function TreeItem({ id, name, depth }: BaseNodeProps): JSX.Elemen
     </div>
   )
 }
+
+export default memo(TreeItem)

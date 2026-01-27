@@ -1,7 +1,7 @@
-import { type HTMLAttributes } from 'react'
+import { memo, type HTMLAttributes } from 'react'
 import styles from './DropIndicator.module.css'
 
-export default function DropIndicator({
+function DropIndicator({
   id,
   className = '',
   ...props
@@ -17,3 +17,5 @@ export default function DropIndicator({
     />
   )
 }
+
+export default memo(DropIndicator)

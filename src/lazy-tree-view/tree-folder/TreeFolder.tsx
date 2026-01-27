@@ -1,9 +1,9 @@
-import { type CSSProperties } from 'react'
+import { memo, type CSSProperties } from 'react'
 import type { FolderProps } from '../types'
 import { calculateIndentation } from '../utils/tree-operations'
 import styles from './TreeFolder.module.css'
 
-export default function TreeFolder({
+function TreeFolder({
   id,
   name,
   isOpen = false,
@@ -49,3 +49,5 @@ export default function TreeFolder({
     </div>
   )
 }
+
+export default memo(TreeFolder)
