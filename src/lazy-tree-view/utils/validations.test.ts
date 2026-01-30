@@ -1,116 +1,104 @@
-import { describe, expect, it } from 'vitest'
-import { DropPosition } from '../../types/dnd'
-import type { BaseNode, FolderNode, TreeNode } from '../../types/tree'
-import { ROOT_NODE } from '../constants'
-import { getNodeParents } from './tree-recursive'
-import { isBaseNode, isFolderNode, isValidMove } from './validations'
+import { describe, it, expect } from 'vitest'
+import { isFolderNode, isBaseNode, isMovingFolderIntoDescendant } from './validations'
+import type { FolderNode, TreeNode, NodeParents } from '../../types/tree'
 
-describe('isValidMove', () => {
-  const mockTree: TreeNode[] = [
-    {
-      id: crypto.randomUUID(),
-      name: 'Folder 1',
-      children: [
-        {
-          id: crypto.randomUUID(),
-          name: 'Folder 2',
-          children: [],
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Item 1',
-        },
-      ],
-    },
-  ]
+describe('isFolderNode', () => {
+  it('should return true for a node with children property', () => {
+    const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
 
-  const rootFolder = { ...mockTree[0] } as FolderNode
-  const [childrenFolder, childrenItem] = rootFolder.children
-
-  const nodeParents = getNodeParents(mockTree)
-
-  it('should return false if source node is already inside target folder', () => {
-    const result = isValidMove({
-      source: childrenItem,
-      target: rootFolder,
-      position: DropPosition.Inside,
-      prevParent: rootFolder,
-      nextParent: rootFolder,
-      nodeParents,
-    })
-
-    expect(result).toBe(false)
+    expect(isFolderNode(folder)).toBe(true)
   })
 
-  it('should return false if moving folder into one of its descendants', () => {
-    const result = isValidMove({
-      source: rootFolder,
-      target: childrenFolder,
-      position: DropPosition.Before,
-      prevParent: ROOT_NODE,
-      nextParent: rootFolder,
-      nodeParents,
-    })
+  it('should return true for a folder with nested children', () => {
+    const folder: FolderNode = {
+      id: '1',
+      name: 'Folder',
+      children: [{ id: '2', name: 'Child', children: [] }],
+    }
 
-    expect(result).toBe(false)
+    expect(isFolderNode(folder)).toBe(true)
   })
 
-  it("should return false if ordering is the same and position hasn't changed", () => {
-    const result = isValidMove({
-      source: childrenFolder,
-      position: DropPosition.Before,
-      target: childrenItem,
-      prevParent: rootFolder,
-      nextParent: rootFolder,
-      nodeParents,
-    })
+  it('should return false for a node without children property', () => {
+    const item: TreeNode = { id: '1', name: 'Item' }
 
-    expect(result).toBe(false)
-  })
-
-  it('should return true if the move is valid', () => {
-    const result = isValidMove({
-      source: childrenFolder,
-      position: DropPosition.After,
-      target: childrenItem,
-      prevParent: rootFolder,
-      nextParent: rootFolder,
-      nodeParents,
-    })
-
-    expect(result).toBe(true)
+    expect(isFolderNode(item)).toBe(false)
   })
 })
 
-describe('TreeNode type', () => {
-  const mockFolderNode: FolderNode = {
-    id: 'folder-1',
-    name: 'Folder 1',
-    children: [],
-  }
+describe('isBaseNode', () => {
+  it('should return true for a node without children property', () => {
+    const item: TreeNode = { id: '1', name: 'Item' }
 
-  const mockItemNode: BaseNode = {
-    id: 'item-1',
-    name: 'Item 1',
-  }
-
-  describe('isFolderNode', () => {
-    it('should return true for a folder node', () => {
-      expect(isFolderNode(mockFolderNode)).toBe(true)
-    })
-
-    it('should return false for an item node', () => {
-      expect(isFolderNode(mockItemNode)).toBe(false)
-    })
+    expect(isBaseNode(item)).toBe(true)
   })
 
-  describe('isBaseNode', () => {
-    it('should return true for an item node', () => {
-      expect(isBaseNode(mockItemNode)).toBe(true)
-    })
+  it('should return false for a node with children property', () => {
+    const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
 
-    it('should return false for a folder node', () => {
-      expect(isBaseNode(mockFolderNode)).toBe(false)
-    })
+    expect(isBaseNode(folder)).toBe(false)
+  })
+})
+
+describe('isMovingFolderIntoDescendant', () => {
+  it('should return true when moving a folder into its direct child', () => {
+    const parent: FolderNode = { id: 'parent', name: 'Parent', children: [] }
+    const child: FolderNode = { id: 'child', name: 'Child', children: [] }
+
+    const nodeParents: NodeParents = {
+      child: parent,
+    }
+
+    expect(isMovingFolderIntoDescendant(parent, child, nodeParents)).toBe(true)
+  })
+
+  it('should return true when moving a folder into a nested descendant', () => {
+    const grandparent: FolderNode = { id: 'grandparent', name: 'Grandparent', children: [] }
+    const parent: FolderNode = { id: 'parent', name: 'Parent', children: [] }
+    const child: FolderNode = { id: 'child', name: 'Child', children: [] }
+
+    const nodeParents: NodeParents = {
+      parent: grandparent,
+      child: parent,
+    }
+
+    expect(isMovingFolderIntoDescendant(grandparent, child, nodeParents)).toBe(true)
+  })
+
+  it('should return false when moving a folder to a sibling', () => {
+    const root: FolderNode = { id: 'root', name: 'Root', children: [] }
+    const folder1: FolderNode = { id: 'folder1', name: 'Folder 1', children: [] }
+    const folder2: FolderNode = { id: 'folder2', name: 'Folder 2', children: [] }
+
+    const nodeParents: NodeParents = {
+      folder1: root,
+      folder2: root,
+    }
+
+    expect(isMovingFolderIntoDescendant(folder1, folder2, nodeParents)).toBe(false)
+  })
+
+  it('should return false when moving a folder to an unrelated node', () => {
+    const root: FolderNode = { id: 'root', name: 'Root', children: [] }
+    const folder1: FolderNode = { id: 'folder1', name: 'Folder 1', children: [] }
+    const folder2: FolderNode = { id: 'folder2', name: 'Folder 2', children: [] }
+    const child2: FolderNode = { id: 'child2', name: 'Child 2', children: [] }
+
+    const nodeParents: NodeParents = {
+      folder1: root,
+      folder2: root,
+      child2: folder2,
+    }
+
+    expect(isMovingFolderIntoDescendant(folder1, child2, nodeParents)).toBe(false)
+  })
+
+  it('should return false when target has no parent', () => {
+    const folder: FolderNode = { id: 'folder', name: 'Folder', children: [] }
+    const orphan: TreeNode = { id: 'orphan', name: 'Orphan' }
+
+    const nodeParents: NodeParents = {}
+
+    expect(isMovingFolderIntoDescendant(folder, orphan, nodeParents)).toBe(false)
   })
 })

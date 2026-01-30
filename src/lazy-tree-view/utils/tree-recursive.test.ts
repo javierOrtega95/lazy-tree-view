@@ -1,135 +1,237 @@
-import { describe, expect, it } from 'vitest'
-import type { FolderNode, FoldersState, TreeNode } from '../../types/tree'
-import { getFoldersState, getNodeParents, recursiveTreeMap } from './tree-recursive'
+import { describe, it, expect } from 'vitest'
+import {
+  recursiveTreeMap,
+  editRecursive,
+  indexNodeParents,
+  createNodeIndex,
+} from './tree-recursive'
+import type { FolderNode, TreeNode, TreeWithRoot } from '../../types/tree'
 
-describe('tree-recursive utilities', () => {
-  const rootFolder = {
-    id: crypto.randomUUID(),
-    name: 'Folder 1',
-  }
+const createRoot = (children: TreeNode[] = []): FolderNode => ({
+  id: 'root',
+  name: 'root',
+  children,
+})
 
-  const childrenFolder = {
-    id: crypto.randomUUID(),
-    name: 'Folder 2',
-    children: [],
-  }
+const createTree = (children: TreeNode[] = []): TreeWithRoot => [createRoot(children)]
 
-  const mockTree: TreeNode[] = [
-    {
-      ...rootFolder,
-      children: [
-        childrenFolder,
-        {
-          id: crypto.randomUUID(),
-          name: 'Item 1',
-        },
-      ],
-    },
-  ]
+const createFolder = (id: string, children: TreeNode[] = []): FolderNode => ({
+  id,
+  name: `Folder ${id}`,
+  children,
+})
 
-  describe('recursiveTreeMap', () => {
-    it('should apply the transformation function to each node', () => {
-      const mockName = 'name mapped'
-      const mockTransformFn = (node: TreeNode): TreeNode => ({
-        ...node,
-        name: `${node.name} ${mockName}`,
-      })
+const createItem = (id: string): TreeNode => ({ id, name: `Item ${id}` })
 
-      const mappedTree = recursiveTreeMap(mockTree, mockTransformFn)
+describe('recursiveTreeMap', () => {
+  it('should return the same tree structure for empty children', () => {
+    const tree = createTree()
+    const result = recursiveTreeMap(tree, (node) => node)
 
-      const [firstNode] = mappedTree
-      const [firstChild, secondChild] = (firstNode as FolderNode).children
+    expect(result).toEqual(tree)
+  })
 
-      expect(firstNode.name).toBe(`Folder 1 ${mockName}`)
-      expect(firstChild.name).toBe(`Folder 2 ${mockName}`)
-      expect(secondChild.name).toBe(`Item 1 ${mockName}`)
+  it('should apply function to all nodes at root level', () => {
+    const tree = createTree([createItem('1'), createItem('2')])
+
+    const result = recursiveTreeMap(tree, (node) => ({
+      ...node,
+      name: node.name.toUpperCase(),
+    }))
+
+    const [root] = result
+    const [item1, item2] = root.children
+
+    expect(item1.name).toBe('ITEM 1')
+    expect(item2.name).toBe('ITEM 2')
+  })
+
+  it('should apply function recursively to nested nodes', () => {
+    const tree = createTree([
+      createFolder('f1', [createItem('1'), createItem('2')]),
+      createItem('3'),
+    ])
+
+    const result = recursiveTreeMap(tree, (node) => ({
+      ...node,
+      name: `modified-${node.name}`,
+    }))
+
+    const [root] = result
+    const [folder1, item3] = root.children
+
+    expect(folder1.name).toBe('modified-Folder f1')
+    expect((folder1 as FolderNode).children[0].name).toBe('modified-Item 1')
+    expect((folder1 as FolderNode).children[1].name).toBe('modified-Item 2')
+    expect(item3.name).toBe('modified-Item 3')
+  })
+
+  it('should handle deeply nested structures', () => {
+    const tree = createTree([
+      createFolder('f1', [createFolder('f2', [createFolder('f3', [createItem('deep')])])]),
+    ])
+
+    const visitedIds: string[] = []
+
+    recursiveTreeMap(tree, (node) => {
+      visitedIds.push(node.id)
+
+      return node
+    })
+
+    expect(visitedIds).toEqual(['f1', 'f2', 'f3', 'deep'])
+  })
+})
+
+describe('editRecursive', () => {
+  it('should edit a node at root level', () => {
+    const tree = createTree([createItem('1'), createItem('2')])
+
+    const result = editRecursive(tree, { id: '1', name: 'Updated Item' })
+    const [root] = result
+    const [item1, item2] = root.children
+
+    expect(item1.name).toBe('Updated Item')
+    expect(item2.name).toBe('Item 2')
+  })
+
+  it('should edit a nested node', () => {
+    const tree = createTree([createFolder('f1', [createItem('1'), createItem('2')])])
+
+    const result = editRecursive(tree, { id: '2', name: 'Updated Nested' })
+    const [root] = result
+    const [folder] = root.children
+
+    expect((folder as FolderNode).children[1].name).toBe('Updated Nested')
+  })
+
+  it('should merge properties when editing', () => {
+    const treeNode: TreeNode<{ customProp: string }> = {
+      id: '1',
+      name: 'Item',
+      customProp: 'original',
+    }
+
+    const tree = createTree([treeNode])
+
+    const updatedNode = {
+      ...treeNode,
+      name: 'Updated',
+      customProp: 'modified',
+    }
+
+    const result = editRecursive(tree, updatedNode)
+
+    const [root] = result
+    const [item] = root.children
+
+    expect(item).toMatchObject({
+      id: '1',
+      name: 'Updated',
+      customProp: 'modified',
     })
   })
 
-  describe('getNodeParents', () => {
-    it('should map each node to its parent correctly', () => {
-      const nodeParents = getNodeParents(mockTree)
+  it('should not modify tree if node id not found', () => {
+    const tree = createTree([createItem('1')])
 
-      const [rootFolder] = mockTree
-      const { children } = rootFolder as FolderNode
+    const result = editRecursive(tree, { id: 'nonexistent', name: 'Updated' })
 
-      const parentOfFirstNode = nodeParents[rootFolder.id]
-      expect(parentOfFirstNode).toBeNull()
+    const [root] = result
+    const [item] = root.children
 
-      for (const child of children) {
-        const childParent = nodeParents[child.id]
-        expect(childParent).toBe(rootFolder)
-      }
-    })
+    expect(item.name).toBe('Item 1')
+  })
+})
 
-    it('should return an empty object for an empty tree', () => {
-      const nodeParents = getNodeParents([])
+describe('indexNodeParents', () => {
+  it('should return empty object for tree with no children', () => {
+    const tree = createTree()
 
-      expect(nodeParents).toEqual({})
-    })
+    const result = indexNodeParents(tree)
+
+    expect(result).toEqual({})
   })
 
-  describe('getFoldersState', () => {
-    it('should return an empty object for an empty tree', () => {
-      const foldersState = getFoldersState([])
+  it('should index root level children with root as parent', () => {
+    const tree = createTree([createItem('1'), createItem('2')])
 
-      expect(foldersState).toEqual({})
-    })
+    const result = indexNodeParents(tree)
 
-    it('should return an empty object when there are no folders', () => {
-      const tree: TreeNode[] = [
-        { id: 'item1', name: 'Item 1' },
-        { id: 'item2', name: 'Item 2' },
-      ]
-      const foldersState = getFoldersState(tree)
+    expect(result['1'].id).toBe('root')
+    expect(result['2'].id).toBe('root')
+  })
 
-      expect(foldersState).toEqual({})
-    })
+  it('should index nested children with their direct parent', () => {
+    const folder = createFolder('f1', [createItem('1'), createItem('2')])
+    const tree = createTree([folder])
 
-    it('should map all folders with default states', () => {
-      const foldersState = getFoldersState(mockTree)
+    const result = indexNodeParents(tree)
 
-      const defaultState = { isOpen: false, isLoading: false, hasFetched: false }
+    expect(result['f1'].id).toBe('root')
+    expect(result['1'].id).toBe('f1')
+    expect(result['2'].id).toBe('f1')
+  })
 
-      const expectedState = {
-        [rootFolder.id]: { ...defaultState, isOpen: true },
-        [childrenFolder.id]: defaultState,
-      }
+  it('should handle deeply nested structures', () => {
+    const tree = createTree([createFolder('f1', [createFolder('f2', [createItem('deep')])])])
 
-      expect(foldersState).toEqual(expectedState)
-    })
+    const result = indexNodeParents(tree)
 
-    it('should respect isOpen and hasFetched from initialState', () => {
-      const initialFolderState = { isOpen: false, isLoading: false, hasFetched: true }
-      const initialState: FoldersState = { [rootFolder.id]: initialFolderState }
+    expect(result['f1'].id).toBe('root')
+    expect(result['f2'].id).toBe('f1')
+    expect(result['deep'].id).toBe('f2')
+  })
+})
 
-      const foldersState = getFoldersState(mockTree, initialState)
-      const { isOpen, isLoading, hasFetched } = foldersState[rootFolder.id]
+describe('createNodeIndex', () => {
+  it('should return empty object for tree with no children', () => {
+    const tree = createTree()
 
-      expect(isOpen).toBe(initialFolderState.isOpen)
-      expect(isLoading).toBe(initialFolderState.isLoading)
-      expect(hasFetched).toBe(initialFolderState.hasFetched)
-    })
+    const result = createNodeIndex(tree)
 
-    it('should use default isOpen if not present in initialState', () => {
-      const initialState: FoldersState = {
-        [rootFolder.id]: { isOpen: true, isLoading: true, hasFetched: true },
-      }
+    expect(result).toEqual({})
+  })
 
-      const foldersState = getFoldersState(mockTree, initialState)
+  it('should index nodes with their parent and sibling index', () => {
+    const tree = createTree([createItem('1'), createItem('2'), createItem('3')])
 
-      expect(foldersState[childrenFolder.id].isOpen).toBe(false)
-    })
+    const result = createNodeIndex(tree)
 
-    it('should handle partial initialState', () => {
-      const initialState: FoldersState = {
-        [rootFolder.id]: { isOpen: false, isLoading: false, hasFetched: false },
-      }
+    expect(result['1'].siblingIndex).toBe(0)
+    expect(result['2'].siblingIndex).toBe(1)
+    expect(result['3'].siblingIndex).toBe(2)
+    expect(result['1'].parent.id).toBe('root')
+  })
 
-      const foldersState = getFoldersState(mockTree, initialState)
+  it('should include the node reference', () => {
+    const item = createItem('1')
+    const tree = createTree([item])
 
-      expect(foldersState[rootFolder.id].isOpen).toBe(false)
-      expect(foldersState[childrenFolder.id].isOpen).toBe(false)
-    })
+    const result = createNodeIndex(tree)
+
+    expect(result['1'].node.id).toBe('1')
+    expect(result['1'].node.name).toBe('Item 1')
+  })
+
+  it('should index nested nodes correctly', () => {
+    const tree = createTree([
+      createFolder('f1', [createItem('a'), createItem('b')]),
+      createItem('c'),
+    ])
+
+    const result = createNodeIndex(tree)
+
+    expect(result['f1'].siblingIndex).toBe(0)
+    expect(result['f1'].parent.id).toBe('root')
+
+    expect(result['a'].siblingIndex).toBe(0)
+    expect(result['a'].parent.id).toBe('f1')
+
+    expect(result['b'].siblingIndex).toBe(1)
+    expect(result['b'].parent.id).toBe('f1')
+
+    expect(result['c'].siblingIndex).toBe(1)
+    expect(result['c'].parent.id).toBe('root')
   })
 })
