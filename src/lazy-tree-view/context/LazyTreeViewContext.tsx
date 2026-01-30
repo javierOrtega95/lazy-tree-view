@@ -5,8 +5,10 @@ export type LazyTreeViewContextData = {
   nodeParents: NodeParents
   draggingNode: TreeNode | null
   hoveredNodeId: NodeId | null
+  focusedNodeId: NodeId | null
   setDraggingNode: (node: TreeNode | null) => void
   setHoveredNodeId: (id: NodeId | null) => void
+  setFocusedNodeId: (id: NodeId | null) => void
 }
 
 export const LazyTreeViewContext = createContext<LazyTreeViewContextData | null>(null)

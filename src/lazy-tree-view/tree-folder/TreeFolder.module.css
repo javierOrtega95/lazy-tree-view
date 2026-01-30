@@ -11,6 +11,11 @@
     background-color: var(--color-hover-bg);
   }
 
+  li:focus > &,
+  li:focus-visible > & {
+    background-color: var(--color-focus-bg, rgba(59, 130, 246, 0.15));
+  }
+
   .iconWrapper {
     display: flex;
     position: relative;

@@ -21,3 +21,11 @@ export type FolderState = {
 export type LoadChildrenFn = (folder: FolderNode) => Promise<TreeNode[]>
 
 export type NodeParents = Record<NodeId, FolderNode>
+
+export type NodeIndexEntry = {
+  node: TreeNode
+  parent: FolderNode
+  siblingIndex: number
+}
+
+export type NodeIndex = Record<NodeId, NodeIndexEntry>

@@ -1,6 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { MoveData } from '../types/dnd'
-import { FolderNode, TreeNode as Node, NodeId, NodeParents, TreeWithRoot } from '../types/tree'
+import type {
+  FolderNode,
+  NodeId,
+  NodeIndex,
+  NodeParents,
+  TreeNode as Node,
+  TreeWithRoot,
+} from '../types/tree'
 import { ROOT_NODE } from './constants'
 import { LazyTreeViewContext } from './context/LazyTreeViewContext'
 import styles from './LazyTreeView.module.css'
@@ -8,8 +15,9 @@ import { default as DefaultFolder } from './tree-folder/TreeFolder'
 import { default as DefaultItem } from './tree-item/TreeItem'
 import TreeNode from './tree-node/TreeNode'
 import type { LazyTreeViewProps, TreeNodeProps } from './types'
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation/useKeyboardNavigation'
 import { moveNode, normalizeNewParent } from './utils/tree-operations'
-import { editRecursive, indexNodeParents } from './utils/tree-recursive'
+import { createNodeIndex, editRecursive, indexNodeParents } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'
 
 export default function LazyTreeView({
@@ -39,8 +47,18 @@ export default function LazyTreeView({
 
   const [draggingNode, setDraggingNode] = useState<Node | null>(null)
   const [hoveredNodeId, setHoveredNodeId] = useState<NodeId | null>(null)
+  const [focusedNodeId, setFocusedNodeId] = useState<NodeId | null>(null)
 
   const nodeParents: NodeParents = useMemo(() => indexNodeParents(tree), [tree])
+  const nodeIndex: NodeIndex = useMemo(() => createNodeIndex(tree), [tree])
+
+  const { handleKeyDown } = useKeyboardNavigation({
+    tree,
+    nodeIndex,
+    focusedNodeId,
+    setFocusedNodeId,
+    onToggleOpen: handleToggleOpen,
+  })
 
   const updateTree = useCallback(
     (updater: (prev: TreeWithRoot) => TreeWithRoot) => {
@@ -56,7 +74,7 @@ export default function LazyTreeView({
     [onTreeChange],
   )
 
-  const handleToggleOpen = async (folder: FolderNode) => {
+  async function handleToggleOpen(folder: FolderNode) {
     // if currently open, close it
     if (folder.isOpen) {
       updateTree((prev) => {
@@ -168,11 +186,20 @@ export default function LazyTreeView({
         nodeParents,
         draggingNode,
         hoveredNodeId,
+        focusedNodeId,
         setDraggingNode,
         setHoveredNodeId,
+        setFocusedNodeId,
       }}
     >
-      <ul role='tree' className={`${styles.lazyTreeView} ${className}`} style={style}>
+      <ul
+        role='tree'
+        className={`${styles.lazyTreeView} ${className}`}
+        style={style}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        aria-label='Tree view'
+      >
         {tree[0].children.map((node) => renderNode(node))}
       </ul>
     </LazyTreeViewContext.Provider>

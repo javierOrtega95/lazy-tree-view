@@ -1,4 +1,4 @@
-import { FolderNode, NodeParents, TreeNode, TreeWithRoot } from '../../types/tree'
+import { FolderNode, NodeIndex, NodeParents, TreeNode, TreeWithRoot } from '../../types/tree'
 import { isFolderNode } from './validations'
 
 export function recursiveTreeMap(
@@ -60,4 +60,29 @@ export function indexNodeParents(tree: TreeWithRoot): NodeParents {
   }
 
   return nodeParents
+}
+
+export function createNodeIndex(tree: TreeWithRoot): NodeIndex {
+  const nodeIndex: NodeIndex = {}
+  const [root] = tree
+
+  indexNodes(root.children, root)
+
+  function indexNodes(nodes: TreeNode[], parent: FolderNode) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i]
+
+      nodeIndex[node.id] = {
+        node,
+        parent,
+        siblingIndex: i,
+      }
+
+      if (isFolderNode(node) && node.children.length > 0) {
+        indexNodes(node.children, node)
+      }
+    }
+  }
+
+  return nodeIndex
 }
