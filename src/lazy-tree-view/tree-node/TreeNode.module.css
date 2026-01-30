@@ -23,7 +23,7 @@
     outline-offset: -2px;
     border-radius: var(--border-radius-sm);
 
-    :first-child > span {
+    > :first-child > span {
       color: var(--color-primary);
       font-weight: 500;
     }
