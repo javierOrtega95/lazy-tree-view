@@ -1,22 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createFolder, createItem } from '../test/test-utils'
 import LazyTreeView from './LazyTreeView'
-import type { FolderNode, TreeNode } from '../types/tree'
-
-const createItem = (id: string, name: string): TreeNode => ({ id, name })
-
-const createFolder = (
-  id: string,
-  name: string,
-  children: TreeNode[] = [],
-  options: Partial<FolderNode> = {},
-): FolderNode => ({
-  id,
-  name,
-  children,
-  ...options,
-})
 
 const mockLoadChildren = vi.fn(() => Promise.resolve([]))
 
@@ -42,7 +28,7 @@ describe('LazyTreeView', () => {
     })
 
     it('should render folders', () => {
-      const tree = [createFolder('folder-1', 'Folder 1')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder 1' })]
 
       render(<LazyTreeView initialTree={tree} loadChildren={mockLoadChildren} />)
 
@@ -51,7 +37,8 @@ describe('LazyTreeView', () => {
 
     it('should render nested structure when folder is open', () => {
       const tree = [
-        createFolder('folder-1', 'Parent Folder', [createItem('item-1', 'Child Item')], {
+        createFolder('folder-1', [createItem('item-1', 'Child Item')], {
+          name: 'Parent Folder',
           isOpen: true,
           hasFetched: true,
         }),
@@ -65,7 +52,8 @@ describe('LazyTreeView', () => {
 
     it('should not render children when folder is closed', () => {
       const tree = [
-        createFolder('folder-1', 'Parent Folder', [createItem('item-1', 'Child Item')], {
+        createFolder('folder-1', [createItem('item-1', 'Child Item')], {
+          name: 'Parent Folder',
           isOpen: false,
           hasFetched: true,
         }),
@@ -123,7 +111,7 @@ describe('LazyTreeView', () => {
   describe('lazy loading', () => {
     it('should call loadChildren when opening a folder without fetched children', async () => {
       const loadChildren = vi.fn(() => Promise.resolve([createItem('child-1', 'Child')]))
-      const tree = [createFolder('folder-1', 'Folder')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
 
       render(<LazyTreeView initialTree={tree} loadChildren={loadChildren} />)
 
@@ -139,7 +127,7 @@ describe('LazyTreeView', () => {
     it('should call onLoadStart when starting to load', async () => {
       const onLoadStart = vi.fn()
       const loadChildren = vi.fn(() => Promise.resolve([]))
-      const tree = [createFolder('folder-1', 'Folder')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
 
       render(
         <LazyTreeView initialTree={tree} loadChildren={loadChildren} onLoadStart={onLoadStart} />,
@@ -156,7 +144,7 @@ describe('LazyTreeView', () => {
       const children = [createItem('child-1', 'Child')]
       const onLoadSuccess = vi.fn()
       const loadChildren = vi.fn(() => Promise.resolve(children))
-      const tree = [createFolder('folder-1', 'Folder')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
 
       render(
         <LazyTreeView
@@ -180,7 +168,7 @@ describe('LazyTreeView', () => {
       const error = new Error('Load failed')
       const onLoadError = vi.fn()
       const loadChildren = vi.fn(() => Promise.reject(error))
-      const tree = [createFolder('folder-1', 'Folder')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
 
       render(
         <LazyTreeView initialTree={tree} loadChildren={loadChildren} onLoadError={onLoadError} />,
@@ -195,7 +183,7 @@ describe('LazyTreeView', () => {
 
     it('should render loaded children after successful load', async () => {
       const loadChildren = vi.fn(() => Promise.resolve([createItem('child-1', 'Loaded Child')]))
-      const tree = [createFolder('folder-1', 'Folder')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
 
       render(<LazyTreeView initialTree={tree} loadChildren={loadChildren} />)
 
@@ -210,7 +198,8 @@ describe('LazyTreeView', () => {
   describe('toggle folder', () => {
     it('should close an open folder when clicked', async () => {
       const tree = [
-        createFolder('folder-1', 'Folder', [createItem('item-1', 'Child')], {
+        createFolder('folder-1', [createItem('item-1', 'Child')], {
+          name: 'Folder',
           isOpen: true,
           hasFetched: true,
         }),
@@ -230,7 +219,8 @@ describe('LazyTreeView', () => {
     it('should not call loadChildren when opening already fetched folder', async () => {
       const loadChildren = vi.fn(() => Promise.resolve([]))
       const tree = [
-        createFolder('folder-1', 'Folder', [createItem('item-1', 'Child')], {
+        createFolder('folder-1', [createItem('item-1', 'Child')], {
+          name: 'Folder',
           isOpen: false,
           hasFetched: true,
         }),
@@ -252,7 +242,7 @@ describe('LazyTreeView', () => {
     it('should call onTreeChange when tree structure changes', async () => {
       const onTreeChange = vi.fn()
       const loadChildren = vi.fn(() => Promise.resolve([createItem('child-1', 'Child')]))
-      const tree = [createFolder('folder-1', 'Folder')]
+      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
 
       render(
         <LazyTreeView initialTree={tree} loadChildren={loadChildren} onTreeChange={onTreeChange} />,

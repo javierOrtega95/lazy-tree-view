@@ -1,27 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { createFolder, createItem, createTree } from '../../test/test-utils'
+import type { FolderNode, TreeNode } from '../../types/tree'
+import { ROOT_NODE } from '../constants'
 import {
-  recursiveTreeMap,
+  createNodeIndex,
   editRecursive,
   indexNodeParents,
-  createNodeIndex,
+  recursiveTreeMap,
 } from './tree-recursive'
-import type { FolderNode, TreeNode, TreeWithRoot } from '../../types/tree'
-
-const createRoot = (children: TreeNode[] = []): FolderNode => ({
-  id: 'root',
-  name: 'root',
-  children,
-})
-
-const createTree = (children: TreeNode[] = []): TreeWithRoot => [createRoot(children)]
-
-const createFolder = (id: string, children: TreeNode[] = []): FolderNode => ({
-  id,
-  name: `Folder ${id}`,
-  children,
-})
-
-const createItem = (id: string): TreeNode => ({ id, name: `Item ${id}` })
 
 describe('recursiveTreeMap', () => {
   it('should return the same tree structure for empty children', () => {
@@ -158,8 +144,8 @@ describe('indexNodeParents', () => {
 
     const result = indexNodeParents(tree)
 
-    expect(result['1'].id).toBe('root')
-    expect(result['2'].id).toBe('root')
+    expect(result['1'].id).toBe(ROOT_NODE.id)
+    expect(result['2'].id).toBe(ROOT_NODE.id)
   })
 
   it('should index nested children with their direct parent', () => {
@@ -168,7 +154,7 @@ describe('indexNodeParents', () => {
 
     const result = indexNodeParents(tree)
 
-    expect(result['f1'].id).toBe('root')
+    expect(result['f1'].id).toBe(ROOT_NODE.id)
     expect(result['1'].id).toBe('f1')
     expect(result['2'].id).toBe('f1')
   })
@@ -178,7 +164,7 @@ describe('indexNodeParents', () => {
 
     const result = indexNodeParents(tree)
 
-    expect(result['f1'].id).toBe('root')
+    expect(result['f1'].id).toBe(ROOT_NODE.id)
     expect(result['f2'].id).toBe('f1')
     expect(result['deep'].id).toBe('f2')
   })
@@ -201,7 +187,7 @@ describe('createNodeIndex', () => {
     expect(result['1'].siblingIndex).toBe(0)
     expect(result['2'].siblingIndex).toBe(1)
     expect(result['3'].siblingIndex).toBe(2)
-    expect(result['1'].parent.id).toBe('root')
+    expect(result['1'].parent.id).toBe(ROOT_NODE.id)
   })
 
   it('should include the node reference', () => {
@@ -223,7 +209,7 @@ describe('createNodeIndex', () => {
     const result = createNodeIndex(tree)
 
     expect(result['f1'].siblingIndex).toBe(0)
-    expect(result['f1'].parent.id).toBe('root')
+    expect(result['f1'].parent.id).toBe(ROOT_NODE.id)
 
     expect(result['a'].siblingIndex).toBe(0)
     expect(result['a'].parent.id).toBe('f1')
@@ -232,6 +218,6 @@ describe('createNodeIndex', () => {
     expect(result['b'].parent.id).toBe('f1')
 
     expect(result['c'].siblingIndex).toBe(1)
-    expect(result['c'].parent.id).toBe('root')
+    expect(result['c'].parent.id).toBe(ROOT_NODE.id)
   })
 })

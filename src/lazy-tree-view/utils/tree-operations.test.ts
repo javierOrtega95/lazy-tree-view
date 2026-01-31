@@ -6,23 +6,9 @@ import {
   normalizeNewParent,
 } from './tree-operations'
 import { DropPosition } from '../../types/dnd'
-import type { FolderNode, TreeNode, TreeWithRoot } from '../../types/tree'
+import type { FolderNode } from '../../types/tree'
 import { ROOT_NODE } from '../constants'
-
-const createRoot = (children: TreeNode[] = []): FolderNode => ({
-  ...ROOT_NODE,
-  children,
-})
-
-const createTree = (children: TreeNode[] = []): TreeWithRoot => [createRoot(children)]
-
-const createFolder = (id: string, children: TreeNode[] = []): FolderNode => ({
-  id,
-  name: `Folder ${id}`,
-  children,
-})
-
-const createItem = (id: string): TreeNode => ({ id, name: `Item ${id}` })
+import { createTree, createFolder, createItem } from '../../test/test-utils'
 
 describe('calculateIndentation', () => {
   it('should return 0 for depth 0', () => {
