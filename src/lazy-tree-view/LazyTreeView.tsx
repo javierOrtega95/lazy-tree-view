@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
-import type { MoveData } from '../types/dnd'
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from 'react'
+import { DropPosition, type MoveData } from '../types/dnd'
 import type {
   FolderNode,
   NodeId,
@@ -14,33 +14,43 @@ import styles from './LazyTreeView.module.css'
 import { default as DefaultFolder } from './tree-folder/TreeFolder'
 import { default as DefaultItem } from './tree-item/TreeItem'
 import TreeNode from './tree-node/TreeNode'
-import type { LazyTreeViewProps, TreeNodeProps } from './types'
+import type { LazyTreeViewHandle, LazyTreeViewProps, TreeNodeProps } from './types'
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation/useKeyboardNavigation'
-import { moveNode, normalizeNewParent } from './utils/tree-operations'
+import {
+  addNode as addNodeToTree,
+  calculateMoveIndices,
+  moveNode,
+  normalizeNewParent,
+  removeFromContainer,
+  updateNode as updateNodeInTree,
+} from './utils/tree-operations'
 import { createNodeIndex, editRecursive, indexNodeParents } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'
 
-export default function LazyTreeView({
-  initialTree,
-  loadChildren,
-  folder = DefaultFolder,
-  item = DefaultItem,
-  folderProps = {},
-  itemProps = {},
-  allowDragAndDrop = true,
-  useDragHandle = false,
-  dragClassNames = {},
-  disableAnimations = false,
-  animationDuration = 300,
-  className = '',
-  style = {},
-  onLoadStart,
-  onLoadSuccess,
-  onLoadError,
-  canDrop = () => true,
-  onDrop,
-  onTreeChange,
-}: LazyTreeViewProps): JSX.Element {
+const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function LazyTreeView(
+  {
+    initialTree,
+    loadChildren,
+    folder = DefaultFolder,
+    item = DefaultItem,
+    folderProps = {},
+    itemProps = {},
+    allowDragAndDrop = true,
+    useDragHandle = false,
+    dragClassNames = {},
+    disableAnimations = false,
+    animationDuration = 300,
+    className = '',
+    style = {},
+    onLoadStart,
+    onLoadSuccess,
+    onLoadError,
+    canDrop = () => true,
+    onDrop,
+    onTreeChange,
+  }: LazyTreeViewProps,
+  ref,
+): JSX.Element {
   const [tree, setTree] = useState<TreeWithRoot>(() => {
     return [{ ...ROOT_NODE, children: initialTree }]
   })
@@ -72,6 +82,64 @@ export default function LazyTreeView({
       })
     },
     [onTreeChange],
+  )
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      addNode: (parentId: NodeId | null, node: Node) => {
+        const normalizedParentId = parentId ?? ROOT_NODE.id
+
+        updateTree((prev) => addNodeToTree(prev, normalizedParentId, node))
+      },
+
+      removeNode: (nodeId: NodeId) => {
+        const parent = nodeParents[nodeId]
+
+        updateTree((prev) => removeFromContainer(prev, nodeId, parent ?? null))
+      },
+
+      updateNode: (nodeId: NodeId, updates: Partial<Node>) => {
+        updateTree((prev) => {
+          return updateNodeInTree(prev, nodeId, (node) => ({ ...node, ...updates }))
+        })
+      },
+
+      moveNode: (nodeId: NodeId, targetId: NodeId, position: DropPosition) => {
+        const source = nodeIndex[nodeId]
+        const target = nodeIndex[targetId]
+
+        if (!source || !target) return
+
+        const isDroppingInside = isFolderNode(target.node) && position === DropPosition.Inside
+        const nextParent = isDroppingInside ? (target.node as FolderNode) : target.parent
+
+        const { prevIndex, nextIndex } = calculateMoveIndices({
+          source: source.node,
+          target: target.node,
+          position,
+          prevParent: source.parent,
+          nextParent,
+        })
+
+        const moveData: MoveData = {
+          source: source.node,
+          target: target.node,
+          position,
+          prevParent: source.parent,
+          nextParent,
+          prevIndex,
+          nextIndex,
+        }
+
+        updateTree((prev) => moveNode(prev, moveData))
+      },
+
+      getTree: () => tree[0].children,
+
+      getNode: (nodeId: NodeId) => nodeIndex[nodeId]?.node,
+    }),
+    [nodeIndex, nodeParents, tree, updateTree],
   )
 
   async function handleToggleOpen(folder: FolderNode) {
@@ -204,4 +272,6 @@ export default function LazyTreeView({
       </ul>
     </LazyTreeViewContext.Provider>
   )
-}
+})
+
+export default LazyTreeView

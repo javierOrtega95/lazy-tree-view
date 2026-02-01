@@ -1,6 +1,25 @@
 import { type FC, type MouseEvent, type ReactNode, CSSProperties, DragEvent } from 'react'
-import { type DragClassNames, DropData, MoveData } from '../types/dnd'
-import type { BaseNode, FolderNode, LoadChildrenFn, TreeNode } from '../types/tree'
+import { type DragClassNames, DropData, DropPosition, MoveData } from '../types/dnd'
+import type { BaseNode, FolderNode, LoadChildrenFn, NodeId, TreeNode } from '../types/tree'
+
+/**
+ * Handle to interact with the LazyTreeView component imperatively
+ */
+export type LazyTreeViewHandle = {
+  /** Add a node to a folder. Use `null` as parentId to add to root level. */
+  addNode: (parentId: NodeId | null, node: TreeNode) => void
+  /** Remove a node and all its children */
+  removeNode: (nodeId: NodeId) => void
+  /** Update properties of a node */
+  updateNode: (nodeId: NodeId, updates: Partial<TreeNode>) => void
+  /** Move a node to a new position. Use `null` as targetId with `Inside` position to move to root level. */
+  moveNode: (nodeId: NodeId, targetId: NodeId, position: DropPosition) => void
+
+  /** Get the current tree structure */
+  getTree: () => TreeNode[]
+  /** Get a node by its ID */
+  getNode: (nodeId: NodeId) => TreeNode | undefined
+}
 
 export type CanDropFn = (data: DropData) => boolean
 

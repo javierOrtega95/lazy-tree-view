@@ -49,7 +49,7 @@ function createNewRoot(root: FolderNode, newChildren: TreeNode[]): TreeWithRoot 
   return [{ ...root, children: newChildren }]
 }
 
-function mapTree(tree: TreeWithRoot, mapper: (node: TreeNode) => TreeNode): TreeWithRoot {
+export function mapTree(tree: TreeWithRoot, mapper: (node: TreeNode) => TreeNode): TreeWithRoot {
   const mapNodeRecursive = (node: TreeNode): TreeNode => {
     const mappedNode = mapper(node)
 
@@ -66,7 +66,7 @@ function mapTree(tree: TreeWithRoot, mapper: (node: TreeNode) => TreeNode): Tree
   return [mappedRoot]
 }
 
-function addNode(
+export function addNode(
   tree: TreeWithRoot,
   parentId: NodeId,
   node: TreeNode,
@@ -89,7 +89,7 @@ function addNode(
   })
 }
 
-function updateNode(
+export function updateNode(
   tree: TreeWithRoot,
   nodeId: NodeId,
   updater: (node: TreeNode) => TreeNode,
@@ -194,7 +194,7 @@ function addToContainer(
   return createNewRoot(root, newChildren)
 }
 
-function removeFromContainer(
+export function removeFromContainer(
   tree: TreeWithRoot,
   nodeId: NodeId,
   container?: FolderNode | null,

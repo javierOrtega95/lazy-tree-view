@@ -1,8 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { createRef } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { DropPosition } from '../types/dnd'
 import { createFolder, createItem } from '../test/test-utils'
 import LazyTreeView from './LazyTreeView'
+import type { LazyTreeViewHandle } from './types'
 
 const mockLoadChildren = vi.fn(() => Promise.resolve([]))
 
@@ -252,6 +255,241 @@ describe('LazyTreeView', () => {
 
       await waitFor(() => {
         expect(onTreeChange).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('imperative handle', () => {
+    describe('addNode', () => {
+      it('should add a node to a folder', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [
+          createFolder('folder-1', [], { name: 'Folder', isOpen: true, hasFetched: true }),
+        ]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        act(() => {
+          ref.current?.addNode('folder-1', createItem('new-item', 'New Item'))
+        })
+
+        expect(screen.getByText('New Item')).toBeInTheDocument()
+      })
+
+      it('should add a node to root level', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        act(() => {
+          ref.current?.addNode(null, createItem('new-item', 'New Item'))
+        })
+
+        expect(screen.getByText('New Item')).toBeInTheDocument()
+      })
+    })
+
+    describe('removeNode', () => {
+      it('should remove a node from the tree', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1'), createItem('item-2', 'Item 2')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        expect(screen.getByText('Item 1')).toBeInTheDocument()
+
+        act(() => {
+          ref.current?.removeNode('item-1')
+        })
+
+        expect(screen.queryByText('Item 1')).not.toBeInTheDocument()
+        expect(screen.getByText('Item 2')).toBeInTheDocument()
+      })
+
+      it('should remove a node from a folder', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [
+          createFolder('folder-1', [createItem('child-1', 'Child')], {
+            name: 'Folder',
+            isOpen: true,
+            hasFetched: true,
+          }),
+        ]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        expect(screen.getByText('Child')).toBeInTheDocument()
+
+        act(() => {
+          ref.current?.removeNode('child-1')
+        })
+
+        expect(screen.queryByText('Child')).not.toBeInTheDocument()
+      })
+    })
+
+    describe('updateNode', () => {
+      it('should update node properties', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Original Name')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        expect(screen.getByText('Original Name')).toBeInTheDocument()
+
+        act(() => {
+          ref.current?.updateNode('item-1', { name: 'Updated Name' })
+        })
+
+        expect(screen.queryByText('Original Name')).not.toBeInTheDocument()
+        expect(screen.getByText('Updated Name')).toBeInTheDocument()
+      })
+    })
+
+    describe('moveNode', () => {
+      it('should move a node to another position', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const onTreeChange = vi.fn()
+        const tree = [
+          createItem('item-1', 'Item 1'),
+          createItem('item-2', 'Item 2'),
+          createItem('item-3', 'Item 3'),
+        ]
+
+        render(
+          <LazyTreeView
+            ref={ref}
+            initialTree={tree}
+            loadChildren={mockLoadChildren}
+            onTreeChange={onTreeChange}
+          />,
+        )
+
+        act(() => {
+          ref.current?.moveNode('item-3', 'item-1', DropPosition.Before)
+        })
+
+        expect(onTreeChange).toHaveBeenCalled()
+        const newTree = onTreeChange.mock.calls[0][0]
+        expect(newTree[0].id).toBe('item-3')
+        expect(newTree[1].id).toBe('item-1')
+        expect(newTree[2].id).toBe('item-2')
+      })
+
+      it('should move a node inside a folder', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const onTreeChange = vi.fn()
+        const tree = [
+          createFolder('folder-1', [], { name: 'Folder', isOpen: true, hasFetched: true }),
+          createItem('item-1', 'Item 1'),
+        ]
+
+        render(
+          <LazyTreeView
+            ref={ref}
+            initialTree={tree}
+            loadChildren={mockLoadChildren}
+            onTreeChange={onTreeChange}
+          />,
+        )
+
+        act(() => {
+          ref.current?.moveNode('item-1', 'folder-1', DropPosition.Inside)
+        })
+
+        expect(onTreeChange).toHaveBeenCalled()
+        const newTree = onTreeChange.mock.calls[0][0]
+        expect(newTree.length).toBe(1)
+        expect(newTree[0].children[0].id).toBe('item-1')
+      })
+
+      it('should move a node from inside a folder to root level', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const onTreeChange = vi.fn()
+        const tree = [
+          createFolder('folder-1', [createItem('child-1', 'Child')], {
+            name: 'Folder',
+            isOpen: true,
+            hasFetched: true,
+          }),
+        ]
+
+        render(
+          <LazyTreeView
+            ref={ref}
+            initialTree={tree}
+            loadChildren={mockLoadChildren}
+            onTreeChange={onTreeChange}
+          />,
+        )
+
+        // Move child-1 after folder-1 (to root level)
+        act(() => {
+          ref.current?.moveNode('child-1', 'folder-1', DropPosition.After)
+        })
+
+        expect(onTreeChange).toHaveBeenCalled()
+        const newTree = onTreeChange.mock.calls[0][0]
+        expect(newTree.length).toBe(2)
+        expect(newTree[0].id).toBe('folder-1')
+        expect(newTree[0].children.length).toBe(0)
+        expect(newTree[1].id).toBe('child-1')
+      })
+    })
+
+    describe('getTree', () => {
+      it('should return current tree state', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1'), createItem('item-2', 'Item 2')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        const currentTree = ref.current?.getTree()
+
+        expect(currentTree).toHaveLength(2)
+        expect(currentTree?.[0].id).toBe('item-1')
+        expect(currentTree?.[1].id).toBe('item-2')
+      })
+
+      it('should reflect changes after mutations', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        act(() => {
+          ref.current?.addNode(null, createItem('item-2', 'Item 2'))
+        })
+
+        const currentTree = ref.current?.getTree()
+
+        expect(currentTree).toHaveLength(2)
+      })
+    })
+
+    describe('getNode', () => {
+      it('should return a node by id', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1'), createItem('item-2', 'Item 2')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        const node = ref.current?.getNode('item-1')
+
+        expect(node?.id).toBe('item-1')
+        expect(node?.name).toBe('Item 1')
+      })
+
+      it('should return undefined for non-existent node', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        const node = ref.current?.getNode('non-existent')
+
+        expect(node).toBeUndefined()
       })
     })
   })
