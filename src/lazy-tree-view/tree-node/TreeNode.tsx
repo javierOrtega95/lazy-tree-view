@@ -27,6 +27,9 @@ function TreeNode({
 }: TreeNodeProps): JSX.Element {
   const nodeRef = useRef<HTMLLIElement>(null)
 
+  const isFolder = isFolderNode(node)
+  const isOpen = isFolder && (node.isOpen ?? false)
+
   const {
     dragPosition,
     isDropAllowed,
@@ -38,22 +41,19 @@ function TreeNode({
   } = useTreeNodeDragAndDrop(node, onDrop, canDrop)
 
   const { focusedNodeId, setFocusedNodeId } = useLazyTreeView()
-
-  const isFolder = isFolderNode(node)
-  const isOpen = isFolder && (node.isOpen ?? false)
   const isFocused = focusedNodeId === node.id
-
-  useEffect(() => {
-    if (!nodeRef.current || !isFocused) return
-
-    nodeRef.current.focus()
-  }, [isFocused])
 
   const { shouldRender, transitionState } = useExpandTransition({
     isOpen,
     transitionDuration: animationDuration,
     disableAnimations,
   })
+
+  useEffect(() => {
+    if (!nodeRef.current || !isFocused) return
+
+    nodeRef.current.focus()
+  }, [isFocused])
 
   const renderFolderContent = shouldRender && Array.isArray(children) && children.length > 0
 

@@ -24,7 +24,7 @@ function isMovingFromRoot(prevParent?: FolderNode | null): boolean {
   return prevParent?.id === ROOT_NODE.id
 }
 
-function isDroppingInsideFolder(target: TreeNode, position: DropPosition): boolean {
+export function isDroppingInsideFolder(target: TreeNode, position: DropPosition): boolean {
   return isFolderNode(target) && position === DropPosition.Inside
 }
 

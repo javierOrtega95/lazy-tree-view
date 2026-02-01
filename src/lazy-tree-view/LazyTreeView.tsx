@@ -19,6 +19,7 @@ import { useKeyboardNavigation } from './hooks/useKeyboardNavigation/useKeyboard
 import {
   addNode as addNodeToTree,
   calculateMoveIndices,
+  isDroppingInsideFolder,
   moveNode,
   normalizeNewParent,
   removeFromContainer,
@@ -111,8 +112,9 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
 
         if (!source || !target) return
 
-        const isDroppingInside = isFolderNode(target.node) && position === DropPosition.Inside
-        const nextParent = isDroppingInside ? (target.node as FolderNode) : target.parent
+        const nextParent = isDroppingInsideFolder(target.node, position)
+          ? (target.node as FolderNode)
+          : target.parent
 
         const { prevIndex, nextIndex } = calculateMoveIndices({
           source: source.node,
