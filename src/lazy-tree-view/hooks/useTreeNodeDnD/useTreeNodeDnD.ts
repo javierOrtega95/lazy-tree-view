@@ -16,8 +16,14 @@ export default function useTreeNodeDnD(
   onDrop: (data: MoveData) => void,
   canDrop: CanDropFn = () => true,
 ): TreeNodeDnDReturn {
-  const { nodeParents, draggingNode, hoveredNodeId, setDraggingNode, setHoveredNodeId } =
-    useLazyTreeView()
+  const {
+    nodeParents,
+    draggingNode,
+    hoveredNodeId,
+    setDraggingNode,
+    setFocusedNodeId,
+    setHoveredNodeId,
+  } = useLazyTreeView()
 
   const [isDropAllowed, setIsDropAllowed] = useState<boolean>(true)
   const [dragPosition, setDragPosition] = useState<DropPosition | null>(null)
@@ -80,10 +86,10 @@ export default function useTreeNodeDnD(
     (event: DragEvent) => {
       event.stopPropagation()
       event.dataTransfer.effectAllowed = 'move'
-
+      setFocusedNodeId(node.id)
       setDraggingNode(node)
     },
-    [node, setDraggingNode],
+    [node, setDraggingNode, setFocusedNodeId],
   )
 
   const handleDragLeave = useCallback(
