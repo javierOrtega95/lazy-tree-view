@@ -129,7 +129,8 @@ function TreeNode({
       draggable={allowDragAndDrop && !useDragHandle}
       className={`${styles.treeNode} ${DnDClassName}`}
       style={animationStyle}
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation()
         setFocusedNodeId(node.id)
       }}
       {...dragAndDropHandlers}
