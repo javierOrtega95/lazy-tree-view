@@ -1,0 +1,25 @@
+/* ============================================
+   Storybook Global Styles
+   ============================================ */
+
+/* Reset app styles that leak from index.css */
+:root {
+  background-color: transparent;
+}
+
+body {
+  display: block;
+}
+
+/* ---- Canvas ---- */
+.sb-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 400px;
+  padding: 32px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

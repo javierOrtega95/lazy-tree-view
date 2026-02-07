@@ -1,0 +1,205 @@
+/**
+ * Imperative API Story Styles
+ */
+
+.imp-demo {
+  --imp-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --imp-radius: 8px;
+  --imp-radius-sm: 6px;
+  --imp-border: #e4e4e7;
+  --imp-bg: #fafafa;
+  --imp-text: #18181b;
+  --imp-text-secondary: #71717a;
+  --imp-accent: #18181b;
+
+  font-family: var(--imp-font);
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ---- Toolbar ---- */
+.imp-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--imp-border);
+  background: var(--imp-bg);
+}
+
+.imp-toolbar__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--imp-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--imp-radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.imp-toolbar__btn:hover {
+  color: var(--imp-text);
+  background: white;
+  border-color: var(--imp-border);
+}
+
+.imp-toolbar__btn:active {
+  transform: scale(0.96);
+}
+
+.imp-toolbar__btn svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.imp-toolbar__btn:hover svg {
+  opacity: 1;
+}
+
+.imp-toolbar__separator {
+  width: 1px;
+  margin: 2px 4px;
+  background: var(--imp-border);
+}
+
+/* ---- Tree area ---- */
+.imp-tree {
+  padding: 4px 0;
+}
+
+/* ---- Dialog ---- */
+.imp-dialog {
+  border: 1px solid var(--imp-border);
+  border-radius: 12px;
+  padding: 0;
+  font-family: var(--imp-font);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  max-width: 360px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.imp-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+}
+
+.imp-dialog__header {
+  padding: 16px 20px 0;
+}
+
+.imp-dialog__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--imp-text);
+}
+
+.imp-dialog__subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--imp-text-secondary);
+}
+
+.imp-dialog__body {
+  padding: 16px 20px;
+}
+
+.imp-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.imp-dialog__field + .imp-dialog__field {
+  margin-top: 12px;
+}
+
+.imp-dialog__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--imp-text-secondary);
+}
+
+.imp-dialog__input,
+.imp-dialog__select {
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--imp-text);
+  background: white;
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-sm);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.imp-dialog__input:focus,
+.imp-dialog__select:focus {
+  border-color: #a1a1aa;
+}
+
+.imp-dialog__select {
+  cursor: pointer;
+}
+
+/* JSON output inside dialog */
+.imp-dialog__json {
+  padding: 12px;
+  font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--imp-text-secondary);
+  background: var(--imp-bg);
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-sm);
+  max-height: 240px;
+  overflow-y: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* Dialog footer */
+.imp-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px;
+}
+
+.imp-dialog__btn {
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--imp-radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.imp-dialog__btn--secondary {
+  color: var(--imp-text-secondary);
+  background: white;
+  border: 1px solid var(--imp-border);
+}
+
+.imp-dialog__btn--secondary:hover {
+  background: var(--imp-bg);
+}
+
+.imp-dialog__btn--primary {
+  color: white;
+  background: var(--imp-accent);
+  border: 1px solid var(--imp-accent);
+}
+
+.imp-dialog__btn--primary:hover {
+  opacity: 0.85;
+}

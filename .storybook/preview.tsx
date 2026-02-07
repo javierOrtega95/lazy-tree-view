@@ -1,9 +1,9 @@
 import type { Preview } from '@storybook/react'
-import React from 'react'
-import '../src/index.css'
+import './storybook.css'
 
 const preview: Preview = {
   parameters: {
+    layout: 'fullscreen',
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -13,9 +13,7 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <div
-        style={{ width: 400, minHeight: 320, margin: 'auto', padding: '1rem' }}
-      >
+      <div className="sb-canvas">
         <Story />
       </div>
     ),
