@@ -254,8 +254,15 @@
 .fe-split__sidebar {
   width: 260px;
   min-width: 260px;
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid var(--fe-border);
   border-radius: 0;
+  overflow: hidden;
+}
+
+.fe-split__sidebar [role='tree'] {
+  flex: 1;
   overflow-y: auto;
 }
 
