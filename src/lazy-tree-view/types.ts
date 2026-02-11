@@ -15,6 +15,8 @@ export type LazyTreeViewHandle = {
   /** Move a node to a new position. Use `null` as targetId with `Inside` position to move to root level. */
   moveNode: (nodeId: NodeId, targetId: NodeId, position: DropPosition) => void
 
+  /** Replace the entire tree with a new one */
+  setTree: (newTree: TreeNode[]) => void
   /** Get the current tree structure */
   getTree: () => TreeNode[]
   /** Get a node by its ID */

@@ -438,6 +438,63 @@ describe('LazyTreeView', () => {
       })
     })
 
+    describe('setTree', () => {
+      it('should replace the entire tree', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1'), createItem('item-2', 'Item 2')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        expect(screen.getByText('Item 1')).toBeInTheDocument()
+        expect(screen.getByText('Item 2')).toBeInTheDocument()
+
+        act(() => {
+          ref.current?.setTree([createItem('item-3', 'Item 3')])
+        })
+
+        expect(screen.queryByText('Item 1')).not.toBeInTheDocument()
+        expect(screen.queryByText('Item 2')).not.toBeInTheDocument()
+        expect(screen.getByText('Item 3')).toBeInTheDocument()
+      })
+
+      it('should call onTreeChange when tree is replaced', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const onTreeChange = vi.fn()
+        const tree = [createItem('item-1', 'Item 1')]
+        const newTree = [createItem('item-2', 'Item 2'), createItem('item-3', 'Item 3')]
+
+        render(
+          <LazyTreeView
+            ref={ref}
+            initialTree={tree}
+            loadChildren={mockLoadChildren}
+            onTreeChange={onTreeChange}
+          />,
+        )
+
+        act(() => {
+          ref.current?.setTree(newTree)
+        })
+
+        expect(onTreeChange).toHaveBeenCalledWith(newTree)
+      })
+
+      it('should replace tree with an empty array', () => {
+        const ref = createRef<LazyTreeViewHandle>()
+        const tree = [createItem('item-1', 'Item 1')]
+
+        render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
+
+        expect(screen.getByText('Item 1')).toBeInTheDocument()
+
+        act(() => {
+          ref.current?.setTree([])
+        })
+
+        expect(screen.queryByText('Item 1')).not.toBeInTheDocument()
+      })
+    })
+
     describe('getTree', () => {
       it('should return current tree state', () => {
         const ref = createRef<LazyTreeViewHandle>()

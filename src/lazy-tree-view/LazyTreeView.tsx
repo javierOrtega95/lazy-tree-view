@@ -137,6 +137,10 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
         updateTree((prev) => moveNode(prev, moveData))
       },
 
+      setTree: (newTree: Node[]) => {
+        updateTree(() => [{ ...ROOT_NODE, children: newTree }])
+      },
+
       getTree: () => tree[0].children,
 
       getNode: (nodeId: NodeId) => nodeIndex[nodeId]?.node,

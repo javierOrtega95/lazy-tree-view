@@ -10,6 +10,7 @@ import {
   MoveIcon,
   PencilIcon,
   PlusIcon,
+  RefreshCwIcon,
   TrashIcon,
 } from '../assets/icons/file-icons'
 import '../assets/styles/imperative-api.css'
@@ -85,6 +86,42 @@ async function loadChildren(folder: { name: string }): Promise<TreeNode[]> {
   return LAZY_CHILDREN[folder.name] ?? []
 }
 
+// ---- Preset trees for setTree demo ----
+
+const PRESET_TREES: Record<string, TreeNode[]> = {
+  Minimal: [
+    { id: 'min-1', name: 'Alpha' },
+    { id: 'min-2', name: 'Beta' },
+    { id: 'min-3', name: 'Gamma' },
+  ],
+  Nested: [
+    {
+      id: 'nest-1',
+      name: 'Section A',
+      children: [
+        { id: 'nest-2', name: 'Item 1' },
+        { id: 'nest-3', name: 'Item 2' },
+      ],
+      isOpen: true,
+      hasFetched: true,
+    },
+    {
+      id: 'nest-4',
+      name: 'Section B',
+      children: [
+        { id: 'nest-5', name: 'Item 3' },
+        { id: 'nest-6', name: 'Item 4' },
+      ],
+      isOpen: true,
+      hasFetched: true,
+    },
+    { id: 'nest-7', name: 'Standalone' },
+  ],
+  Empty: [],
+}
+
+const PRESET_NAMES = Object.keys(PRESET_TREES)
+
 // ---- Helpers ----
 
 function collectFolders(nodes: TreeNode[], prefix = ''): { id: string; label: string }[] {
@@ -118,6 +155,7 @@ const ImperativeApiDemo: FC = () => {
   const addDialog = useDialog()
   const removeDialog = useDialog()
   const renameDialog = useDialog()
+  const setTreeDialog = useDialog()
   const treeDialog = useDialog()
 
   // Form state
@@ -127,6 +165,9 @@ const ImperativeApiDemo: FC = () => {
   const [removeTarget, setRemoveTarget] = useState<string>('')
   const [renameName, setRenameName] = useState('')
   const [renameTarget, setRenameTarget] = useState<string>('')
+  const [setTreePreset, setSetTreePreset] = useState(PRESET_NAMES[0])
+  const [newTreeJson, setNewTreeJson] = useState('')
+  const [setTreeError, setSetTreeError] = useState('')
   const [treeJson, setTreeJson] = useState('')
 
   const getFolders = () => collectFolders(treeRef.current?.getTree() ?? [])
@@ -196,6 +237,35 @@ const ImperativeApiDemo: FC = () => {
     treeRef.current?.moveNode(last.id, first.id, DropPosition.Before)
   }
 
+  const handleSetTreeOpen = () => {
+    const preset = PRESET_NAMES[0]
+    setSetTreePreset(preset)
+    setNewTreeJson(JSON.stringify(PRESET_TREES[preset], null, 2))
+    setSetTreeError('')
+    setTreeDialog.open()
+  }
+
+  const handleSetTreePresetChange = (name: string) => {
+    setSetTreePreset(name)
+    if (name === '__custom__') return
+    setNewTreeJson(JSON.stringify(PRESET_TREES[name], null, 2))
+    setSetTreeError('')
+  }
+
+  const handleSetTreeConfirm = () => {
+    try {
+      const parsed = JSON.parse(newTreeJson)
+      if (!Array.isArray(parsed)) {
+        setSetTreeError('Must be a JSON array.')
+        return
+      }
+      treeRef.current?.setTree(parsed)
+      setTreeDialog.close()
+    } catch (error) {
+      setSetTreeError(error instanceof SyntaxError ? 'Invalid JSON.' : String(error))
+    }
+  }
+
   const handleGetTree = () => {
     const tree = treeRef.current?.getTree()
     setTreeJson(JSON.stringify(tree, null, 2))
@@ -218,8 +288,11 @@ const ImperativeApiDemo: FC = () => {
         <button className='imp-actions__btn' onClick={handleMove}>
           <MoveIcon /> Move
         </button>
+        <button className='imp-actions__btn' onClick={handleSetTreeOpen}>
+          <RefreshCwIcon /> Set Tree
+        </button>
         <button className='imp-actions__btn' onClick={handleGetTree}>
-          <ClipboardListIcon /> Tree
+          <ClipboardListIcon /> Get Tree
         </button>
       </div>
 
@@ -371,6 +444,52 @@ const ImperativeApiDemo: FC = () => {
         </div>
       </dialog>
 
+      {/* Set Tree Dialog */}
+      <dialog ref={setTreeDialog.ref} className='imp-dialog'>
+        <div className='imp-dialog__header'>
+          <h3 className='imp-dialog__title'>Set Tree</h3>
+          <p className='imp-dialog__subtitle'>Replace the entire tree with a new structure.</p>
+        </div>
+        <div className='imp-dialog__body'>
+          <div className='imp-dialog__field'>
+            <label className='imp-dialog__label'>Preset</label>
+            <select
+              className='imp-dialog__select'
+              value={setTreePreset}
+              onChange={(e) => handleSetTreePresetChange(e.target.value)}
+            >
+              {PRESET_NAMES.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+              <option value='__custom__'>Custom JSON</option>
+            </select>
+          </div>
+          <div className='imp-dialog__field'>
+            <label className='imp-dialog__label'>JSON</label>
+            <textarea
+              className='imp-dialog__textarea'
+              value={newTreeJson}
+              onChange={(e) => {
+                setNewTreeJson(e.target.value)
+                setSetTreePreset('__custom__')
+                setSetTreeError('')
+              }}
+            />
+            {setTreeError && <p className='imp-dialog__hint' style={{ color: '#cf222e' }}>{setTreeError}</p>}
+          </div>
+        </div>
+        <div className='imp-dialog__footer'>
+          <button className='imp-dialog__btn imp-dialog__btn--secondary' onClick={setTreeDialog.close}>
+            Cancel
+          </button>
+          <button className='imp-dialog__btn imp-dialog__btn--primary' onClick={handleSetTreeConfirm}>
+            Apply
+          </button>
+        </div>
+      </dialog>
+
       {/* Get Tree Dialog */}
       <dialog ref={treeDialog.ref} className='imp-dialog'>
         <div className='imp-dialog__header'>
@@ -410,6 +529,12 @@ treeRef.current?.updateNode('node-id', { name: 'Renamed' })
 // Move a node
 treeRef.current?.moveNode('node-id', 'target-id', 'before')
 
+// Replace the entire tree
+treeRef.current?.setTree([
+  { id: '1', name: 'New Root Item' },
+  { id: '2', name: 'New Folder', children: [] },
+])
+
 // Read the tree
 const tree = treeRef.current?.getTree()
 const node = treeRef.current?.getNode('node-id')
@@ -428,7 +553,7 @@ const meta: Meta<typeof ImperativeApiDemo> = {
     docs: {
       description: {
         component:
-          'Control the tree externally via `ref` using the imperative API. Methods: `addNode`, `removeNode`, `updateNode`, `moveNode`, `getTree`, `getNode`.',
+          'Control the tree externally via `ref` using the imperative API. Methods: `addNode`, `removeNode`, `updateNode`, `moveNode`, `setTree`, `getTree`, `getNode`.',
       },
     },
   },

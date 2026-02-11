@@ -159,6 +159,38 @@
   tab-size: 2;
 }
 
+/* Editable JSON textarea */
+.imp-dialog__textarea {
+  padding: 12px;
+  font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--imp-text);
+  background: white;
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius);
+  max-height: 240px;
+  min-height: 120px;
+  overflow-y: auto;
+  white-space: pre;
+  tab-size: 2;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.imp-dialog__textarea:focus {
+  border-color: var(--imp-accent);
+}
+
+.imp-dialog__hint {
+  font-size: 11px;
+  color: var(--imp-text-secondary);
+  margin-top: 6px;
+}
+
 /* Dialog footer */
 .imp-dialog__footer {
   display: flex;
