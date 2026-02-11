@@ -1,0 +1,509 @@
+/**
+ * Organization Hierarchy - Clean corporate theme
+ */
+
+.org-hierarchy {
+  --org-bg: #ffffff;
+  --org-bg-hover: #f8fafc;
+  --org-bg-focus: #eff6ff;
+  --org-text: #1e293b;
+  --org-text-secondary: #64748b;
+  --org-text-muted: #94a3b8;
+  --org-border: #e2e8f0;
+  --org-item-height: 48px;
+  --org-indent: 20px;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  color: var(--org-text);
+  background: var(--org-bg);
+  user-select: none;
+}
+
+/* ============================================
+   Window Frame (matches File Explorer)
+   ============================================ */
+
+.org-window {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--org-border);
+}
+
+.org-window__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #f6f8fa;
+  border-bottom: 1px solid var(--org-border);
+}
+
+.org-window__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.org-window__dot--red { background-color: #ff5f57; }
+.org-window__dot--yellow { background-color: #febc2e; }
+.org-window__dot--green { background-color: #28c840; }
+
+/* ============================================
+   Split Layout
+   ============================================ */
+
+.org-split {
+  display: flex;
+  width: 740px;
+  height: 500px;
+  overflow: hidden;
+  background: var(--org-bg);
+}
+
+.org-split__sidebar {
+  width: 340px;
+  min-width: 340px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--org-border);
+  overflow: hidden;
+}
+
+.org-split__sidebar [role='tree'] {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Header */
+.org-hierarchy__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--org-text);
+  border-bottom: 1px solid var(--org-border);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.org-hierarchy__header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+/* Tree overrides */
+.org-hierarchy [role='tree'] {
+  --color-hover-bg: var(--org-bg-hover);
+  --color-focus-bg: var(--org-bg-focus);
+  --border-radius: 0;
+  --padding-item: 0;
+  --gap: 0;
+  padding: 4px 0;
+}
+
+/* Shared item row */
+.org-hierarchy__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--org-item-height);
+  padding: 6px 16px;
+  padding-left: calc(var(--depth, 0) * var(--org-indent) + 16px);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.org-hierarchy__row:hover {
+  background: var(--org-bg-hover);
+}
+
+.org-hierarchy [role='treeitem']:focus > .org-hierarchy__row,
+.org-hierarchy [role='treeitem']:focus-visible > .org-hierarchy__row {
+  background: var(--org-bg-focus);
+  outline: none;
+}
+
+/* Chevron */
+.org-hierarchy__chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--org-text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.org-hierarchy__chevron--open {
+  transform: rotate(90deg);
+}
+
+.org-hierarchy__chevron--hidden {
+  visibility: hidden;
+}
+
+/* Department color bar */
+.org-hierarchy__dept-dot {
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Avatar */
+.org-hierarchy__avatar {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Lead indicator (star badge on avatar) */
+.org-hierarchy__lead-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f59e0b;
+  border: 2px solid var(--org-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.org-hierarchy__lead-badge svg {
+  width: 8px;
+  height: 8px;
+}
+
+/* Status indicator */
+.org-hierarchy__status {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--org-bg);
+}
+
+.org-hierarchy__status--online { background: #22c55e; }
+.org-hierarchy__status--away { background: #f59e0b; }
+.org-hierarchy__status--offline { background: #cbd5e1; }
+
+/* Text info (inline in tree row) */
+.org-hierarchy__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.org-hierarchy__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.org-hierarchy__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--org-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.org-hierarchy__role {
+  font-size: 11px;
+  color: var(--org-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Permission badge */
+.org-hierarchy__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  line-height: 16px;
+}
+
+.org-hierarchy__badge--admin {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.org-hierarchy__badge--manager {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.org-hierarchy__badge--viewer {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+/* Department folder row info */
+.org-hierarchy__dept-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.org-hierarchy__dept-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--org-text);
+}
+
+.org-hierarchy__dept-count {
+  font-size: 11px;
+  color: var(--org-text-muted);
+}
+
+/* Loader (inside chevron) */
+.org-hierarchy__loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: org-spin 1s linear infinite;
+}
+
+@keyframes org-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Detail Panel (right side)
+   ============================================ */
+
+.org-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--org-bg);
+  overflow-y: auto;
+}
+
+.org-detail__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--org-text-muted);
+  font-size: 14px;
+}
+
+.org-detail__empty svg {
+  opacity: 0.25;
+}
+
+.org-detail__empty p {
+  margin: 0;
+}
+
+/* Profile card */
+.org-detail__card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.org-detail__profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 32px 24px 20px;
+  border-bottom: 1px solid var(--org-border);
+}
+
+.org-detail__avatar {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.org-detail__avatar .org-hierarchy__status {
+  width: 14px;
+  height: 14px;
+  bottom: 0;
+  right: 0;
+  border-width: 3px;
+}
+
+.org-detail__avatar .org-hierarchy__lead-badge {
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+}
+
+.org-detail__avatar .org-hierarchy__lead-badge svg {
+  width: 10px;
+  height: 10px;
+}
+
+.org-detail__name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--org-text);
+}
+
+.org-detail__role {
+  font-size: 13px;
+  color: var(--org-text-secondary);
+}
+
+.org-detail__badge {
+  margin-top: 4px;
+}
+
+/* Info rows */
+.org-detail__fields {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.org-detail__field {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.org-detail__field-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--org-text-muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.org-detail__field-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.org-detail__field-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--org-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.org-detail__field-value {
+  font-size: 13px;
+  color: var(--org-text);
+}
+
+/* Department detail */
+.org-detail__dept-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-bottom: 1px solid var(--org-border);
+}
+
+.org-detail__dept-color {
+  width: 6px;
+  height: 40px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.org-detail__dept-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--org-text);
+}
+
+.org-detail__dept-count {
+  font-size: 13px;
+  color: var(--org-text-secondary);
+}
+
+/* Drag and drop */
+.org-hierarchy [data-dragging='true'] {
+  opacity: 0.4;
+}
+
+.org-hierarchy .org-drag-over {
+  background: var(--org-bg-focus);
+}
+
+.org-hierarchy .org-drop-before::before,
+.org-hierarchy .org-drop-after::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: #3b82f6;
+  border-radius: 1px;
+}
+
+.org-hierarchy .org-drop-before::before {
+  top: 0;
+}
+
+.org-hierarchy .org-drop-after::after {
+  bottom: 0;
+}
+
+.org-hierarchy .org-drop-not-allowed {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
