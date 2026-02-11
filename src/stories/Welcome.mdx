@@ -1,0 +1,62 @@
+import { Meta } from '@storybook/blocks'
+
+<Meta title="Introduction" />
+
+# LazyTreeView
+
+A lightweight, flexible React component for rendering hierarchical data with **lazy loading**, **drag & drop** reordering, and full **keyboard navigation**.
+
+---
+
+### Key Features
+
+- **Lazy Loading** — Load children on demand with async callbacks. Built-in loading and error states with retry support.
+- **Drag & Drop** — Reorder nodes with configurable drop positions (before, inside, after) and validation via `canDrop`.
+- **Keyboard Navigation** — Full ARIA tree pattern: arrow keys, Home/End, Enter/Space to toggle folders.
+- **Custom Components** — Replace the default folder and item renderers with your own via `folder` and `item` props.
+- **Imperative API** — Control the tree externally via `ref`: add, remove, update, move nodes and read the current state.
+- **Animations** — Smooth expand/collapse transitions with configurable duration or opt-out.
+
+---
+
+### Quick Start
+
+```tsx
+import LazyTreeView from 'lazy-tree-view'
+
+const tree = [
+  {
+    id: '1',
+    name: 'Documents',
+    children: [
+      { id: '2', name: 'Resume.pdf' },
+      { id: '3', name: 'Cover Letter.docx' },
+    ],
+  },
+  { id: '4', name: 'README.md' },
+]
+
+async function loadChildren(folder) {
+  const response = await fetch(`/api/folders/${folder.id}/children`)
+  return response.json()
+}
+
+function App() {
+  return (
+    <LazyTreeView
+      initialTree={tree}
+      loadChildren={loadChildren}
+      allowDragAndDrop
+    />
+  )
+}
+```
+
+---
+
+### Explore
+
+Browse the sidebar to see the component in action:
+
+- **Features** — Individual stories for each capability (default, lazy loading, drag & drop, animations, imperative API).
+- **Use Cases** — Complete demos like the File Explorer with custom components and preview panel.

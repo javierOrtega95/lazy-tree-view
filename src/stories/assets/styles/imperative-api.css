@@ -5,68 +5,61 @@
 .imp-demo {
   --imp-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
-  --imp-radius: 8px;
-  --imp-radius-sm: 6px;
-  --imp-border: #e4e4e7;
-  --imp-bg: #fafafa;
-  --imp-text: #18181b;
-  --imp-text-secondary: #71717a;
-  --imp-accent: #18181b;
+  --imp-radius: 6px;
+  --imp-border: #d1d9e0;
+  --imp-bg: #f6f8fa;
+  --imp-text: #1f2328;
+  --imp-text-secondary: #656d76;
+  --imp-accent: #0969da;
 
   font-family: var(--imp-font);
-  width: 100%;
-  max-width: 520px;
+  min-height: 400px;
+  min-width: 340px;
 }
 
-/* ---- Toolbar ---- */
-.imp-toolbar {
+/* ---- Action buttons ---- */
+.imp-actions {
   display: flex;
-  gap: 4px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--imp-border);
-  background: var(--imp-bg);
-}
-
-.imp-toolbar__btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
   gap: 6px;
-  padding: 6px 10px;
+  margin-bottom: 16px;
+}
+
+.imp-actions__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   color: var(--imp-text-secondary);
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--imp-radius-sm);
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius);
   cursor: pointer;
   transition: all 0.12s ease;
 }
 
-.imp-toolbar__btn:hover {
+.imp-actions__btn:hover {
   color: var(--imp-text);
-  background: white;
-  border-color: var(--imp-border);
+  background: var(--imp-bg);
+  border-color: #afb8c1;
 }
 
-.imp-toolbar__btn:active {
-  transform: scale(0.96);
+.imp-actions__btn:active {
+  transform: scale(0.97);
 }
 
-.imp-toolbar__btn svg {
+.imp-actions__btn svg {
   flex-shrink: 0;
-  opacity: 0.7;
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
 }
 
-.imp-toolbar__btn:hover svg {
-  opacity: 1;
-}
-
-.imp-toolbar__separator {
-  width: 1px;
-  margin: 2px 4px;
-  background: var(--imp-border);
+.imp-actions__btn:hover svg {
+  opacity: 0.9;
 }
 
 /* ---- Tree area ---- */
@@ -77,17 +70,17 @@
 /* ---- Dialog ---- */
 .imp-dialog {
   border: 1px solid var(--imp-border);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 0;
   font-family: var(--imp-font);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
-  max-width: 360px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-width: 340px;
   width: 100%;
   overflow: hidden;
 }
 
 .imp-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(2px);
 }
 
@@ -130,20 +123,20 @@
 
 .imp-dialog__input,
 .imp-dialog__select {
-  padding: 8px 10px;
+  padding: 7px 10px;
   font-family: inherit;
   font-size: 13px;
   color: var(--imp-text);
   background: white;
   border: 1px solid var(--imp-border);
-  border-radius: var(--imp-radius-sm);
+  border-radius: var(--imp-radius);
   outline: none;
   transition: border-color 0.15s ease;
 }
 
 .imp-dialog__input:focus,
 .imp-dialog__select:focus {
-  border-color: #a1a1aa;
+  border-color: var(--imp-accent);
 }
 
 .imp-dialog__select {
@@ -159,7 +152,7 @@
   color: var(--imp-text-secondary);
   background: var(--imp-bg);
   border: 1px solid var(--imp-border);
-  border-radius: var(--imp-radius-sm);
+  border-radius: var(--imp-radius);
   max-height: 240px;
   overflow-y: auto;
   white-space: pre;
@@ -175,11 +168,11 @@
 }
 
 .imp-dialog__btn {
-  padding: 7px 14px;
+  padding: 6px 14px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  border-radius: var(--imp-radius-sm);
+  border-radius: var(--imp-radius);
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -201,5 +194,5 @@
 }
 
 .imp-dialog__btn--primary:hover {
-  opacity: 0.85;
+  opacity: 0.9;
 }
