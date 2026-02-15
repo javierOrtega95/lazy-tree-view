@@ -28,6 +28,13 @@ import {
 import { createNodeIndex, editRecursive, indexNodeParents } from './utils/tree-recursive'
 import { isFolderNode } from './utils/validations'
 
+/**
+ * A tree view component with lazy-loaded children, drag-and-drop, keyboard
+ * navigation, and an imperative API via `ref`.
+ *
+ * @see {@link LazyTreeViewProps} for available props.
+ * @see {@link LazyTreeViewHandle} for imperative methods (addNode, removeNode, etc.).
+ */
 const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function LazyTreeView(
   {
     initialTree,
