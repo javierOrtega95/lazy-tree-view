@@ -12,13 +12,27 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        order: ['Welcome', 'Features', 'Use Cases'],
+        order: [
+          'Welcome',
+          'Features',
+          [
+            'Default',
+            'Lazy Loading',
+            'Drag & Drop',
+            'Customization',
+            'Keyboard Navigation',
+            'Imperative API',
+            'Animations',
+          ],
+          'Use Cases',
+          ['File Explorer', 'Organization Hierarchy', 'Help Center'],
+        ],
       },
     },
   },
   decorators: [
     (Story) => (
-      <div className="sb-canvas">
+      <div className='sb-canvas'>
         <Story />
       </div>
     ),
