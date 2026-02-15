@@ -1,0 +1,194 @@
+/**
+ * Customization Story Styles — Task List
+ */
+
+.cust-demo {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  color: #1e293b;
+  user-select: none;
+}
+
+/* ---- Window Frame ---- */
+
+.cust-window {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  width: 380px;
+}
+
+.cust-window__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #f6f8fa;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cust-window__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.cust-window__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.cust-window__dot--red { background: #ff5f57; }
+.cust-window__dot--yellow { background: #febc2e; }
+.cust-window__dot--green { background: #28c840; }
+
+.cust-window__title {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* ---- Tree area ---- */
+
+.cust-tree {
+  padding: 8px 0;
+  background: #ffffff;
+  min-height: 300px;
+}
+
+/* ---- Folder row ---- */
+
+.cust-folder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 calc(12px + var(--depth, 0) * 20px);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cust-folder:hover {
+  background: #f8fafc;
+}
+
+.cust-folder__chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #94a3b8;
+  transition: transform 0.15s ease;
+}
+
+.cust-folder__chevron--open {
+  transform: rotate(90deg);
+}
+
+.cust-folder__color {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.cust-folder__name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cust-folder__progress {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ---- Item row ---- */
+
+.cust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px 0 calc(12px + var(--depth, 0) * 20px);
+  transition: background 0.1s;
+}
+
+.cust-item:hover {
+  background: #f8fafc;
+}
+
+.cust-item--done .cust-item__name {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+/* Checkbox */
+.cust-item__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  color: white;
+}
+
+.cust-item__check:hover {
+  border-color: #3b82f6;
+}
+
+.cust-item__check--checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Name */
+.cust-item__name {
+  flex: 1;
+  font-size: 13px;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Priority badge */
+.cust-item__priority {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.cust-item__priority--high {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.cust-item__priority--medium {
+  color: #d97706;
+  background: #fffbeb;
+}
+
+.cust-item__priority--low {
+  color: #64748b;
+  background: #f1f5f9;
+}
