@@ -112,8 +112,14 @@ const StarIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => (
 // ---- Helpers ----
 
 const AVATAR_COLORS = [
-  '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
-  '#10b981', '#06b6d4', '#f97316', '#6366f1',
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#06b6d4',
+  '#f97316',
+  '#6366f1',
 ]
 
 function getAvatarColor(name: string): string {
@@ -288,10 +294,7 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
     return (
       <div className='org-detail__card'>
         <div className='org-detail__dept-header'>
-          <span
-            className='org-detail__dept-color'
-            style={{ background: selection.data.color }}
-          />
+          <span className='org-detail__dept-color' style={{ background: selection.data.color }} />
           <div>
             <div className='org-detail__dept-name'>{selection.name}</div>
             <div className='org-detail__dept-count'>
@@ -308,10 +311,7 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
   return (
     <div className='org-detail__card'>
       <div className='org-detail__profile'>
-        <div
-          className='org-detail__avatar'
-          style={{ background: getAvatarColor(selection.name) }}
-        >
+        <div className='org-detail__avatar' style={{ background: getAvatarColor(selection.name) }}>
           {data.initials}
           {data.isLead ? <LeadBadge /> : <StatusDot status={data.status} />}
         </div>
@@ -335,7 +335,9 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
         </div>
 
         <div className='org-detail__field'>
-          <span className='org-detail__field-icon'><MailIcon width={14} height={14} /></span>
+          <span className='org-detail__field-icon'>
+            <MailIcon width={14} height={14} />
+          </span>
           <div className='org-detail__field-content'>
             <span className='org-detail__field-label'>Email</span>
             <span className='org-detail__field-value'>{data.email}</span>
@@ -343,7 +345,9 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
         </div>
 
         <div className='org-detail__field'>
-          <span className='org-detail__field-icon'><MapPinIcon width={14} height={14} /></span>
+          <span className='org-detail__field-icon'>
+            <MapPinIcon width={14} height={14} />
+          </span>
           <div className='org-detail__field-content'>
             <span className='org-detail__field-label'>Location</span>
             <span className='org-detail__field-value'>{data.location}</span>
@@ -351,7 +355,9 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
         </div>
 
         <div className='org-detail__field'>
-          <span className='org-detail__field-icon'><CalendarIcon width={14} height={14} /></span>
+          <span className='org-detail__field-icon'>
+            <CalendarIcon width={14} height={14} />
+          </span>
           <div className='org-detail__field-content'>
             <span className='org-detail__field-label'>Joined</span>
             <span className='org-detail__field-value'>{data.joinDate}</span>
@@ -360,7 +366,9 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
 
         {data.reportsTo && (
           <div className='org-detail__field'>
-            <span className='org-detail__field-icon'><UserIcon width={14} height={14} /></span>
+            <span className='org-detail__field-icon'>
+              <UserIcon width={14} height={14} />
+            </span>
             <div className='org-detail__field-content'>
               <span className='org-detail__field-label'>Reports to</span>
               <span className='org-detail__field-value'>{data.reportsTo}</span>
@@ -369,12 +377,12 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
         )}
 
         <div className='org-detail__field'>
-          <span className='org-detail__field-icon'><ShieldIcon width={14} height={14} /></span>
+          <span className='org-detail__field-icon'>
+            <ShieldIcon width={14} height={14} />
+          </span>
           <div className='org-detail__field-content'>
             <span className='org-detail__field-label'>Permission</span>
-            <span className='org-detail__field-value'>
-              {PERMISSION_LABELS[data.permission]}
-            </span>
+            <span className='org-detail__field-value'>{PERMISSION_LABELS[data.permission]}</span>
           </div>
         </div>
       </div>
@@ -396,8 +404,7 @@ function canDrop({ source, target, position, prevParent, nextParent }: DropData)
   const permission = (source as { data?: PersonData }).data?.permission
 
   // HR is restricted — only admins can be dropped there
-  const targetIsHR = target.id === 'dept-hr'
-    || nextParent?.id === 'dept-hr'
+  const targetIsHR = target.id === 'dept-hr' || nextParent?.id === 'dept-hr'
   if (targetIsHR && permission !== 'admin') return false
 
   // Admins can go anywhere
@@ -488,7 +495,7 @@ const meta: Meta<typeof OrgHierarchyDemo> = {
           '- **Team leads**: star indicator on lead avatars',
           '- **Detail panel**: click a person to see their full profile (email, location, reports to)',
           '- **Lazy loading**: all departments and teams load their members on demand',
-          '- **Permission-based drag & drop**: Admins can be moved anywhere. Managers can go anywhere except HR. Viewers can only be reordered within their team. Departments and teams can\'t be dragged.',
+          "- **Permission-based drag & drop**: Admins can be moved anywhere. Managers can go anywhere except HR. Viewers can only be reordered within their team. Departments and teams can't be dragged.",
         ].join('\n'),
       },
     },
@@ -501,7 +508,8 @@ const meta: Meta<typeof OrgHierarchyDemo> = {
   },
   argTypes: {
     allowDragAndDrop: {
-      description: 'Enable permission-based drag & drop. Admins move freely, Managers can\'t enter HR, Viewers can only reorder within their team.',
+      description:
+        "Enable permission-based drag & drop. Admins move freely, Managers can't enter HR, Viewers can only reorder within their team.",
       control: 'boolean',
       table: { category: 'Behavior', defaultValue: { summary: 'true' } },
     },

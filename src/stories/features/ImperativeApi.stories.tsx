@@ -477,14 +477,24 @@ const ImperativeApiDemo: FC = () => {
                 setSetTreeError('')
               }}
             />
-            {setTreeError && <p className='imp-dialog__hint' style={{ color: '#cf222e' }}>{setTreeError}</p>}
+            {setTreeError && (
+              <p className='imp-dialog__hint' style={{ color: '#cf222e' }}>
+                {setTreeError}
+              </p>
+            )}
           </div>
         </div>
         <div className='imp-dialog__footer'>
-          <button className='imp-dialog__btn imp-dialog__btn--secondary' onClick={setTreeDialog.close}>
+          <button
+            className='imp-dialog__btn imp-dialog__btn--secondary'
+            onClick={setTreeDialog.close}
+          >
             Cancel
           </button>
-          <button className='imp-dialog__btn imp-dialog__btn--primary' onClick={handleSetTreeConfirm}>
+          <button
+            className='imp-dialog__btn imp-dialog__btn--primary'
+            onClick={handleSetTreeConfirm}
+          >
             Apply
           </button>
         </div>

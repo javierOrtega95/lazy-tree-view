@@ -41,9 +41,12 @@ const LazyLoadingDemo: FC<LazyLoadingProps> = ({
   const [logs, setLogs] = useState<LogEntry[]>([])
   let logId = 0
 
-  const addLog = useCallback((type: LogEntry['type'], branch: string, message: string) => {
-    setLogs((prev) => [...prev.slice(-9), { id: ++logId, type, branch, message }])
-  }, [])
+  const addLog = useCallback(
+    (type: LogEntry['type'], branch: string, message: string) => {
+      setLogs((prev) => [...prev.slice(-9), { id: ++logId, type, branch, message }])
+    },
+    [logId],
+  )
 
   const loadChildren = useCallback(async (branch: BranchNode): Promise<TreeNode[]> => {
     switch (branch.name) {
