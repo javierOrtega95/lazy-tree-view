@@ -53,8 +53,8 @@ const SHORTCUTS = [
   { key: '→', action: 'Expand folder or move to first child' },
   { key: '←', action: 'Collapse folder or move to parent' },
   { key: 'Enter / Space', action: 'Toggle folder open/close' },
-  { key: 'Home', action: 'Jump to the first node' },
-  { key: 'End', action: 'Jump to the last visible node' },
+  { key: 'Home', macKey: 'Fn + ←', action: 'Jump to the first node' },
+  { key: 'End', macKey: 'Fn + →', action: 'Jump to the last visible node' },
   { key: 'Tab', action: 'Move to next node' },
   { key: 'Shift + Tab', action: 'Move to previous node' },
 ]
@@ -136,6 +136,26 @@ const KeyboardNavigationDemo: FC<KeyboardNavProps> = ({
                 >
                   {s.key}
                 </kbd>
+                {'macKey' in s && (
+                  <>
+                    {' '}
+                    <kbd
+                      style={{
+                        display: 'inline-block',
+                        padding: '2px 6px',
+                        fontSize: 10,
+                        fontFamily: 'monospace',
+                        color: '#656d76',
+                        background: '#f6f8fa',
+                        border: '1px solid #d1d9e0',
+                        borderRadius: 4,
+                        boxShadow: '0 1px 0 #d1d9e0',
+                      }}
+                    >
+                      {s.macKey}
+                    </kbd>
+                  </>
+                )}
               </td>
               <td
                 style={{
