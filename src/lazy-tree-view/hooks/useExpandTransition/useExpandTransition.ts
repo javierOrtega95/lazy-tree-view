@@ -50,7 +50,7 @@ export function useExpandTransition({
         return
       }
 
-      timeoutRef.current = setTimeout(() => setTransitionState('open'), OPEN_DELAY_MS)
+      timeoutRef.current = window.setTimeout(() => setTransitionState('open'), OPEN_DELAY_MS)
     }
 
     const startClosingTransition = () => {
@@ -61,7 +61,7 @@ export function useExpandTransition({
         return
       }
 
-      timeoutRef.current = setTimeout(() => setTransitionState('closed'), transitionDuration)
+      timeoutRef.current = window.setTimeout(() => setTransitionState('closed'), transitionDuration)
     }
 
     void (wasOpening ? startOpeningTransition() : startClosingTransition())

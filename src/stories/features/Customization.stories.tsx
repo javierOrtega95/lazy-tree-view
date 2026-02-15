@@ -178,8 +178,12 @@ const CustomizationDemo: FC<CustomizationProps> = ({
 
   const handleToggle = useCallback((taskId: string) => {
     const node = treeRef.current?.getNode(taskId) as { data?: TaskData } | undefined
+
     if (!node?.data) return
-    treeRef.current?.updateNode(taskId, { data: { ...node.data, done: !node.data.done } })
+
+    const newData = { data: { ...node.data, done: !node.data.done } } as Partial<TreeNode>
+
+    treeRef.current?.updateNode(taskId, newData)
   }, [])
 
   return (
