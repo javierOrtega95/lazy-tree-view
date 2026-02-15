@@ -69,17 +69,20 @@ const DragAndDropDemo: FC<DragAndDropProps> = ({
   const [logs, setLogs] = useState<DropLogEntry[]>([])
   let logId = 0
 
-  const handleDrop = useCallback((data: DropData) => {
-    setLogs((prev) => [
-      ...prev.slice(-7),
-      {
-        id: ++logId,
-        source: data.source.name,
-        target: data.target.name,
-        position: data.position,
-      },
-    ])
-  }, [])
+  const handleDrop = useCallback(
+    (data: DropData) => {
+      setLogs((prev) => [
+        ...prev.slice(-7),
+        {
+          id: ++logId,
+          source: data.source.name,
+          target: data.target.name,
+          position: data.position,
+        },
+      ])
+    },
+    [logId],
+  )
 
   return (
     <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', minHeight: 400 }}>
@@ -121,8 +124,7 @@ const DragAndDropDemo: FC<DragAndDropProps> = ({
         )}
         {logs.map((log) => (
           <div key={log.id} style={{ padding: '3px 0', color: '#1f2328' }}>
-            <strong>{log.source}</strong>{' '}
-            <span style={{ color: '#656d76' }}>{log.position}</span>{' '}
+            <strong>{log.source}</strong> <span style={{ color: '#656d76' }}>{log.position}</span>{' '}
             <strong>{log.target}</strong>
           </div>
         ))}
