@@ -1,8 +1,8 @@
 import { DragEvent } from 'react'
 import { DropPosition, MoveData } from '../../types/dnd'
-import { FolderNode, NodeId, TreeNode, TreeWithRoot } from '../../types/tree'
+import { BranchNode, NodeId, TreeNode, TreeWithRoot } from '../../types/tree'
 import { ROOT_NODE } from '../constants'
-import { isFolderNode } from './validations'
+import { isBranchNode } from './validations'
 
 // ===== UTILITY FUNCTIONS =====
 
@@ -16,16 +16,16 @@ export function calculateIndentation(depth: number): number {
   return Math.log2(depth + 1) * 20
 }
 
-function isMovingToRoot(nextParent?: FolderNode | null): boolean {
+function isMovingToRoot(nextParent?: BranchNode | null): boolean {
   return nextParent?.id === ROOT_NODE.id
 }
 
-function isMovingFromRoot(prevParent?: FolderNode | null): boolean {
+function isMovingFromRoot(prevParent?: BranchNode | null): boolean {
   return prevParent?.id === ROOT_NODE.id
 }
 
-export function isDroppingInsideFolder(target: TreeNode, position: DropPosition): boolean {
-  return isFolderNode(target) && position === DropPosition.Inside
+export function isDroppingInsideBranch(target: TreeNode, position: DropPosition): boolean {
+  return isBranchNode(target) && position === DropPosition.Inside
 }
 
 function calculateInsertPosition(
@@ -45,7 +45,7 @@ function findNodeIndex(children: TreeNode[], nodeId: NodeId): number {
   return children.findIndex((child) => child.id === nodeId)
 }
 
-function createNewRoot(root: FolderNode, newChildren: TreeNode[]): TreeWithRoot {
+function createNewRoot(root: BranchNode, newChildren: TreeNode[]): TreeWithRoot {
   return [{ ...root, children: newChildren }]
 }
 
@@ -53,7 +53,7 @@ export function mapTree(tree: TreeWithRoot, mapper: (node: TreeNode) => TreeNode
   const mapNodeRecursive = (node: TreeNode): TreeNode => {
     const mappedNode = mapper(node)
 
-    if (isFolderNode(mappedNode)) {
+    if (isBranchNode(mappedNode)) {
       return { ...mappedNode, children: mappedNode.children.map(mapNodeRecursive) }
     }
 
@@ -75,14 +75,14 @@ export function addNode(
   if (parentId === ROOT_NODE.id) return addToContainer(tree, null, node, position)
 
   return mapTree(tree, (currentNode) => {
-    if (isFolderNode(currentNode) && currentNode.id === parentId) {
-      const folder = currentNode
-      const newChildren = [...folder.children]
+    if (isBranchNode(currentNode) && currentNode.id === parentId) {
+      const branch = currentNode
+      const newChildren = [...branch.children]
 
       const insertPosition = position === -1 ? newChildren.length : position
       newChildren.splice(insertPosition, 0, node)
 
-      return { ...folder, children: newChildren }
+      return { ...branch, children: newChildren }
     }
 
     return currentNode
@@ -114,29 +114,29 @@ function reorderWithinContainer(tree: TreeWithRoot, moveData: MoveData): TreeWit
     return reorderInContainer(tree, null, moveData)
   }
 
-  const parent = prevParent as FolderNode
+  const parent = prevParent as BranchNode
   return updateNode(tree, parent.id, (node) => {
-    if (!isFolderNode(node)) return node
+    if (!isBranchNode(node)) return node
 
-    const folder = node as FolderNode
-    const sourceIndex = findNodeIndex(folder.children, source.id)
-    const targetIndex = findNodeIndex(folder.children, target.id)
+    const branch = node as BranchNode
+    const sourceIndex = findNodeIndex(branch.children, source.id)
+    const targetIndex = findNodeIndex(branch.children, target.id)
 
     if (sourceIndex === -1 || targetIndex === -1) return node
 
-    const newChildren = [...folder.children]
+    const newChildren = [...branch.children]
     newChildren.splice(sourceIndex, 1)
 
     const insertIndex = calculateInsertPosition(sourceIndex, targetIndex, position)
     newChildren.splice(insertIndex, 0, source)
 
-    return { ...folder, children: newChildren }
+    return { ...branch, children: newChildren }
   })
 }
 
 function moveBetweenContainers(tree: TreeWithRoot, moveData: MoveData): TreeWithRoot {
   const { source, target, position, prevParent, nextParent } = moveData
-  const isDroppedInside = isDroppingInsideFolder(target, position)
+  const isDroppedInside = isDroppingInsideBranch(target, position)
 
   // remove from source container
   const result = removeFromContainer(tree, source.id, prevParent)
@@ -156,7 +156,7 @@ function moveBetweenContainers(tree: TreeWithRoot, moveData: MoveData): TreeWith
 
 function reorderInContainer(
   tree: TreeWithRoot,
-  container: FolderNode | null,
+  container: BranchNode | null,
   moveData: MoveData,
 ): TreeWithRoot {
   const { source, target, position } = moveData
@@ -179,7 +179,7 @@ function reorderInContainer(
 
 function addToContainer(
   tree: TreeWithRoot,
-  container: FolderNode | null,
+  container: BranchNode | null,
   node: TreeNode,
   position: number,
 ): TreeWithRoot {
@@ -197,7 +197,7 @@ function addToContainer(
 export function removeFromContainer(
   tree: TreeWithRoot,
   nodeId: NodeId,
-  container?: FolderNode | null,
+  container?: BranchNode | null,
 ): TreeWithRoot {
   if (isMovingFromRoot(container)) {
     const [root] = tree
@@ -207,11 +207,11 @@ export function removeFromContainer(
   }
 
   return updateNode(tree, container!.id, (node) => {
-    if (isFolderNode(node)) {
-      const folder = node as FolderNode
-      const filteredChildren = folder.children.filter((child) => child.id !== nodeId)
+    if (isBranchNode(node)) {
+      const branch = node as BranchNode
+      const filteredChildren = branch.children.filter((child) => child.id !== nodeId)
 
-      return { ...folder, children: filteredChildren }
+      return { ...branch, children: filteredChildren }
     }
 
     return node
@@ -232,9 +232,9 @@ export function calculateMoveIndices({
 }: Omit<MoveData, 'prevIndex' | 'nextIndex'>): { prevIndex: number; nextIndex: number } {
   const prevIndex = prevParent.children.findIndex((child) => child.id === source.id)
 
-  const droppingInsideFolder = isFolderNode(target) && position === DropPosition.Inside
+  const droppingInsideBranch = isBranchNode(target) && position === DropPosition.Inside
 
-  if (droppingInsideFolder) return { prevIndex, nextIndex: nextParent.children.length }
+  if (droppingInsideBranch) return { prevIndex, nextIndex: nextParent.children.length }
 
   const targetIndex = nextParent.children.findIndex((child) => child.id === target.id)
   const isSameContainer = prevParent.id === nextParent.id
@@ -242,7 +242,6 @@ export function calculateMoveIndices({
   const isDroppingBefore = position === DropPosition.Before
 
   if (isSameContainer) {
-    // Same container - need to adjust for the removal of source
     const adjustedTargetIndex = prevIndex < targetIndex ? targetIndex - 1 : targetIndex
 
     const nextIndex = isDroppingBefore ? adjustedTargetIndex : adjustedTargetIndex + 1
@@ -250,7 +249,6 @@ export function calculateMoveIndices({
     return { prevIndex, nextIndex }
   }
 
-  // Different container - position relative to target
   const nextIndex = isDroppingBefore ? targetIndex : targetIndex + 1
 
   return { prevIndex, nextIndex }
@@ -270,14 +268,14 @@ export function calculateDragPosition(event: DragEvent): DropPosition {
 
     return offsetY <= threshold ? DropPosition.Before : DropPosition.After
   }
-  // For folders, find the actual folder element (excluding drop indicators)
+  // For branches, find the actual branch element (excluding drop indicators)
   const children = Array.from(target.children)
-  const folderElement = children.find((child) => !child.classList.contains('drop-indicator'))
+  const branchElement = children.find((child) => !child.classList.contains('drop-indicator'))
 
-  if (!folderElement) return DropPosition.Inside
+  if (!branchElement) return DropPosition.Inside
 
   const { clientY } = event.nativeEvent
-  const { top, bottom } = folderElement.getBoundingClientRect()
+  const { top, bottom } = branchElement.getBoundingClientRect()
 
   if (clientY <= top) return DropPosition.Before
 
@@ -287,7 +285,7 @@ export function calculateDragPosition(event: DragEvent): DropPosition {
 }
 
 /**
- * Move a node from one position to another - unified logic treating root as another folder
+ * Move a node from one position to another - unified logic treating root as another branch
  */
 export function moveNode(tree: TreeWithRoot, moveData: MoveData): TreeWithRoot {
   const { prevParent, nextParent } = moveData
@@ -300,13 +298,12 @@ export function moveNode(tree: TreeWithRoot, moveData: MoveData): TreeWithRoot {
     return reorderWithinContainer(tree, moveData)
   }
 
-  // Different containers - move between them
   return moveBetweenContainers(tree, moveData)
 }
 
 /**
  * Normalize new parent to return null if it's the root node
  */
-export function normalizeNewParent(parent: FolderNode): FolderNode | null {
+export function normalizeNewParent(parent: BranchNode): BranchNode | null {
   return parent?.id === ROOT_NODE.id ? null : parent
 }

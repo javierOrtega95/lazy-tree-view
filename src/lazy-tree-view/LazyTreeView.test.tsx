@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DropPosition } from '../types/dnd'
-import { createFolder, createItem } from '../test/test-utils'
+import { createBranch, createItem } from '../test/test-utils'
 import LazyTreeView from './LazyTreeView'
 import type { LazyTreeViewHandle } from './types'
 
@@ -30,18 +30,18 @@ describe('LazyTreeView', () => {
       expect(screen.getByText('Item 2')).toBeInTheDocument()
     })
 
-    it('should render folders', () => {
-      const tree = [createFolder('folder-1', [], { name: 'Folder 1' })]
+    it('should render branches', () => {
+      const tree = [createBranch('branch-1', [], { name: 'Branch 1' })]
 
       render(<LazyTreeView initialTree={tree} loadChildren={mockLoadChildren} />)
 
-      expect(screen.getByText('Folder 1')).toBeInTheDocument()
+      expect(screen.getByText('Branch 1')).toBeInTheDocument()
     })
 
-    it('should render nested structure when folder is open', () => {
+    it('should render nested structure when branch is open', () => {
       const tree = [
-        createFolder('folder-1', [createItem('item-1', 'Child Item')], {
-          name: 'Parent Folder',
+        createBranch('branch-1', [createItem('item-1', 'Child Item')], {
+          name: 'Parent Branch',
           isOpen: true,
           hasFetched: true,
         }),
@@ -49,14 +49,14 @@ describe('LazyTreeView', () => {
 
       render(<LazyTreeView initialTree={tree} loadChildren={mockLoadChildren} />)
 
-      expect(screen.getByText('Parent Folder')).toBeInTheDocument()
+      expect(screen.getByText('Parent Branch')).toBeInTheDocument()
       expect(screen.getByText('Child Item')).toBeInTheDocument()
     })
 
-    it('should not render children when folder is closed', () => {
+    it('should not render children when branch is closed', () => {
       const tree = [
-        createFolder('folder-1', [createItem('item-1', 'Child Item')], {
-          name: 'Parent Folder',
+        createBranch('branch-1', [createItem('item-1', 'Child Item')], {
+          name: 'Parent Branch',
           isOpen: false,
           hasFetched: true,
         }),
@@ -64,7 +64,7 @@ describe('LazyTreeView', () => {
 
       render(<LazyTreeView initialTree={tree} loadChildren={mockLoadChildren} />)
 
-      expect(screen.getByText('Parent Folder')).toBeInTheDocument()
+      expect(screen.getByText('Parent Branch')).toBeInTheDocument()
       expect(screen.queryByText('Child Item')).not.toBeInTheDocument()
     })
   })
@@ -112,17 +112,17 @@ describe('LazyTreeView', () => {
   })
 
   describe('lazy loading', () => {
-    it('should call loadChildren when opening a folder without fetched children', async () => {
+    it('should call loadChildren when opening a branch without fetched children', async () => {
       const loadChildren = vi.fn(() => Promise.resolve([createItem('child-1', 'Child')]))
-      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
+      const tree = [createBranch('branch-1', [], { name: 'Branch' })]
 
       render(<LazyTreeView initialTree={tree} loadChildren={loadChildren} />)
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(loadChildren).toHaveBeenCalledWith(
-          expect.objectContaining({ id: 'folder-1', name: 'Folder' }),
+          expect.objectContaining({ id: 'branch-1', name: 'Branch' }),
         )
       })
     })
@@ -130,13 +130,13 @@ describe('LazyTreeView', () => {
     it('should call onLoadStart when starting to load', async () => {
       const onLoadStart = vi.fn()
       const loadChildren = vi.fn(() => Promise.resolve([]))
-      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
+      const tree = [createBranch('branch-1', [], { name: 'Branch' })]
 
       render(
         <LazyTreeView initialTree={tree} loadChildren={loadChildren} onLoadStart={onLoadStart} />,
       )
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(onLoadStart).toHaveBeenCalled()
@@ -147,7 +147,7 @@ describe('LazyTreeView', () => {
       const children = [createItem('child-1', 'Child')]
       const onLoadSuccess = vi.fn()
       const loadChildren = vi.fn(() => Promise.resolve(children))
-      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
+      const tree = [createBranch('branch-1', [], { name: 'Branch' })]
 
       render(
         <LazyTreeView
@@ -157,11 +157,11 @@ describe('LazyTreeView', () => {
         />,
       )
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(onLoadSuccess).toHaveBeenCalledWith(
-          expect.objectContaining({ id: 'folder-1' }),
+          expect.objectContaining({ id: 'branch-1' }),
           children,
         )
       })
@@ -171,26 +171,26 @@ describe('LazyTreeView', () => {
       const error = new Error('Load failed')
       const onLoadError = vi.fn()
       const loadChildren = vi.fn(() => Promise.reject(error))
-      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
+      const tree = [createBranch('branch-1', [], { name: 'Branch' })]
 
       render(
         <LazyTreeView initialTree={tree} loadChildren={loadChildren} onLoadError={onLoadError} />,
       )
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
-        expect(onLoadError).toHaveBeenCalledWith(expect.objectContaining({ id: 'folder-1' }), error)
+        expect(onLoadError).toHaveBeenCalledWith(expect.objectContaining({ id: 'branch-1' }), error)
       })
     })
 
     it('should render loaded children after successful load', async () => {
       const loadChildren = vi.fn(() => Promise.resolve([createItem('child-1', 'Loaded Child')]))
-      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
+      const tree = [createBranch('branch-1', [], { name: 'Branch' })]
 
       render(<LazyTreeView initialTree={tree} loadChildren={loadChildren} />)
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(screen.getByText('Loaded Child')).toBeInTheDocument()
@@ -198,11 +198,11 @@ describe('LazyTreeView', () => {
     })
   })
 
-  describe('toggle folder', () => {
-    it('should close an open folder when clicked', async () => {
+  describe('toggle branch', () => {
+    it('should close an open branch when clicked', async () => {
       const tree = [
-        createFolder('folder-1', [createItem('item-1', 'Child')], {
-          name: 'Folder',
+        createBranch('branch-1', [createItem('item-1', 'Child')], {
+          name: 'Branch',
           isOpen: true,
           hasFetched: true,
         }),
@@ -212,18 +212,18 @@ describe('LazyTreeView', () => {
 
       expect(screen.getByText('Child')).toBeInTheDocument()
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(screen.queryByText('Child')).not.toBeInTheDocument()
       })
     })
 
-    it('should not call loadChildren when opening already fetched folder', async () => {
+    it('should not call loadChildren when opening already fetched branch', async () => {
       const loadChildren = vi.fn(() => Promise.resolve([]))
       const tree = [
-        createFolder('folder-1', [createItem('item-1', 'Child')], {
-          name: 'Folder',
+        createBranch('branch-1', [createItem('item-1', 'Child')], {
+          name: 'Branch',
           isOpen: false,
           hasFetched: true,
         }),
@@ -231,7 +231,7 @@ describe('LazyTreeView', () => {
 
       render(<LazyTreeView initialTree={tree} loadChildren={loadChildren} />)
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(screen.getByText('Child')).toBeInTheDocument()
@@ -245,13 +245,13 @@ describe('LazyTreeView', () => {
     it('should call onTreeChange when tree structure changes', async () => {
       const onTreeChange = vi.fn()
       const loadChildren = vi.fn(() => Promise.resolve([createItem('child-1', 'Child')]))
-      const tree = [createFolder('folder-1', [], { name: 'Folder' })]
+      const tree = [createBranch('branch-1', [], { name: 'Branch' })]
 
       render(
         <LazyTreeView initialTree={tree} loadChildren={loadChildren} onTreeChange={onTreeChange} />,
       )
 
-      await userEvent.click(screen.getByText('Folder'))
+      await userEvent.click(screen.getByText('Branch'))
 
       await waitFor(() => {
         expect(onTreeChange).toHaveBeenCalled()
@@ -261,16 +261,16 @@ describe('LazyTreeView', () => {
 
   describe('imperative handle', () => {
     describe('addNode', () => {
-      it('should add a node to a folder', () => {
+      it('should add a node to a branch', () => {
         const ref = createRef<LazyTreeViewHandle>()
         const tree = [
-          createFolder('folder-1', [], { name: 'Folder', isOpen: true, hasFetched: true }),
+          createBranch('branch-1', [], { name: 'Branch', isOpen: true, hasFetched: true }),
         ]
 
         render(<LazyTreeView ref={ref} initialTree={tree} loadChildren={mockLoadChildren} />)
 
         act(() => {
-          ref.current?.addNode('folder-1', createItem('new-item', 'New Item'))
+          ref.current?.addNode('branch-1', createItem('new-item', 'New Item'))
         })
 
         expect(screen.getByText('New Item')).toBeInTheDocument()
@@ -307,11 +307,11 @@ describe('LazyTreeView', () => {
         expect(screen.getByText('Item 2')).toBeInTheDocument()
       })
 
-      it('should remove a node from a folder', () => {
+      it('should remove a node from a branch', () => {
         const ref = createRef<LazyTreeViewHandle>()
         const tree = [
-          createFolder('folder-1', [createItem('child-1', 'Child')], {
-            name: 'Folder',
+          createBranch('branch-1', [createItem('child-1', 'Child')], {
+            name: 'Branch',
             isOpen: true,
             hasFetched: true,
           }),
@@ -377,11 +377,11 @@ describe('LazyTreeView', () => {
         expect(newTree[2].id).toBe('item-2')
       })
 
-      it('should move a node inside a folder', () => {
+      it('should move a node inside a branch', () => {
         const ref = createRef<LazyTreeViewHandle>()
         const onTreeChange = vi.fn()
         const tree = [
-          createFolder('folder-1', [], { name: 'Folder', isOpen: true, hasFetched: true }),
+          createBranch('branch-1', [], { name: 'Branch', isOpen: true, hasFetched: true }),
           createItem('item-1', 'Item 1'),
         ]
 
@@ -395,7 +395,7 @@ describe('LazyTreeView', () => {
         )
 
         act(() => {
-          ref.current?.moveNode('item-1', 'folder-1', DropPosition.Inside)
+          ref.current?.moveNode('item-1', 'branch-1', DropPosition.Inside)
         })
 
         expect(onTreeChange).toHaveBeenCalled()
@@ -404,12 +404,12 @@ describe('LazyTreeView', () => {
         expect(newTree[0].children[0].id).toBe('item-1')
       })
 
-      it('should move a node from inside a folder to root level', () => {
+      it('should move a node from inside a branch to root level', () => {
         const ref = createRef<LazyTreeViewHandle>()
         const onTreeChange = vi.fn()
         const tree = [
-          createFolder('folder-1', [createItem('child-1', 'Child')], {
-            name: 'Folder',
+          createBranch('branch-1', [createItem('child-1', 'Child')], {
+            name: 'Branch',
             isOpen: true,
             hasFetched: true,
           }),
@@ -424,15 +424,15 @@ describe('LazyTreeView', () => {
           />,
         )
 
-        // Move child-1 after folder-1 (to root level)
+        // Move child-1 after branch (to root level)
         act(() => {
-          ref.current?.moveNode('child-1', 'folder-1', DropPosition.After)
+          ref.current?.moveNode('child-1', 'branch-1', DropPosition.After)
         })
 
         expect(onTreeChange).toHaveBeenCalled()
         const newTree = onTreeChange.mock.calls[0][0]
         expect(newTree.length).toBe(2)
-        expect(newTree[0].id).toBe('folder-1')
+        expect(newTree[0].id).toBe('branch-1')
         expect(newTree[0].children.length).toBe(0)
         expect(newTree[1].id).toBe('child-1')
       })

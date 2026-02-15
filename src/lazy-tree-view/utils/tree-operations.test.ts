@@ -6,9 +6,9 @@ import {
   normalizeNewParent,
 } from './tree-operations'
 import { DropPosition } from '../../types/dnd'
-import type { FolderNode } from '../../types/tree'
+import type { BranchNode } from '../../types/tree'
 import { ROOT_NODE } from '../constants'
-import { createTree, createFolder, createItem } from '../../test/test-utils'
+import { createTree, createBranch, createItem } from '../../test/test-utils'
 
 describe('calculateIndentation', () => {
   it('should return 0 for depth 0', () => {
@@ -49,20 +49,20 @@ describe('normalizeNewParent', () => {
   })
 
   it('should return the parent when it is not ROOT_NODE', () => {
-    const folder = createFolder('f1')
+    const branch = createBranch('f1')
 
-    const result = normalizeNewParent(folder)
+    const result = normalizeNewParent(branch)
 
-    expect(result).toBe(folder)
+    expect(result).toBe(branch)
   })
 })
 
 describe('calculateMoveIndices', () => {
-  describe('dropping inside a folder', () => {
-    it('should return nextIndex as folder children length', () => {
+  describe('dropping inside a branch', () => {
+    it('should return nextIndex as branch children length', () => {
       const source = createItem('1')
-      const target = createFolder('f1', [createItem('a'), createItem('b')])
-      const prevParent = createFolder('prev', [source])
+      const target = createBranch('f1', [createItem('a'), createItem('b')])
+      const prevParent = createBranch('prev', [source])
       const nextParent = target
 
       const result = calculateMoveIndices({
@@ -74,7 +74,7 @@ describe('calculateMoveIndices', () => {
       })
 
       expect(result.prevIndex).toBe(0)
-      expect(result.nextIndex).toBe(2) // folder has 2 children
+      expect(result.nextIndex).toBe(2) // branch has 2 children
     })
   })
 
@@ -83,7 +83,7 @@ describe('calculateMoveIndices', () => {
       const item1 = createItem('1')
       const item2 = createItem('2')
       const item3 = createItem('3')
-      const parent = createFolder('parent', [item1, item2, item3])
+      const parent = createBranch('parent', [item1, item2, item3])
 
       const result = calculateMoveIndices({
         source: item1,
@@ -101,7 +101,7 @@ describe('calculateMoveIndices', () => {
       const item1 = createItem('1')
       const item2 = createItem('2')
       const item3 = createItem('3')
-      const parent = createFolder('parent', [item1, item2, item3])
+      const parent = createBranch('parent', [item1, item2, item3])
 
       const result = calculateMoveIndices({
         source: item1,
@@ -119,7 +119,7 @@ describe('calculateMoveIndices', () => {
       const item1 = createItem('1')
       const item2 = createItem('2')
       const item3 = createItem('3')
-      const parent = createFolder('parent', [item1, item2, item3])
+      const parent = createBranch('parent', [item1, item2, item3])
 
       const result = calculateMoveIndices({
         source: item3,
@@ -138,8 +138,8 @@ describe('calculateMoveIndices', () => {
     it('should calculate correct indices when moving to different parent before target', () => {
       const source = createItem('1')
       const target = createItem('a')
-      const prevParent = createFolder('prev', [source])
-      const nextParent = createFolder('next', [target, createItem('b')])
+      const prevParent = createBranch('prev', [source])
+      const nextParent = createBranch('next', [target, createItem('b')])
 
       const result = calculateMoveIndices({
         source,
@@ -156,8 +156,8 @@ describe('calculateMoveIndices', () => {
     it('should calculate correct indices when moving to different parent after target', () => {
       const source = createItem('1')
       const target = createItem('a')
-      const prevParent = createFolder('prev', [source])
-      const nextParent = createFolder('next', [target, createItem('b')])
+      const prevParent = createBranch('prev', [source])
+      const nextParent = createBranch('next', [target, createItem('b')])
 
       const result = calculateMoveIndices({
         source,
@@ -195,40 +195,40 @@ describe('moveNode', () => {
       expect(root.children.map((c) => c.id)).toEqual(['2', '3', '1'])
     })
 
-    it('should reorder items within a folder', () => {
+    it('should reorder items within a branch', () => {
       const item1 = createItem('1')
       const item2 = createItem('2')
-      const folder = createFolder('f1', [item1, item2])
-      const tree = createTree([folder])
+      const branch = createBranch('f1', [item1, item2])
+      const tree = createTree([branch])
 
       const result = moveNode(tree, {
         source: item2,
         target: item1,
         position: DropPosition.Before,
-        prevParent: folder,
-        nextParent: folder,
+        prevParent: branch,
+        nextParent: branch,
         prevIndex: 1,
         nextIndex: 0,
       })
 
       const [root] = result
-      const updatedFolder = root.children[0] as FolderNode
-      expect(updatedFolder.children.map((c) => c.id)).toEqual(['2', '1'])
+      const updatedBranch = root.children[0] as BranchNode
+      expect(updatedBranch.children.map((c) => c.id)).toEqual(['2', '1'])
     })
   })
 
   describe('moving between containers', () => {
-    it('should move item from root to folder (inside)', () => {
+    it('should move item from root to branch (inside)', () => {
       const item1 = createItem('1')
-      const folder = createFolder('f1', [])
-      const tree = createTree([item1, folder])
+      const branch = createBranch('f1', [])
+      const tree = createTree([item1, branch])
 
       const result = moveNode(tree, {
         source: item1,
-        target: folder,
+        target: branch,
         position: DropPosition.Inside,
         prevParent: ROOT_NODE,
-        nextParent: folder,
+        nextParent: branch,
         prevIndex: 0,
         nextIndex: 0,
       })
@@ -238,22 +238,22 @@ describe('moveNode', () => {
       expect(root.children.length).toBe(1)
       expect(root.children[0].id).toBe('f1')
 
-      const updatedFolder = root.children[0] as FolderNode
-      expect(updatedFolder.children.length).toBe(1)
-      expect(updatedFolder.children[0].id).toBe('1')
+      const updatedBranch = root.children[0] as BranchNode
+      expect(updatedBranch.children.length).toBe(1)
+      expect(updatedBranch.children[0].id).toBe('1')
     })
 
-    it('should move item from folder to root', () => {
+    it('should move item from branch to root', () => {
       const item1 = createItem('1')
       const item2 = createItem('2')
-      const folder = createFolder('f1', [item1])
-      const tree = createTree([folder, item2])
+      const branch = createBranch('f1', [item1])
+      const tree = createTree([branch, item2])
 
       const result = moveNode(tree, {
         source: item1,
         target: item2,
         position: DropPosition.Before,
-        prevParent: folder,
+        prevParent: branch,
         nextParent: ROOT_NODE,
         prevIndex: 0,
         nextIndex: 1,
@@ -263,41 +263,41 @@ describe('moveNode', () => {
       expect(root.children.map((c) => c.id)).toEqual(['f1', '1', '2'])
     })
 
-    it('should move item between folders', () => {
+    it('should move item between branches', () => {
       const item1 = createItem('1')
       const item2 = createItem('2')
-      const folder1 = createFolder('f1', [item1])
-      const folder2 = createFolder('f2', [item2])
-      const tree = createTree([folder1, folder2])
+      const branch1 = createBranch('f1', [item1])
+      const branch2 = createBranch('f2', [item2])
+      const tree = createTree([branch1, branch2])
 
       const result = moveNode(tree, {
         source: item1,
-        target: folder2,
+        target: branch2,
         position: DropPosition.Inside,
-        prevParent: folder1,
-        nextParent: folder2,
+        prevParent: branch1,
+        nextParent: branch2,
         prevIndex: 0,
         nextIndex: 1,
       })
 
       const [root] = result
-      const updatedFolder1 = root.children[0] as FolderNode
-      const updatedFolder2 = root.children[1] as FolderNode
+      const updatedBranch1 = root.children[0] as BranchNode
+      const updatedBranch2 = root.children[1] as BranchNode
 
-      expect(updatedFolder1.children.length).toBe(0)
-      expect(updatedFolder2.children.map((c) => c.id)).toEqual(['2', '1'])
+      expect(updatedBranch1.children.length).toBe(0)
+      expect(updatedBranch2.children.map((c) => c.id)).toEqual(['2', '1'])
     })
   })
 
-  describe('moving folders', () => {
-    it('should move a folder with its children', () => {
+  describe('moving branches', () => {
+    it('should move a branch with its children', () => {
       const item1 = createItem('1')
-      const folder = createFolder('f1', [item1])
+      const branch = createBranch('f1', [item1])
       const item2 = createItem('2')
-      const tree = createTree([folder, item2])
+      const tree = createTree([branch, item2])
 
       const result = moveNode(tree, {
-        source: folder,
+        source: branch,
         target: item2,
         position: DropPosition.After,
         prevParent: ROOT_NODE,
@@ -309,9 +309,9 @@ describe('moveNode', () => {
       const [root] = result
       expect(root.children.map((c) => c.id)).toEqual(['2', 'f1'])
 
-      const movedFolder = root.children[1] as FolderNode
-      expect(movedFolder.children.length).toBe(1)
-      expect(movedFolder.children[0].id).toBe('1')
+      const movedBranch = root.children[1] as BranchNode
+      expect(movedBranch.children.length).toBe(1)
+      expect(movedBranch.children[0].id).toBe('1')
     })
   })
 })

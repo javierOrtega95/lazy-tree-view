@@ -5,15 +5,15 @@ import DropIndicator from '../drop-indicator/DropIndicator'
 import { useExpandTransition } from '../hooks/useExpandTransition/useExpandTransition'
 import useTreeNodeDragAndDrop from '../hooks/useTreeNodeDnD/useTreeNodeDnD'
 import type { TreeNodeProps } from '../types'
-import { isBaseNode, isFolderNode } from '../utils/validations'
+import { isBaseNode, isBranchNode } from '../utils/validations'
 import styles from './TreeNode.module.css'
 
 function TreeNode({
   node,
   depth,
-  folder: Folder,
+  branch: Branch,
   item: Item,
-  folderProps,
+  branchProps,
   itemProps,
   children,
   allowDragAndDrop,
@@ -27,8 +27,8 @@ function TreeNode({
 }: TreeNodeProps): JSX.Element {
   const nodeRef = useRef<HTMLLIElement>(null)
 
-  const isFolder = isFolderNode(node)
-  const isOpen = isFolder && (node.isOpen ?? false)
+  const isBranch = isBranchNode(node)
+  const isOpen = isBranch && (node.isOpen ?? false)
 
   const {
     dragPosition,
@@ -55,7 +55,7 @@ function TreeNode({
     nodeRef.current.focus()
   }, [isFocused])
 
-  const renderFolderContent = shouldRender && Array.isArray(children) && children.length > 0
+  const renderBranchContent = shouldRender && Array.isArray(children) && children.length > 0
 
   const { isDroppingBefore, isDroppingAfter } = useMemo(() => {
     if (!allowDragAndDrop || !dragPosition) {
@@ -121,10 +121,10 @@ function TreeNode({
       ref={nodeRef}
       id={node.id}
       data-testid={node.id}
-      data-type={isFolder ? 'folder' : 'item'}
+      data-type={isBranch ? 'branch' : 'item'}
       role='treeitem'
       tabIndex={isFocused ? 0 : -1}
-      aria-expanded={isFolder ? isOpen : undefined}
+      aria-expanded={isBranch ? isOpen : undefined}
       aria-level={depth + 1}
       draggable={allowDragAndDrop && !useDragHandle}
       className={`${styles.treeNode} ${DnDClassName}`}
@@ -139,9 +139,9 @@ function TreeNode({
         <DropIndicator id={`indicator-before-${node.id}`} className={indicatorClassName} />
       )}
 
-      {isFolder && (
-        <Folder
-          {...folderProps}
+      {isBranch && (
+        <Branch
+          {...branchProps}
           {...node}
           isOpen={isOpen}
           isLoading={node.isLoading ?? false}
@@ -160,7 +160,7 @@ function TreeNode({
         />
       )}
 
-      {isFolder && renderFolderContent && (
+      {isBranch && renderBranchContent && (
         <ul
           role='group'
           className={`${styles.treeGroup} ${transitionState === 'open' ? styles.open : ''}`}

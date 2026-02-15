@@ -8,7 +8,7 @@ import {
   type LazyTreeViewContextData,
 } from '../../context/LazyTreeViewContext'
 import useTreeNodeDnD from './useTreeNodeDnD'
-import { createFolder, createItem } from '../../../test/test-utils'
+import { createBranch, createItem } from '../../../test/test-utils'
 
 // Mock calculateDragPosition to avoid DOM dependencies
 vi.mock('../../utils/tree-operations', async () => {
@@ -165,8 +165,8 @@ describe('useTreeNodeDnD', () => {
       // Use different parents so the move is valid
       const source = createItem('source')
       const target = createItem('target')
-      const sourceParent = createFolder('sourceParent', [source])
-      const targetParent = createFolder('targetParent', [target])
+      const sourceParent = createBranch('sourceParent', [source])
+      const targetParent = createBranch('targetParent', [target])
 
       const nodeParents: NodeParents = {
         source: sourceParent,
@@ -203,7 +203,7 @@ describe('useTreeNodeDnD', () => {
 
     it('should not call onDrop when dragging onto itself', () => {
       const node = createItem('1')
-      const parent = createFolder('parent', [node])
+      const parent = createBranch('parent', [node])
 
       const nodeParents: NodeParents = {
         '1': parent,
@@ -245,18 +245,18 @@ describe('useTreeNodeDnD', () => {
   })
 
   describe('validation', () => {
-    it('should not allow dropping folder into its descendant', () => {
+    it('should not allow dropping branch into its descendant', () => {
       const child = createItem('child')
-      const folder = createFolder('folder', [child])
-      const parent = createFolder('parent', [folder])
+      const branch = createBranch('branch', [child])
+      const parent = createBranch('parent', [branch])
 
       const nodeParents: NodeParents = {
-        folder: parent,
-        child: folder,
+        branch: parent,
+        child: branch,
       }
 
       const contextValue = createContextValue({
-        draggingNode: folder,
+        draggingNode: branch,
         nodeParents,
         hoveredNodeId: 'child',
       })
@@ -276,8 +276,8 @@ describe('useTreeNodeDnD', () => {
       // Use different parents so the move passes internal validation
       const source = createItem('source')
       const target = createItem('target')
-      const sourceParent = createFolder('sourceParent', [source])
-      const targetParent = createFolder('targetParent', [target])
+      const sourceParent = createBranch('sourceParent', [source])
+      const targetParent = createBranch('targetParent', [target])
 
       const nodeParents: NodeParents = {
         source: sourceParent,

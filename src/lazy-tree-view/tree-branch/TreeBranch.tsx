@@ -1,9 +1,9 @@
 import { memo, type CSSProperties } from 'react'
-import type { FolderProps } from '../types'
+import type { BranchProps } from '../types'
 import { calculateIndentation } from '../utils/tree-operations'
-import styles from './TreeFolder.module.css'
+import styles from './TreeBranch.module.css'
 
-function TreeFolder({
+function TreeBranch({
   id,
   name,
   isOpen = false,
@@ -11,12 +11,12 @@ function TreeFolder({
   error,
   depth,
   onToggleOpen,
-}: FolderProps): JSX.Element {
+}: BranchProps): JSX.Element {
   return (
     <div
       id={id}
       data-testid={id}
-      className={styles.treeFolder}
+      className={styles.treeBranch}
       style={{ '--tree-item-indentation': `${calculateIndentation(depth)}px` } as CSSProperties}
       onClick={(event) => onToggleOpen(event)}
     >
@@ -50,4 +50,4 @@ function TreeFolder({
   )
 }
 
-export default memo(TreeFolder)
+export default memo(TreeBranch)

@@ -1,12 +1,12 @@
 import { type FC, type MouseEvent, type ReactNode, CSSProperties, DragEvent } from 'react'
 import { type DragClassNames, DropData, DropPosition, MoveData } from '../types/dnd'
-import type { BaseNode, FolderNode, LoadChildrenFn, NodeId, TreeNode } from '../types/tree'
+import type { BaseNode, BranchNode, LoadChildrenFn, NodeId, TreeNode } from '../types/tree'
 
 /**
  * Handle to interact with the LazyTreeView component imperatively
  */
 export type LazyTreeViewHandle = {
-  /** Add a node to a folder. Use `null` as parentId to add to root level. */
+  /** Add a node to a branch. Use `null` as parentId to add to root level. */
   addNode: (parentId: NodeId | null, node: TreeNode) => void
   /** Remove a node and all its children */
   removeNode: (nodeId: NodeId) => void
@@ -34,16 +34,16 @@ interface DragAndDropConfig {
 }
 
 interface CustomComponents {
-  folder: FC<FolderProps>
+  branch: FC<BranchProps>
   item: FC<BaseNodeProps>
-  folderProps?: Record<string, unknown>
+  branchProps?: Record<string, unknown>
   itemProps?: Record<string, unknown>
 }
 
 interface LoadCallbacks {
-  onLoadStart?: (folder: FolderNode) => void
-  onLoadSuccess?: (folder: FolderNode, children: TreeNode[]) => void
-  onLoadError?: (folder: FolderNode, error: unknown) => void
+  onLoadStart?: (branch: BranchNode) => void
+  onLoadSuccess?: (branch: BranchNode, children: TreeNode[]) => void
+  onLoadError?: (branch: BranchNode, error: unknown) => void
 }
 
 interface AnimationConfig {
@@ -56,7 +56,7 @@ export interface LazyTreeViewProps
   extends Partial<DragAndDropConfig>, Partial<CustomComponents>, LoadCallbacks, AnimationConfig {
   /** Initial tree data. Only read on mount — use the imperative API to update afterwards. */
   initialTree: TreeNode[]
-  /** Async function called to fetch children when a folder is expanded for the first time. */
+  /** Async function called to fetch children when a branch is expanded for the first time. */
   loadChildren: LoadChildrenFn
   /** CSS class name for the root `<ul>` element. */
   className?: string
@@ -73,7 +73,7 @@ export interface TreeNodeProps
   node: TreeNode
   depth: Depth
   children?: ReactNode
-  onToggleOpen: (folder: FolderNode) => void
+  onToggleOpen: (branch: BranchNode) => void
   onDrop: (data: MoveData) => void
 }
 
@@ -89,11 +89,11 @@ export type BaseNodeProps<T = object> = BaseNode<T> & {
   onDragStart?: OnDragStartFn
 }
 
-/** Props received by a custom folder renderer passed via the `folder` prop. */
-export type FolderProps<T = object> = FolderNode<T> & {
+/** Props received by a custom branch renderer passed via the `branch` prop. */
+export type BranchProps<T = object> = BranchNode<T> & {
   /** Nesting depth (0 = root level). Useful for indentation. */
   depth: Depth
-  /** Call this to toggle the folder's open/closed state. */
+  /** Call this to toggle the branch's open/closed state. */
   onToggleOpen: (event: MouseEvent<Element>) => void
   /** When `useDragHandle` is enabled, attach this handler to your drag handle element. */
   onDragStart?: OnDragStartFn

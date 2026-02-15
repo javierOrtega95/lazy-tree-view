@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { type FC, useState } from 'react'
 
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
-import type { BaseNodeProps, FolderProps } from '../../lazy-tree-view/types'
-import { isFolderNode } from '../../lazy-tree-view/utils/validations'
+import type { BaseNodeProps, BranchProps } from '../../lazy-tree-view/types'
+import { isBranchNode } from '../../lazy-tree-view/utils/validations'
 import type { DropData } from '../../types/dnd'
 import { DropPosition } from '../../types/dnd'
-import type { FolderNode } from '../../types/tree'
+import type { BranchNode } from '../../types/tree'
 import { ChevronRightIcon, LoaderIcon } from '../assets/icons/file-icons'
 import '../assets/styles/org-hierarchy.css'
 
@@ -171,12 +171,12 @@ type Selection = SelectedPerson | SelectedDept | null
 
 // ---- Custom Tree Components ----
 
-type OrgFolderExtra = {
+type OrgBranchExtra = {
   data?: DepartmentData
   onSelect?: (selection: Selection) => void
 }
 
-const OrgFolder: FC<FolderProps & OrgFolderExtra> = ({
+const OrgBranch: FC<BranchProps & OrgBranchExtra> = ({
   name,
   children,
   isOpen = false,
@@ -391,7 +391,7 @@ const DetailPanel: FC<{ selection: Selection }> = ({ selection }) => {
 
 function canDrop({ source, target, position, prevParent, nextParent }: DropData): boolean {
   // Folders (departments/teams) can't be moved
-  if (isFolderNode(source)) return false
+  if (isBranchNode(source)) return false
 
   const permission = (source as { data?: PersonData }).data?.permission
 
@@ -447,14 +447,14 @@ const OrgHierarchyDemo: FC<OrgHierarchyProps> = ({
           </div>
           <LazyTreeView
             initialTree={ORG_TREE}
-            loadChildren={(folder: FolderNode) => loadChildren(folder.name)}
-            folder={OrgFolder}
+            loadChildren={(branch: BranchNode) => loadChildren(branch.name)}
+            branch={OrgBranch}
             item={OrgItem}
             allowDragAndDrop={allowDragAndDrop}
             canDrop={canDrop}
             disableAnimations={disableAnimations}
             animationDuration={animationDuration}
-            folderProps={{ onSelect: setSelection }}
+            branchProps={{ onSelect: setSelection }}
             itemProps={{ onSelect: setSelection }}
             dragClassNames={{
               dragOver: 'org-drag-over',
@@ -523,11 +523,11 @@ type Story = StoryObj<typeof OrgHierarchyDemo>
 
 const SOURCE_CODE = `
 import LazyTreeView from 'lazy-tree-view'
-import { isFolderNode } from 'lazy-tree-view/utils'
+import { isBranchNode } from 'lazy-tree-view/utils'
 
 // Permission-based drop rules
 function canDrop({ source, target, position, prevParent, nextParent }) {
-  if (isFolderNode(source)) return false        // departments can't be dragged
+  if (isBranchNode(source)) return false        // departments can't be dragged
 
   const { permission } = source.data
   const targetIsHR = target.id === 'dept-hr' || nextParent?.id === 'dept-hr'
@@ -544,7 +544,7 @@ function canDrop({ source, target, position, prevParent, nextParent }) {
 <LazyTreeView
   initialTree={orgTree}
   loadChildren={(folder) => fetchTeamMembers(folder.name)}
-  folder={DeptFolder}
+  branch={DeptBranch}
   item={EmployeeItem}
   allowDragAndDrop
   canDrop={canDrop}

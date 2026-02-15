@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from 'react'
 import { DropPosition, type MoveData } from '../types/dnd'
 import type {
-  FolderNode,
+  BranchNode,
   NodeId,
   NodeIndex,
   NodeParents,
@@ -11,7 +11,7 @@ import type {
 import { ROOT_NODE } from './constants'
 import { LazyTreeViewContext } from './context/LazyTreeViewContext'
 import styles from './LazyTreeView.module.css'
-import { default as DefaultFolder } from './tree-folder/TreeFolder'
+import { default as DefaultBranch } from './tree-branch/TreeBranch'
 import { default as DefaultItem } from './tree-item/TreeItem'
 import TreeNode from './tree-node/TreeNode'
 import type { LazyTreeViewHandle, LazyTreeViewProps, TreeNodeProps } from './types'
@@ -19,14 +19,14 @@ import { useKeyboardNavigation } from './hooks/useKeyboardNavigation/useKeyboard
 import {
   addNode as addNodeToTree,
   calculateMoveIndices,
-  isDroppingInsideFolder,
+  isDroppingInsideBranch,
   moveNode,
   normalizeNewParent,
   removeFromContainer,
   updateNode as updateNodeInTree,
 } from './utils/tree-operations'
 import { createNodeIndex, editRecursive, indexNodeParents } from './utils/tree-recursive'
-import { isFolderNode } from './utils/validations'
+import { isBranchNode } from './utils/validations'
 
 /**
  * A tree view component with lazy-loaded children, drag-and-drop, keyboard
@@ -39,9 +39,9 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
   {
     initialTree,
     loadChildren,
-    folder = DefaultFolder,
+    branch = DefaultBranch,
     item = DefaultItem,
-    folderProps = {},
+    branchProps = {},
     itemProps = {},
     allowDragAndDrop = true,
     useDragHandle = false,
@@ -119,8 +119,8 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
 
         if (!source || !target) return
 
-        const nextParent = isDroppingInsideFolder(target.node, position)
-          ? (target.node as FolderNode)
+        const nextParent = isDroppingInsideBranch(target.node, position)
+          ? (target.node as BranchNode)
           : target.parent
 
         const { prevIndex, nextIndex } = calculateMoveIndices({
@@ -155,11 +155,11 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
     [nodeIndex, nodeParents, tree, updateTree],
   )
 
-  async function handleToggleOpen(folder: FolderNode) {
+  async function handleToggleOpen(branch: BranchNode) {
     // if currently open, close it
-    if (folder.isOpen) {
+    if (branch.isOpen) {
       updateTree((prev) => {
-        const newTree = editRecursive(prev, { ...folder, isOpen: false })
+        const newTree = editRecursive(prev, { ...branch, isOpen: false })
 
         return newTree
       })
@@ -168,20 +168,20 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
     }
 
     // if currently closed and doesn't have children loaded, load them
-    if (!folder.isOpen && !folder.hasFetched) {
+    if (!branch.isOpen && !branch.hasFetched) {
       updateTree((prev) => {
-        const newTree = editRecursive(prev, { ...folder, isLoading: true, error: undefined })
+        const newTree = editRecursive(prev, { ...branch, isLoading: true, error: undefined })
 
         return newTree
       })
 
       try {
-        onLoadStart?.(folder)
+        onLoadStart?.(branch)
 
-        const children = await loadChildren(folder)
+        const children = await loadChildren(branch)
 
-        const newFolder: FolderNode = {
-          ...folder,
+        const newBranch: BranchNode = {
+          ...branch,
           isOpen: true,
           isLoading: false,
           hasFetched: true,
@@ -189,18 +189,18 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
           children,
         }
 
-        onLoadSuccess?.(newFolder, children)
+        onLoadSuccess?.(newBranch, children)
 
         updateTree((prev) => {
-          const newTree = editRecursive(prev, newFolder)
+          const newTree = editRecursive(prev, newBranch)
 
           return newTree
         })
       } catch (error) {
-        onLoadError?.(folder, error)
+        onLoadError?.(branch, error)
 
         updateTree((prev) => {
-          const newTree = editRecursive(prev, { ...folder, isLoading: false, error })
+          const newTree = editRecursive(prev, { ...branch, isLoading: false, error })
 
           return newTree
         })
@@ -211,7 +211,7 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
 
     // if currently closed and has children loaded, just open it
     updateTree((prev) => {
-      const newTree = editRecursive(prev, { ...folder, isOpen: true })
+      const newTree = editRecursive(prev, { ...branch, isOpen: true })
 
       return newTree
     })
@@ -239,9 +239,9 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
       node,
       depth,
       item,
-      folder,
+      branch,
       itemProps,
-      folderProps,
+      branchProps,
       allowDragAndDrop,
       useDragHandle,
       dragClassNames,
@@ -252,7 +252,7 @@ const LazyTreeView = forwardRef<LazyTreeViewHandle, LazyTreeViewProps>(function 
       onToggleOpen: handleToggleOpen,
     }
 
-    if (!isFolderNode(node)) return <TreeNode key={node.id} {...commonProps} />
+    if (!isBranchNode(node)) return <TreeNode key={node.id} {...commonProps} />
 
     return (
       <TreeNode key={node.id} {...commonProps}>

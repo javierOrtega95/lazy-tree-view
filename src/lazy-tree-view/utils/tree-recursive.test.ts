@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createFolder, createItem, createTree } from '../../test/test-utils'
-import type { FolderNode, TreeNode } from '../../types/tree'
+import { createBranch, createItem, createTree } from '../../test/test-utils'
+import type { BranchNode, TreeNode } from '../../types/tree'
 import { ROOT_NODE } from '../constants'
 import {
   createNodeIndex,
@@ -34,7 +34,7 @@ describe('recursiveTreeMap', () => {
 
   it('should apply function recursively to nested nodes', () => {
     const tree = createTree([
-      createFolder('f1', [createItem('1'), createItem('2')]),
+      createBranch('f1', [createItem('1'), createItem('2')]),
       createItem('3'),
     ])
 
@@ -44,17 +44,17 @@ describe('recursiveTreeMap', () => {
     }))
 
     const [root] = result
-    const [folder1, item3] = root.children
+    const [branch1, item3] = root.children
 
-    expect(folder1.name).toBe('modified-Folder f1')
-    expect((folder1 as FolderNode).children[0].name).toBe('modified-Item 1')
-    expect((folder1 as FolderNode).children[1].name).toBe('modified-Item 2')
+    expect(branch1.name).toBe('modified-Branch f1')
+    expect((branch1 as BranchNode).children[0].name).toBe('modified-Item 1')
+    expect((branch1 as BranchNode).children[1].name).toBe('modified-Item 2')
     expect(item3.name).toBe('modified-Item 3')
   })
 
   it('should handle deeply nested structures', () => {
     const tree = createTree([
-      createFolder('f1', [createFolder('f2', [createFolder('f3', [createItem('deep')])])]),
+      createBranch('f1', [createBranch('f2', [createBranch('f3', [createItem('deep')])])]),
     ])
 
     const visitedIds: string[] = []
@@ -82,13 +82,13 @@ describe('editRecursive', () => {
   })
 
   it('should edit a nested node', () => {
-    const tree = createTree([createFolder('f1', [createItem('1'), createItem('2')])])
+    const tree = createTree([createBranch('f1', [createItem('1'), createItem('2')])])
 
     const result = editRecursive(tree, { id: '2', name: 'Updated Nested' })
     const [root] = result
-    const [folder] = root.children
+    const [branch] = root.children
 
-    expect((folder as FolderNode).children[1].name).toBe('Updated Nested')
+    expect((branch as BranchNode).children[1].name).toBe('Updated Nested')
   })
 
   it('should merge properties when editing', () => {
@@ -149,8 +149,8 @@ describe('indexNodeParents', () => {
   })
 
   it('should index nested children with their direct parent', () => {
-    const folder = createFolder('f1', [createItem('1'), createItem('2')])
-    const tree = createTree([folder])
+    const branch = createBranch('f1', [createItem('1'), createItem('2')])
+    const tree = createTree([branch])
 
     const result = indexNodeParents(tree)
 
@@ -160,7 +160,7 @@ describe('indexNodeParents', () => {
   })
 
   it('should handle deeply nested structures', () => {
-    const tree = createTree([createFolder('f1', [createFolder('f2', [createItem('deep')])])])
+    const tree = createTree([createBranch('f1', [createBranch('f2', [createItem('deep')])])])
 
     const result = indexNodeParents(tree)
 
@@ -202,7 +202,7 @@ describe('createNodeIndex', () => {
 
   it('should index nested nodes correctly', () => {
     const tree = createTree([
-      createFolder('f1', [createItem('a'), createItem('b')]),
+      createBranch('f1', [createItem('a'), createItem('b')]),
       createItem('c'),
     ])
 

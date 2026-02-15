@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { type FC, useCallback, useState } from 'react'
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
 import type { TreeNode } from '../../types/tree'
-import type { FolderNode } from '../../types/tree'
+import type { BranchNode } from '../../types/tree'
 import { generateUUID } from '../../lazy-tree-view/utils/uuid'
 
 // ---- Demo data ----
@@ -25,7 +25,7 @@ const SUCCESS_CHILDREN: TreeNode[] = [
 type LogEntry = {
   id: number
   type: 'start' | 'success' | 'error'
-  folder: string
+  branch: string
   message: string
 }
 
@@ -41,12 +41,12 @@ const LazyLoadingDemo: FC<LazyLoadingProps> = ({
   const [logs, setLogs] = useState<LogEntry[]>([])
   let logId = 0
 
-  const addLog = useCallback((type: LogEntry['type'], folder: string, message: string) => {
-    setLogs((prev) => [...prev.slice(-9), { id: ++logId, type, folder, message }])
+  const addLog = useCallback((type: LogEntry['type'], branch: string, message: string) => {
+    setLogs((prev) => [...prev.slice(-9), { id: ++logId, type, branch, message }])
   }, [])
 
-  const loadChildren = useCallback(async (folder: FolderNode): Promise<TreeNode[]> => {
-    switch (folder.name) {
+  const loadChildren = useCallback(async (branch: BranchNode): Promise<TreeNode[]> => {
+    switch (branch.name) {
       case 'Always succeeds': {
         await new Promise((r) => setTimeout(r, 800))
         return SUCCESS_CHILDREN.map((c) => ({ ...c, id: generateUUID() }))
@@ -80,11 +80,11 @@ const LazyLoadingDemo: FC<LazyLoadingProps> = ({
         disableAnimations={disableAnimations}
         animationDuration={animationDuration}
         allowDragAndDrop={false}
-        onLoadStart={(folder) => addLog('start', folder.name, 'Loading...')}
-        onLoadSuccess={(folder, children) =>
-          addLog('success', folder.name, `Loaded ${children.length} items`)
+        onLoadStart={(branch) => addLog('start', branch.name, 'Loading...')}
+        onLoadSuccess={(branch, children) =>
+          addLog('success', branch.name, `Loaded ${children.length} items`)
         }
-        onLoadError={(folder, error) => addLog('error', folder.name, (error as Error).message)}
+        onLoadError={(branch, error) => addLog('error', branch.name, (error as Error).message)}
         style={{ minWidth: 260 }}
       />
 
@@ -107,7 +107,7 @@ const LazyLoadingDemo: FC<LazyLoadingProps> = ({
           Callback Log
         </div>
         {logs.length === 0 && (
-          <div style={{ color: '#8b949e' }}>Expand a folder to see callbacks...</div>
+          <div style={{ color: '#8b949e' }}>Expand a branch to see callbacks...</div>
         )}
         {logs.map((log) => (
           <div
@@ -118,7 +118,7 @@ const LazyLoadingDemo: FC<LazyLoadingProps> = ({
                 log.type === 'error' ? '#d1242f' : log.type === 'success' ? '#1a7f37' : '#656d76',
             }}
           >
-            <span style={{ opacity: 0.6 }}>[{log.type}]</span> {log.folder}: {log.message}
+            <span style={{ opacity: 0.6 }}>[{log.type}]</span> {log.branch}: {log.message}
           </div>
         ))}
       </div>
@@ -131,8 +131,8 @@ const LazyLoadingDemo: FC<LazyLoadingProps> = ({
 const SOURCE_CODE = `
 import LazyTreeView from 'lazy-tree-view'
 
-async function loadChildren(folder) {
-  const res = await fetch(\`/api/folders/\${folder.id}/children\`)
+async function loadChildren(branch) {
+  const res = await fetch(\`/api/branches/\${branch.id}/children\`)
   if (!res.ok) throw new Error('Failed to load')
   return res.json()
 }
@@ -140,9 +140,9 @@ async function loadChildren(folder) {
 <LazyTreeView
   initialTree={tree}
   loadChildren={loadChildren}
-  onLoadStart={(folder) => console.log('Loading:', folder.name)}
-  onLoadSuccess={(folder, children) => console.log('Loaded:', children.length)}
-  onLoadError={(folder, error) => console.error('Error:', error.message)}
+  onLoadStart={(branch) => console.log('Loading:', branch.name)}
+  onLoadSuccess={(branch, children) => console.log('Loaded:', children.length)}
+  onLoadError={(branch, error) => console.error('Error:', error.message)}
 />
 `.trim()
 
@@ -153,7 +153,7 @@ const meta: Meta<typeof LazyLoadingDemo> = {
     docs: {
       description: {
         component:
-          'Demonstrates the full lazy loading lifecycle: loading spinner, success, and error states with retry. Each folder simulates a different scenario. The callback log on the right shows `onLoadStart`, `onLoadSuccess`, and `onLoadError` events in real time.',
+          'Demonstrates the full lazy loading lifecycle: loading spinner, success, and error states with retry. Each branch simulates a different scenario. The callback log on the right shows `onLoadStart`, `onLoadSuccess`, and `onLoadError` events in real time.',
       },
     },
   },

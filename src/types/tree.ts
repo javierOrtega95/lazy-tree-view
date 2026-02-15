@@ -4,20 +4,20 @@ export type NodeId = string
 /** Base node with an id, name, and optional custom data via generic. */
 export type BaseNode<T = object> = { id: NodeId; name: string } & T
 
-/** A folder node that can contain children and tracks its expand/load state. */
-export type FolderNode<T = object> = BaseNode & {
+/** A branch node that can contain children and tracks its expand/load state. */
+export type BranchNode<T = object> = BaseNode & {
   children: TreeNode<T>[]
 } & T &
-  FolderState
+  BranchState
 
-/** A tree node — either a leaf (`BaseNode`) or a folder (`FolderNode`). */
-export type TreeNode<T = object> = BaseNode<T> | FolderNode<T>
+/** A tree node — either a leaf (`BaseNode`) or a branch (`BranchNode`). */
+export type TreeNode<T = object> = BaseNode<T> | BranchNode<T>
 
-export type TreeWithRoot = [root: FolderNode, ...children: TreeNode[]]
+export type TreeWithRoot = [root: BranchNode, ...children: TreeNode[]]
 
-/** Internal state tracked for each folder node. */
-export type FolderState = {
-  /** Whether the folder is currently expanded. */
+/** Internal state tracked for each branch node. */
+export type BranchState = {
+  /** Whether the branch is currently expanded. */
   isOpen?: boolean
   /** Whether children are being loaded asynchronously. */
   isLoading?: boolean
@@ -27,14 +27,14 @@ export type FolderState = {
   error?: unknown
 }
 
-/** Async function that fetches and returns the children of a folder. */
-export type LoadChildrenFn = (folder: FolderNode) => Promise<TreeNode[]>
+/** Async function that fetches and returns the children of a branch. */
+export type LoadChildrenFn = (branch: BranchNode) => Promise<TreeNode[]>
 
-export type NodeParents = Record<NodeId, FolderNode>
+export type NodeParents = Record<NodeId, BranchNode>
 
 export type NodeIndexEntry = {
   node: TreeNode
-  parent: FolderNode
+  parent: BranchNode
   siblingIndex: number
 }
 

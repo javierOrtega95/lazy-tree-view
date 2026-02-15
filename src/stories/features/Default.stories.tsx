@@ -83,9 +83,9 @@ const LAZY_CHILDREN: Record<string, TreeNode[]> = {
   ],
 }
 
-async function loadChildren(folder: { name: string }): Promise<TreeNode[]> {
+async function loadChildren(branch: { name: string }): Promise<TreeNode[]> {
   await new Promise((resolve) => setTimeout(resolve, 600 + Math.random() * 400))
-  return LAZY_CHILDREN[folder.name] ?? []
+  return LAZY_CHILDREN[branch.name] ?? []
 }
 
 const meta: Meta<typeof LazyTreeView> = {
@@ -113,7 +113,7 @@ const meta: Meta<typeof LazyTreeView> = {
       table: { category: 'Required' },
     },
     loadChildren: {
-      description: 'Async function called when a folder without children is expanded.',
+      description: 'Async function called when a branch without children is expanded.',
       control: false,
       table: { category: 'Required' },
     },
@@ -155,8 +155,8 @@ const meta: Meta<typeof LazyTreeView> = {
     },
 
     // Custom Components
-    folder: {
-      description: 'Custom React component to render folder nodes.',
+    branch: {
+      description: 'Custom React component to render branch nodes.',
       control: false,
       table: { category: 'Custom Components' },
     },
@@ -165,8 +165,8 @@ const meta: Meta<typeof LazyTreeView> = {
       control: false,
       table: { category: 'Custom Components' },
     },
-    folderProps: {
-      description: 'Additional props passed to every folder component instance.',
+    branchProps: {
+      description: 'Additional props passed to every branch component instance.',
       control: 'object',
       table: { category: 'Custom Components' },
     },
@@ -186,7 +186,7 @@ const meta: Meta<typeof LazyTreeView> = {
       table: { category: 'Callbacks' },
     },
     onLoadStart: {
-      description: 'Called when a folder starts loading its children.',
+      description: 'Called when a branch starts loading its children.',
       table: { category: 'Callbacks' },
     },
     onLoadSuccess: {

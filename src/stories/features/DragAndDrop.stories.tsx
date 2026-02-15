@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { type FC, useCallback, useState } from 'react'
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
 import type { TreeNode } from '../../types/tree'
-import { isFolderNode } from '../../lazy-tree-view/utils/validations'
+import { isBranchNode } from '../../lazy-tree-view/utils/validations'
 import type { DropData } from '../../types/dnd'
 
 // ---- Demo data ----
@@ -93,7 +93,7 @@ const DragAndDropDemo: FC<DragAndDropProps> = ({
         disableAnimations={disableAnimations}
         animationDuration={animationDuration}
         canDrop={({ source, target, nextParent }) => {
-          if (isFolderNode(source) && target.id === source.id) return false
+          if (isBranchNode(source) && target.id === source.id) return false
           if (target.id === 'folder-locked' || nextParent?.id === 'folder-locked') return false
           return true
         }}
@@ -137,15 +137,15 @@ const DragAndDropDemo: FC<DragAndDropProps> = ({
 
 const SOURCE_CODE = `
 import LazyTreeView from 'lazy-tree-view'
-import { isFolderNode } from 'lazy-tree-view/utils'
+import { isBranchNode } from 'lazy-tree-view/utils'
 
 <LazyTreeView
   initialTree={tree}
   loadChildren={loadChildren}
   allowDragAndDrop
   canDrop={({ source, target, nextParent }) => {
-    // Prevent dropping a folder inside itself
-    if (isFolderNode(source) && target.id === source.id) return false
+    // Prevent dropping a branch inside itself
+    if (isBranchNode(source) && target.id === source.id) return false
     // Prevent dropping into or between items of locked folders
     if (target.id === 'folder-locked' || nextParent?.id === 'folder-locked') return false
     return true
@@ -166,10 +166,10 @@ const meta: Meta<typeof DragAndDropDemo> = {
           'Demonstrates all drag & drop features:',
           '',
           '- **Drop positions**: before, inside, and after any node',
-          '- **Validation via `canDrop`**: the "Locked (no drop)" folder blocks drops on it and between its children (uses `nextParent`), and folders cannot be dropped inside themselves',
+          '- **Validation via `canDrop`**: the "Locked (no drop)" folder blocks drops on it and between its children (uses `nextParent`), and branches cannot be dropped inside themselves',
           '- **`onDrop` callback**: the log panel shows every drop event with source, target, and position',
           '',
-          'Try dragging nodes between folders, reordering items, and dropping onto the locked folder to see the validation in action.',
+          'Try dragging nodes between branches, reordering items, and dropping onto the locked folder to see the validation in action.',
         ].join('\n'),
       },
     },

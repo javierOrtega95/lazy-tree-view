@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { KeyboardEvent } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createFolder, createItem, createTree } from '../../../test/test-utils'
+import { createBranch, createItem, createTree } from '../../../test/test-utils'
 import { createNodeIndex } from '../../utils/tree-recursive'
 import { useKeyboardNavigation } from './useKeyboardNavigation'
 
@@ -68,8 +68,8 @@ describe('useKeyboardNavigation', () => {
       expect(setFocusedNodeId).toHaveBeenCalledWith('2')
     })
 
-    it('should navigate into open folder', () => {
-      const tree = createTree([createFolder('f1', [createItem('child')], { isOpen: true })])
+    it('should navigate into open branch', () => {
+      const tree = createTree([createBranch('f1', [createItem('child')], { isOpen: true })])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -89,9 +89,9 @@ describe('useKeyboardNavigation', () => {
       expect(setFocusedNodeId).toHaveBeenCalledWith('child')
     })
 
-    it('should skip closed folder children', () => {
+    it('should skip closed branch children', () => {
       const tree = createTree([
-        createFolder('f1', [createItem('child')], { isOpen: false }),
+        createBranch('f1', [createItem('child')], { isOpen: false }),
         createItem('2'),
       ])
 
@@ -138,7 +138,7 @@ describe('useKeyboardNavigation', () => {
     })
 
     it('should navigate to parent when no previous sibling', () => {
-      const tree = createTree([createFolder('f1', [createItem('child')], { isOpen: true })])
+      const tree = createTree([createBranch('f1', [createItem('child')], { isOpen: true })])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -160,7 +160,7 @@ describe('useKeyboardNavigation', () => {
 
     it('should navigate to last visible descendant of previous sibling', () => {
       const tree = createTree([
-        createFolder('f1', [createItem('deep')], { isOpen: true }),
+        createBranch('f1', [createItem('deep')], { isOpen: true }),
         createItem('2'),
       ])
 
@@ -185,9 +185,9 @@ describe('useKeyboardNavigation', () => {
   })
 
   describe('ArrowRight navigation', () => {
-    it('should expand closed folder', () => {
-      const folder = createFolder('f1', [createItem('child')], { isOpen: false })
-      const tree = createTree([folder])
+    it('should expand closed branch', () => {
+      const branch = createBranch('f1', [createItem('child')], { isOpen: false })
+      const tree = createTree([branch])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -207,8 +207,8 @@ describe('useKeyboardNavigation', () => {
       expect(onToggleOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'f1' }))
     })
 
-    it('should navigate to first child when folder is already open', () => {
-      const tree = createTree([createFolder('f1', [createItem('child')], { isOpen: true })])
+    it('should navigate to first child when branch is already open', () => {
+      const tree = createTree([createBranch('f1', [createItem('child')], { isOpen: true })])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -252,9 +252,9 @@ describe('useKeyboardNavigation', () => {
   })
 
   describe('ArrowLeft navigation', () => {
-    it('should collapse open folder', () => {
-      const folder = createFolder('f1', [createItem('child')], { isOpen: true })
-      const tree = createTree([folder])
+    it('should collapse open branch', () => {
+      const branch = createBranch('f1', [createItem('child')], { isOpen: true })
+      const tree = createTree([branch])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -274,8 +274,8 @@ describe('useKeyboardNavigation', () => {
       expect(onToggleOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'f1' }))
     })
 
-    it('should navigate to parent when on closed folder or item', () => {
-      const tree = createTree([createFolder('f1', [createItem('child')], { isOpen: true })])
+    it('should navigate to parent when on closed branch or item', () => {
+      const tree = createTree([createBranch('f1', [createItem('child')], { isOpen: true })])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -344,7 +344,7 @@ describe('useKeyboardNavigation', () => {
     it('should navigate to last visible descendant of last node', () => {
       const tree = createTree([
         createItem('1'),
-        createFolder('f1', [createItem('deep')], { isOpen: true }),
+        createBranch('f1', [createItem('deep')], { isOpen: true }),
       ])
       const nodeIndex = createNodeIndex(tree)
 
@@ -367,9 +367,9 @@ describe('useKeyboardNavigation', () => {
   })
 
   describe('Enter and Space keys', () => {
-    it('should toggle folder on Enter', () => {
-      const folder = createFolder('f1', [createItem('child')], { isOpen: false })
-      const tree = createTree([folder])
+    it('should toggle branch on Enter', () => {
+      const branch = createBranch('f1', [createItem('child')], { isOpen: false })
+      const tree = createTree([branch])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -389,9 +389,9 @@ describe('useKeyboardNavigation', () => {
       expect(onToggleOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'f1' }))
     })
 
-    it('should toggle folder on Space', () => {
-      const folder = createFolder('f1', [createItem('child')], { isOpen: true })
-      const tree = createTree([folder])
+    it('should toggle branch on Space', () => {
+      const branch = createBranch('f1', [createItem('child')], { isOpen: true })
+      const tree = createTree([branch])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>
@@ -434,9 +434,9 @@ describe('useKeyboardNavigation', () => {
   })
 
   describe('loading state', () => {
-    it('should not toggle loading folder on ArrowRight', () => {
-      const folder = createFolder('f1', [], { isOpen: false, isLoading: true })
-      const tree = createTree([folder])
+    it('should not toggle loading branch on ArrowRight', () => {
+      const branch = createBranch('f1', [], { isOpen: false, isLoading: true })
+      const tree = createTree([branch])
       const nodeIndex = createNodeIndex(tree)
 
       const { result } = renderHook(() =>

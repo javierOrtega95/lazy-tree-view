@@ -1,5 +1,5 @@
-import { FolderNode, NodeIndex, NodeParents, TreeNode, TreeWithRoot } from '../../types/tree'
-import { isFolderNode } from './validations'
+import { BranchNode, NodeIndex, NodeParents, TreeNode, TreeWithRoot } from '../../types/tree'
+import { isBranchNode } from './validations'
 
 export function recursiveTreeMap(
   tree: TreeWithRoot,
@@ -25,7 +25,7 @@ function processChildren(children: TreeNode[], fn: (item: TreeNode) => TreeNode)
   return children.map((item) => {
     const newNode = fn({ ...item })
 
-    if (isFolderNode(newNode) && newNode.children.length > 0) {
+    if (isBranchNode(newNode) && newNode.children.length > 0) {
       newNode.children = processChildren(newNode.children, fn)
     }
 
@@ -49,11 +49,11 @@ export function indexNodeParents(tree: TreeWithRoot): NodeParents {
 
   initializeNodeParents(root.children, root)
 
-  function initializeNodeParents(nodes: TreeNode[], parent: FolderNode) {
+  function initializeNodeParents(nodes: TreeNode[], parent: BranchNode) {
     for (const node of nodes) {
       nodeParents[node.id] = parent
 
-      if (isFolderNode(node) && node.children.length > 0) {
+      if (isBranchNode(node) && node.children.length > 0) {
         initializeNodeParents(node.children, node)
       }
     }
@@ -68,7 +68,7 @@ export function createNodeIndex(tree: TreeWithRoot): NodeIndex {
 
   indexNodes(root.children, root)
 
-  function indexNodes(nodes: TreeNode[], parent: FolderNode) {
+  function indexNodes(nodes: TreeNode[], parent: BranchNode) {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i]
 
@@ -78,7 +78,7 @@ export function createNodeIndex(tree: TreeWithRoot): NodeIndex {
         siblingIndex: i,
       }
 
-      if (isFolderNode(node) && node.children.length > 0) {
+      if (isBranchNode(node) && node.children.length > 0) {
         indexNodes(node.children, node)
       }
     }

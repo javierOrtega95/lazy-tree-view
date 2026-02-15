@@ -1,6 +1,6 @@
 import { KeyboardEvent, useCallback } from 'react'
-import type { FolderNode, NodeId, TreeNode } from '../../../types/tree'
-import { isFolderNode } from '../../utils/validations'
+import type { BranchNode, NodeId, TreeNode } from '../../../types/tree'
+import { isBranchNode } from '../../utils/validations'
 import type { UseKeyboardNavigationOptions, UseKeyboardNavigationResult } from './types'
 
 export function useKeyboardNavigation({
@@ -50,7 +50,7 @@ export function useKeyboardNavigation({
   )
 
   const getLastVisibleDescendant = useCallback((node: TreeNode): TreeNode => {
-    if (!isFolderNode(node) || !node.isOpen || node.children.length === 0) {
+    if (!isBranchNode(node) || !node.isOpen || node.children.length === 0) {
       return node
     }
 
@@ -60,7 +60,7 @@ export function useKeyboardNavigation({
   }, [])
 
   const getVisibleParent = useCallback(
-    (nodeId: NodeId): FolderNode | null => {
+    (nodeId: NodeId): BranchNode | null => {
       const entry = nodeIndex[nodeId]
 
       if (!entry) return null
@@ -78,8 +78,8 @@ export function useKeyboardNavigation({
     const currentNode = getCurrentNode()
     if (!currentNode) return
 
-    // If open folder with children → first child
-    if (isFolderNode(currentNode) && currentNode.isOpen && currentNode.children.length > 0) {
+    // If open branch with children → first child
+    if (isBranchNode(currentNode) && currentNode.isOpen && currentNode.children.length > 0) {
       setFocusedNodeId(currentNode.children[0].id)
       return
     }
@@ -128,7 +128,7 @@ export function useKeyboardNavigation({
 
   const expandOrNavigateToChild = useCallback(() => {
     const currentNode = getCurrentNode()
-    if (!currentNode || !isFolderNode(currentNode)) return
+    if (!currentNode || !isBranchNode(currentNode)) return
     if (currentNode.isLoading) return
 
     if (!currentNode.isOpen) {
@@ -145,9 +145,9 @@ export function useKeyboardNavigation({
     const currentNode = getCurrentNode()
     if (!currentNode) return
 
-    if (isFolderNode(currentNode) && currentNode.isLoading) return
+    if (isBranchNode(currentNode) && currentNode.isLoading) return
 
-    if (isFolderNode(currentNode) && currentNode.isOpen) {
+    if (isBranchNode(currentNode) && currentNode.isOpen) {
       onToggleOpen(currentNode)
 
       return
@@ -180,7 +180,7 @@ export function useKeyboardNavigation({
   const toggleCurrentNode = useCallback(() => {
     const currentNode = getCurrentNode()
 
-    if (!currentNode || !isFolderNode(currentNode)) return
+    if (!currentNode || !isBranchNode(currentNode)) return
 
     if (currentNode.isLoading) return
 

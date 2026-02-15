@@ -81,9 +81,9 @@ const LAZY_CHILDREN: Record<string, TreeNode[]> = {
   ],
 }
 
-async function loadChildren(folder: { name: string }): Promise<TreeNode[]> {
+async function loadChildren(branch: { name: string }): Promise<TreeNode[]> {
   await new Promise((resolve) => setTimeout(resolve, 600 + Math.random() * 400))
-  return LAZY_CHILDREN[folder.name] ?? []
+  return LAZY_CHILDREN[branch.name] ?? []
 }
 
 // ---- Preset trees for setTree demo ----

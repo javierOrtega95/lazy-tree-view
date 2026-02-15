@@ -6,9 +6,9 @@ import type { CanDropFn } from '../../types'
 import {
   calculateDragPosition,
   calculateMoveIndices,
-  isDroppingInsideFolder,
+  isDroppingInsideBranch,
 } from '../../utils/tree-operations'
-import { isFolderNode, isMovingFolderIntoDescendant } from '../../utils/validations'
+import { isBranchNode, isMovingBranchIntoDescendant } from '../../utils/validations'
 import type { TreeNodeDnDReturn } from './types'
 
 export default function useTreeNodeDnD(
@@ -41,8 +41,8 @@ export default function useTreeNodeDnD(
     (source: TreeNode, target: TreeNode, position: DropPosition): MoveData => {
       const prevParent = nodeParents[source.id]
 
-      const droppingInsideFolder = isFolderNode(target) && position === DropPosition.Inside
-      const nextParent = droppingInsideFolder ? target : nodeParents[target.id]
+      const droppingInsideBranch = isBranchNode(target) && position === DropPosition.Inside
+      const nextParent = droppingInsideBranch ? target : nodeParents[target.id]
 
       const { prevIndex, nextIndex } = calculateMoveIndices({
         source,
@@ -66,16 +66,16 @@ export default function useTreeNodeDnD(
       const isDroppingIntoSameParent = prevParent.id === nextParent.id
 
       if (isDroppingIntoSameParent) {
-        if (isDroppingInsideFolder(target, position) && isDroppingIntoSameParent) return false
+        if (isDroppingInsideBranch(target, position) && isDroppingIntoSameParent) return false
 
         // If moving within the same parent, check if indices are the same
         if (prevIndex === nextIndex) return false
       }
 
-      const isFolderIntoDescendant =
-        isFolderNode(source) && isMovingFolderIntoDescendant(source, target, nodeParents)
+      const isBranchIntoDescendant =
+        isBranchNode(source) && isMovingBranchIntoDescendant(source, target, nodeParents)
 
-      if (isFolderIntoDescendant) return false
+      if (isBranchIntoDescendant) return false
 
       return canDrop(moveData)
     },

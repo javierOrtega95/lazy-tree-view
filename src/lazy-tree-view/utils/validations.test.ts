@@ -1,28 +1,28 @@
 import { describe, it, expect } from 'vitest'
-import { isFolderNode, isBaseNode, isMovingFolderIntoDescendant } from './validations'
-import type { FolderNode, TreeNode, NodeParents } from '../../types/tree'
+import { isBranchNode, isBaseNode, isMovingBranchIntoDescendant } from './validations'
+import type { BranchNode, TreeNode, NodeParents } from '../../types/tree'
 
-describe('isFolderNode', () => {
+describe('isBranchNode', () => {
   it('should return true for a node with children property', () => {
-    const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
+    const branch: BranchNode = { id: '1', name: 'Branch', children: [] }
 
-    expect(isFolderNode(folder)).toBe(true)
+    expect(isBranchNode(branch)).toBe(true)
   })
 
-  it('should return true for a folder with nested children', () => {
-    const folder: FolderNode = {
+  it('should return true for a branch with nested children', () => {
+    const branch: BranchNode = {
       id: '1',
-      name: 'Folder',
+      name: 'Branch',
       children: [{ id: '2', name: 'Child', children: [] }],
     }
 
-    expect(isFolderNode(folder)).toBe(true)
+    expect(isBranchNode(branch)).toBe(true)
   })
 
   it('should return false for a node without children property', () => {
     const item: TreeNode = { id: '1', name: 'Item' }
 
-    expect(isFolderNode(item)).toBe(false)
+    expect(isBranchNode(item)).toBe(false)
   })
 })
 
@@ -34,71 +34,71 @@ describe('isBaseNode', () => {
   })
 
   it('should return false for a node with children property', () => {
-    const folder: FolderNode = { id: '1', name: 'Folder', children: [] }
+    const branch: BranchNode = { id: '1', name: 'Branch', children: [] }
 
-    expect(isBaseNode(folder)).toBe(false)
+    expect(isBaseNode(branch)).toBe(false)
   })
 })
 
-describe('isMovingFolderIntoDescendant', () => {
-  it('should return true when moving a folder into its direct child', () => {
-    const parent: FolderNode = { id: 'parent', name: 'Parent', children: [] }
-    const child: FolderNode = { id: 'child', name: 'Child', children: [] }
+describe('isMovingBranchIntoDescendant', () => {
+  it('should return true when moving a branch into its direct child', () => {
+    const parent: BranchNode = { id: 'parent', name: 'Parent', children: [] }
+    const child: BranchNode = { id: 'child', name: 'Child', children: [] }
 
     const nodeParents: NodeParents = {
       child: parent,
     }
 
-    expect(isMovingFolderIntoDescendant(parent, child, nodeParents)).toBe(true)
+    expect(isMovingBranchIntoDescendant(parent, child, nodeParents)).toBe(true)
   })
 
-  it('should return true when moving a folder into a nested descendant', () => {
-    const grandparent: FolderNode = { id: 'grandparent', name: 'Grandparent', children: [] }
-    const parent: FolderNode = { id: 'parent', name: 'Parent', children: [] }
-    const child: FolderNode = { id: 'child', name: 'Child', children: [] }
+  it('should return true when moving a branch into a nested descendant', () => {
+    const grandparent: BranchNode = { id: 'grandparent', name: 'Grandparent', children: [] }
+    const parent: BranchNode = { id: 'parent', name: 'Parent', children: [] }
+    const child: BranchNode = { id: 'child', name: 'Child', children: [] }
 
     const nodeParents: NodeParents = {
       parent: grandparent,
       child: parent,
     }
 
-    expect(isMovingFolderIntoDescendant(grandparent, child, nodeParents)).toBe(true)
+    expect(isMovingBranchIntoDescendant(grandparent, child, nodeParents)).toBe(true)
   })
 
-  it('should return false when moving a folder to a sibling', () => {
-    const root: FolderNode = { id: 'root', name: 'Root', children: [] }
-    const folder1: FolderNode = { id: 'folder1', name: 'Folder 1', children: [] }
-    const folder2: FolderNode = { id: 'folder2', name: 'Folder 2', children: [] }
+  it('should return false when moving a branch to a sibling', () => {
+    const root: BranchNode = { id: 'root', name: 'Root', children: [] }
+    const branch1: BranchNode = { id: 'branch1', name: 'Branch 1', children: [] }
+    const branch2: BranchNode = { id: 'branch2', name: 'Branch 2', children: [] }
 
     const nodeParents: NodeParents = {
-      folder1: root,
-      folder2: root,
+      branch1: root,
+      branch2: root,
     }
 
-    expect(isMovingFolderIntoDescendant(folder1, folder2, nodeParents)).toBe(false)
+    expect(isMovingBranchIntoDescendant(branch1, branch2, nodeParents)).toBe(false)
   })
 
-  it('should return false when moving a folder to an unrelated node', () => {
-    const root: FolderNode = { id: 'root', name: 'Root', children: [] }
-    const folder1: FolderNode = { id: 'folder1', name: 'Folder 1', children: [] }
-    const folder2: FolderNode = { id: 'folder2', name: 'Folder 2', children: [] }
-    const child2: FolderNode = { id: 'child2', name: 'Child 2', children: [] }
+  it('should return false when moving a branch to an unrelated node', () => {
+    const root: BranchNode = { id: 'root', name: 'Root', children: [] }
+    const branch1: BranchNode = { id: 'branch1', name: 'Branch 1', children: [] }
+    const branch2: BranchNode = { id: 'branch2', name: 'Branch 2', children: [] }
+    const child2: BranchNode = { id: 'child2', name: 'Child 2', children: [] }
 
     const nodeParents: NodeParents = {
-      folder1: root,
-      folder2: root,
-      child2: folder2,
+      branch1: root,
+      branch2: root,
+      child2: branch2,
     }
 
-    expect(isMovingFolderIntoDescendant(folder1, child2, nodeParents)).toBe(false)
+    expect(isMovingBranchIntoDescendant(branch1, child2, nodeParents)).toBe(false)
   })
 
   it('should return false when target has no parent', () => {
-    const folder: FolderNode = { id: 'folder', name: 'Folder', children: [] }
+    const branch: BranchNode = { id: 'branch', name: 'Branch', children: [] }
     const orphan: TreeNode = { id: 'orphan', name: 'Orphan' }
 
     const nodeParents: NodeParents = {}
 
-    expect(isMovingFolderIntoDescendant(folder, orphan, nodeParents)).toBe(false)
+    expect(isMovingBranchIntoDescendant(branch, orphan, nodeParents)).toBe(false)
   })
 })

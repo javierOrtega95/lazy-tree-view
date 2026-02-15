@@ -1,4 +1,4 @@
-import type { BaseNode, FolderNode, NodeParents, TreeNode } from '../../types/tree'
+import type { BaseNode, BranchNode, NodeParents, TreeNode } from '../../types/tree'
 
 function isDescendant(source: TreeNode, target: TreeNode, nodeParents: NodeParents): boolean {
   let currentParent = nodeParents[target.id]
@@ -12,8 +12,8 @@ function isDescendant(source: TreeNode, target: TreeNode, nodeParents: NodeParen
   return false
 }
 
-export function isMovingFolderIntoDescendant(
-  source: FolderNode,
+export function isMovingBranchIntoDescendant(
+  source: BranchNode,
   target: TreeNode,
   nodeParents: NodeParents,
 ): boolean {
@@ -22,10 +22,10 @@ export function isMovingFolderIntoDescendant(
   return false
 }
 
-export function isFolderNode(node: TreeNode): node is FolderNode {
+export function isBranchNode(node: TreeNode): node is BranchNode {
   return 'children' in node
 }
 
 export function isBaseNode(node: TreeNode): node is BaseNode {
-  return !isFolderNode(node)
+  return !isBranchNode(node)
 }

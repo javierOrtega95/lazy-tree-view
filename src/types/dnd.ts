@@ -1,4 +1,4 @@
-import type { FolderNode, TreeNode } from './tree'
+import type { BranchNode, TreeNode } from './tree'
 
 /** Where a dragged node will be placed relative to the drop target. */
 export enum DropPosition {
@@ -31,17 +31,17 @@ export type TreeMove = {
 }
 
 export type MoveData = TreeMove & {
-  prevParent: FolderNode
-  nextParent: FolderNode
+  prevParent: BranchNode
+  nextParent: BranchNode
 }
 
 /**
  * Data passed to the `onDrop` and `canDrop` callbacks.
- * Extends TreeMove with parent folder references (`null` when at root level).
+ * Extends TreeMove with parent branch references (`null` when at root level).
  */
 export type DropData = TreeMove & {
-  /** The folder the node was in before the drop, or `null` if it was at root level. */
-  prevParent: FolderNode | null
-  /** The folder the node will be in after the drop, or `null` if dropping at root level. */
-  nextParent: FolderNode | null
+  /** The branch the node was in before the drop, or `null` if it was at root level. */
+  prevParent: BranchNode | null
+  /** The branch the node will be in after the drop, or `null` if dropping at root level. */
+  nextParent: BranchNode | null
 }

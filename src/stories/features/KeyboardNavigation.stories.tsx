@@ -50,9 +50,9 @@ async function noop(): Promise<TreeNode[]> {
 
 const SHORTCUTS = [
   { key: '↑ / ↓', action: 'Navigate between visible nodes' },
-  { key: '→', action: 'Expand folder or move to first child' },
-  { key: '←', action: 'Collapse folder or move to parent' },
-  { key: 'Enter / Space', action: 'Toggle folder open/close' },
+  { key: '→', action: 'Expand branch or move to first child' },
+  { key: '←', action: 'Collapse branch or move to parent' },
+  { key: 'Enter / Space', action: 'Toggle branch open/close' },
   { key: 'Home', macKey: 'Fn + ←', action: 'Jump to the first node' },
   { key: 'End', macKey: 'Fn + →', action: 'Jump to the last visible node' },
   { key: 'Tab', action: 'Move to next node' },

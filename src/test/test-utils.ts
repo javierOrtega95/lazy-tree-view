@@ -1,5 +1,5 @@
 import { ROOT_NODE } from '../lazy-tree-view/constants'
-import type { FolderNode, TreeNode, TreeWithRoot } from '../types/tree'
+import type { BranchNode, TreeNode, TreeWithRoot } from '../types/tree'
 
 /**
  * Create a simple item node for testing
@@ -10,15 +10,15 @@ export const createItem = (id: string, name?: string): TreeNode => ({
 })
 
 /**
- * Create a folder node for testing
+ * Create a branch node for testing
  */
-export const createFolder = (
+export const createBranch = (
   id: string,
   children: TreeNode[] = [],
-  options: Partial<FolderNode> = {},
-): FolderNode => ({
+  options: Partial<BranchNode> = {},
+): BranchNode => ({
   id,
-  name: `Folder ${id}`,
+  name: `Branch ${id}`,
   children,
   ...options,
 })
@@ -26,7 +26,7 @@ export const createFolder = (
 /**
  * Create a root node for testing
  */
-export const createRoot = (children: TreeNode[] = []): FolderNode => ({ ...ROOT_NODE, children })
+export const createRoot = (children: TreeNode[] = []): BranchNode => ({ ...ROOT_NODE, children })
 
 /**
  * Create a tree with root for testing

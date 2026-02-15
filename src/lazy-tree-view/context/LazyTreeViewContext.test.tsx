@@ -39,10 +39,10 @@ describe('LazyTreeViewContext', () => {
     })
 
     it('should return updated context values', () => {
-      const mockParentFolder = { id: 'parent-1', name: 'Parent', children: [] }
+      const mockParentBranch = { id: 'parent-1', name: 'Parent', children: [] }
       const mockNode = { id: 'node-1', name: 'Test Node' }
       const mockContextValue: LazyTreeViewContextData = {
-        nodeParents: { 'child-1': mockParentFolder },
+        nodeParents: { 'child-1': mockParentBranch },
         draggingNode: mockNode,
         hoveredNodeId: 'hovered-1',
         focusedNodeId: 'focused-1',
@@ -59,7 +59,7 @@ describe('LazyTreeViewContext', () => {
 
       const { result } = renderHook(() => useLazyTreeView(), { wrapper })
 
-      expect(result.current.nodeParents['child-1']).toBe(mockParentFolder)
+      expect(result.current.nodeParents['child-1']).toBe(mockParentBranch)
       expect(result.current.draggingNode).toBe(mockNode)
       expect(result.current.hoveredNodeId).toBe('hovered-1')
       expect(result.current.focusedNodeId).toBe('focused-1')

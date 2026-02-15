@@ -199,9 +199,9 @@ export { type CategoryData }
 
 // ---- Lazy load (category expand) ----
 
-export async function loadChildren(folder: { id: string }): Promise<TreeNode[]> {
+export async function loadChildren(branch: { id: string }): Promise<TreeNode[]> {
   await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 300))
-  return ALL_ARTICLES[folder.id] ?? []
+  return ALL_ARTICLES[branch.id] ?? []
 }
 
 // ---- Server-side search simulation ----

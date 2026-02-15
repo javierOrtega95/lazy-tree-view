@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { FolderNode, TreeNode as TreeNodeType } from '../../types/tree'
+import type { BranchNode, TreeNode as TreeNodeType } from '../../types/tree'
 import { LazyTreeViewContext, type LazyTreeViewContextData } from '../context/LazyTreeViewContext'
 import TreeNode from './TreeNode'
 
 // Mock components
-const MockFolder = vi.fn(({ id, name }: { id: string; name: string }) => (
-  <div data-testid={`folder-${id}`}>{name}</div>
+const MockBranch = vi.fn(({ id, name }: { id: string; name: string }) => (
+  <div data-testid={`branch-${id}`}>{name}</div>
 ))
 
 const MockItem = vi.fn(({ id, name }: { id: string; name: string }) => (
@@ -25,9 +25,9 @@ const defaultContextValue: LazyTreeViewContextData = {
 }
 
 const defaultProps = {
-  folder: MockFolder,
+  branch: MockBranch,
   item: MockItem,
-  folderProps: {},
+  branchProps: {},
   itemProps: {},
   allowDragAndDrop: false,
   useDragHandle: false,
@@ -50,7 +50,7 @@ const renderWithContext = (
 
 const createItem = (id: string, name: string): TreeNodeType => ({ id, name })
 
-const createFolder = (id: string, name: string, children: TreeNodeType[] = []): FolderNode => ({
+const createBranch = (id: string, name: string, children: TreeNodeType[] = []): BranchNode => ({
   id,
   name,
   children,
@@ -87,25 +87,25 @@ describe('TreeNode', () => {
     })
   })
 
-  describe('rendering folders', () => {
-    it('should render a folder node', () => {
-      const folder = createFolder('folder-1', 'Test Folder')
+  describe('rendering branches', () => {
+    it('should render a branch node', () => {
+      const branch = createBranch('branch-1', 'Test Branch')
 
-      renderWithContext(<TreeNode {...defaultProps} node={folder} depth={0} />)
+      renderWithContext(<TreeNode {...defaultProps} node={branch} depth={0} />)
 
-      expect(screen.getByTestId('folder-folder-1')).toBeInTheDocument()
-      expect(screen.getByText('Test Folder')).toBeInTheDocument()
+      expect(screen.getByTestId('branch-branch-1')).toBeInTheDocument()
+      expect(screen.getByText('Test Branch')).toBeInTheDocument()
     })
 
-    it('should pass correct props to Folder component', () => {
-      const folder = createFolder('folder-1', 'Test Folder')
+    it('should pass correct props to Branch component', () => {
+      const branch = createBranch('branch-1', 'Test Branch')
 
-      renderWithContext(<TreeNode {...defaultProps} node={folder} depth={1} />)
+      renderWithContext(<TreeNode {...defaultProps} node={branch} depth={1} />)
 
-      expect(MockFolder).toHaveBeenCalledWith(
+      expect(MockBranch).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'folder-1',
-          name: 'Test Folder',
+          id: 'branch-1',
+          name: 'Test Branch',
           depth: 1,
           isOpen: false,
           isLoading: false,
@@ -132,18 +132,18 @@ describe('TreeNode', () => {
       expect(screen.getByRole('treeitem')).toHaveAttribute('aria-level', '3')
     })
 
-    it('should set aria-expanded for folders', () => {
-      const folder = createFolder('folder-1', 'Test Folder')
+    it('should set aria-expanded for branches', () => {
+      const branch = createBranch('branch-1', 'Test Branch')
 
-      renderWithContext(<TreeNode {...defaultProps} node={folder} depth={0} />)
+      renderWithContext(<TreeNode {...defaultProps} node={branch} depth={0} />)
 
       expect(screen.getByRole('treeitem')).toHaveAttribute('aria-expanded', 'false')
     })
 
-    it('should set aria-expanded="true" when folder is open', () => {
-      const folder: FolderNode = { ...createFolder('folder-1', 'Test Folder'), isOpen: true }
+    it('should set aria-expanded="true" when branch is open', () => {
+      const branch: BranchNode = { ...createBranch('branch-1', 'Test Branch'), isOpen: true }
 
-      renderWithContext(<TreeNode {...defaultProps} node={folder} depth={0} />)
+      renderWithContext(<TreeNode {...defaultProps} node={branch} depth={0} />)
 
       expect(screen.getByRole('treeitem')).toHaveAttribute('aria-expanded', 'true')
     })
@@ -166,12 +166,12 @@ describe('TreeNode', () => {
       expect(screen.getByTestId('item-1')).toHaveAttribute('data-type', 'item')
     })
 
-    it('should set data-type="folder" for folders', () => {
-      const folder = createFolder('folder-1', 'Test Folder')
+    it('should set data-type="branch" for branches', () => {
+      const branch = createBranch('branch-1', 'Test Branch')
 
-      renderWithContext(<TreeNode {...defaultProps} node={folder} depth={0} />)
+      renderWithContext(<TreeNode {...defaultProps} node={branch} depth={0} />)
 
-      expect(screen.getByTestId('folder-1')).toHaveAttribute('data-type', 'folder')
+      expect(screen.getByTestId('branch-1')).toHaveAttribute('data-type', 'branch')
     })
   })
 

@@ -56,7 +56,7 @@ const person = (
   },
 })
 
-// Helper to create a department/team folder (always lazy — no prefetched children)
+// Helper to create a department/team branch (always lazy — no prefetched children)
 const group = (
   id: string,
   name: string,
@@ -78,7 +78,7 @@ export const DEPT_COLORS: Record<string, string> = {
   'Human Resources': '#10b981',
 }
 
-// ---- Main tree (all folders start empty — children loaded on demand) ----
+// ---- Main tree (all branches start empty — children loaded on demand) ----
 
 export const ORG_TREE: TreeNode[] = [
   group('dept-engineering', 'Engineering', { color: DEPT_COLORS.Engineering, headcount: 14 }),

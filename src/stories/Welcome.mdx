@@ -12,8 +12,8 @@ A lightweight, flexible React component for rendering hierarchical data with **l
 
 - **Lazy Loading** — Load children on demand with async callbacks. Built-in loading and error states with retry support.
 - **Drag & Drop** — Reorder nodes with configurable drop positions (before, inside, after) and validation via `canDrop`.
-- **Keyboard Navigation** — Full ARIA tree pattern: arrow keys, Home/End, Enter/Space to toggle folders.
-- **Custom Components** — Replace the default folder and item renderers with your own via `folder` and `item` props.
+- **Keyboard Navigation** — Full ARIA tree pattern: arrow keys, Home/End, Enter/Space to toggle branches.
+- **Custom Components** — Replace the default branch and item renderers with your own via `branch` and `item` props.
 - **Imperative API** — Control the tree externally via `ref`: add, remove, update, move nodes and read the current state.
 - **Animations** — Smooth expand/collapse transitions with configurable duration or opt-out.
 
@@ -36,8 +36,8 @@ const tree = [
   { id: '4', name: 'README.md' },
 ]
 
-async function loadChildren(folder) {
-  const response = await fetch(`/api/folders/${folder.id}/children`)
+async function loadChildren(branch) {
+  const response = await fetch(`/api/branches/${branch.id}/children`)
   return response.json()
 }
 

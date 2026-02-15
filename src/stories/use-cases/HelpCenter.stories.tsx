@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { type FC, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
-import type { BaseNodeProps, FolderProps, LazyTreeViewHandle } from '../../lazy-tree-view/types'
+import type { BaseNodeProps, BranchProps, LazyTreeViewHandle } from '../../lazy-tree-view/types'
 import { ChevronRightIcon, LoaderIcon } from '../assets/icons/file-icons'
 import '../assets/styles/help-center.css'
 
@@ -143,7 +143,7 @@ type KbExtra = {
   onSelect?: (article: ArticleData & { name: string }) => void
 }
 
-const KbCategory: FC<FolderProps<{ data?: CategoryData }> & KbExtra> = ({
+const KbCategory: FC<BranchProps<{ data?: CategoryData }> & KbExtra> = ({
   name,
   children,
   isOpen = false,
@@ -350,9 +350,9 @@ const KnowledgeBaseDemo: FC<KnowledgeBaseProps> = ({
                 ref={treeRef}
                 initialTree={KB_TREE}
                 loadChildren={loadChildren}
-                folder={KbCategory}
+                branch={KbCategory}
                 item={KbArticle}
-                folderProps={{ searchQuery: query, onSelect: setSelected }}
+                branchProps={{ searchQuery: query, onSelect: setSelected }}
                 itemProps={{ searchQuery: query, onSelect: setSelected }}
                 disableAnimations={disableAnimations}
                 animationDuration={animationDuration}
@@ -443,9 +443,9 @@ useEffect(() => {
   ref={treeRef}
   initialTree={originalTree}
   loadChildren={loadChildren}
-  folder={CategoryFolder}
+  branch={CategoryBranch}
   item={ArticleItem}
-  folderProps={{ searchQuery: query }}
+  branchProps={{ searchQuery: query }}
   itemProps={{ searchQuery: query }}
 />
 `.trim()

@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { type FC, useState } from 'react'
 
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
-import type { BaseNodeProps, FolderProps } from '../../lazy-tree-view/types'
-import type { FolderNode, TreeNode } from '../../types/tree'
-import { isFolderNode } from '../../lazy-tree-view/utils/validations'
+import type { BaseNodeProps, BranchProps } from '../../lazy-tree-view/types'
+import type { BranchNode, TreeNode } from '../../types/tree'
+import { isBranchNode } from '../../lazy-tree-view/utils/validations'
 import {
   ChevronRightIcon,
   FileIcon,
@@ -30,7 +30,7 @@ type OnSelectFn = (node: SelectedNode) => void
 
 // ---- Custom Components ----
 
-const ExplorerFolder: FC<FolderProps & { onSelect?: OnSelectFn }> = ({
+const ExplorerBranch: FC<BranchProps & { onSelect?: OnSelectFn }> = ({
   id,
   name,
   children,
@@ -108,12 +108,12 @@ const ExplorerItem: FC<BaseNodeProps & { onSelect?: OnSelectFn }> = ({
 
 const treeConfig = {
   initialTree: FILE_EXPLORER_TREE,
-  loadChildren: (folder: FolderNode) => loadChildren(folder.name),
-  folder: ExplorerFolder,
+  loadChildren: (branch: BranchNode) => loadChildren(branch.name),
+  branch: ExplorerBranch,
   item: ExplorerItem,
   allowDragAndDrop: true as const,
   canDrop: ({ source, target }: { source: TreeNode; target: TreeNode }) => {
-    if (isFolderNode(source) && target.id === source.id) return false
+    if (isBranchNode(source) && target.id === source.id) return false
     return true
   },
   dragClassNames: {
@@ -217,7 +217,7 @@ const FileExplorerDemo: FC<FileExplorerProps> = ({
             allowDragAndDrop={allowDragAndDrop}
             disableAnimations={disableAnimations}
             animationDuration={animationDuration}
-            folderProps={{ onSelect: setSelected }}
+            branchProps={{ onSelect: setSelected }}
             itemProps={{ onSelect: setSelected }}
           />
         </div>
@@ -238,7 +238,7 @@ const meta: Meta<typeof FileExplorerDemo> = {
     docs: {
       description: {
         component:
-          'A GitHub-inspired file explorer built with **LazyTreeView**. Demonstrates custom `folder` and `item` components, lazy loading, drag & drop reordering, and selection state synced with a preview panel.',
+          'A GitHub-inspired file explorer built with **LazyTreeView**. Demonstrates custom `branch` and `item` components, lazy loading, drag & drop reordering, and selection state synced with a preview panel.',
       },
     },
   },
@@ -273,8 +273,8 @@ type Story = StoryObj<typeof FileExplorerDemo>
 const SOURCE_CODE = `
 import LazyTreeView from 'lazy-tree-view'
 
-// Custom folder component
-const ExplorerFolder = ({ name, isOpen, isLoading, depth, onToggleOpen }) => (
+// Custom branch component
+const ExplorerBranch = ({ name, isOpen, isLoading, depth, onToggleOpen }) => (
   <div className="file-explorer__item" onClick={onToggleOpen}>
     <ChevronIcon open={isOpen} />
     {isLoading ? <Spinner /> : <FolderIcon open={isOpen} />}
@@ -292,12 +292,12 @@ const ExplorerItem = ({ name, depth }) => (
 
 <LazyTreeView
   initialTree={fileTree}
-  loadChildren={(folder) => fetchFiles(folder.name)}
-  folder={ExplorerFolder}
+  loadChildren={(branch) => fetchFiles(branch.name)}
+  branch={ExplorerBranch}
   item={ExplorerItem}
   allowDragAndDrop
   canDrop={({ source, target }) =>
-    !(isFolderNode(source) && target.id === source.id)
+    !(isBranchNode(source) && target.id === source.id)
   }
   dragClassNames={{
     dragOver: 'drag-over',

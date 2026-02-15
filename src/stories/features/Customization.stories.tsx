@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { type FC, useCallback, useRef } from 'react'
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
-import type { BaseNodeProps, FolderProps, LazyTreeViewHandle } from '../../lazy-tree-view/types'
+import type { BaseNodeProps, BranchProps, LazyTreeViewHandle } from '../../lazy-tree-view/types'
 import type { TreeNode } from '../../types/tree'
 import '../assets/styles/customization.css'
 
@@ -101,7 +101,7 @@ const PRIORITY_LABELS: Record<Priority, string> = {
   low: 'Low',
 }
 
-const TaskFolder: FC<FolderProps<{ data?: CategoryData }> & TaskExtra> = ({
+const TaskBranch: FC<BranchProps<{ data?: CategoryData }> & TaskExtra> = ({
   name,
   children,
   isOpen = false,
@@ -202,7 +202,7 @@ const CustomizationDemo: FC<CustomizationProps> = ({
             ref={treeRef}
             initialTree={INITIAL_TREE}
             loadChildren={noop}
-            folder={TaskFolder}
+            branch={TaskBranch}
             item={TaskItem}
             itemProps={{ onToggle: handleToggle }}
             disableAnimations={disableAnimations}
@@ -218,13 +218,13 @@ const CustomizationDemo: FC<CustomizationProps> = ({
 
 const SOURCE_CODE = `
 import { useCallback, useState } from 'react'
-import LazyTreeView, { type BaseNodeProps, type FolderProps } from 'lazy-tree-view'
+import LazyTreeView, { type BaseNodeProps, type BranchProps } from 'lazy-tree-view'
 
 type TaskData = { priority: 'high' | 'medium' | 'low'; done: boolean }
 type CategoryData = { color: string }
 
-// Custom folder renderer
-const TaskFolder: FC<FolderProps<{ data?: CategoryData }>> = ({
+// Custom branch renderer
+const TaskBranch: FC<BranchProps<{ data?: CategoryData }>> = ({
   name, children, isOpen, depth, data, onToggleOpen,
 }) => (
   <div onClick={onToggleOpen}>
@@ -250,7 +250,7 @@ const TaskItem: FC<BaseNodeProps<{ data?: TaskData }> & { onToggle?: (id: string
 <LazyTreeView
   initialTree={tree}
   loadChildren={loadChildren}
-  folder={TaskFolder}             // custom folder component
+  branch={TaskBranch}             // custom branch component
   item={TaskItem}                 // custom item component
   itemProps={{ onToggle: handleToggle }}  // extra props for items
 />
@@ -265,10 +265,10 @@ const meta: Meta<typeof CustomizationDemo> = {
         component: [
           'Demonstrates how to fully customize the tree appearance using custom renderers:',
           '',
-          '- **Custom `folder` component**: category header with color dot, name, and progress counter (done/total)',
+          '- **Custom `branch` component**: category header with color dot, name, and progress counter (done/total)',
           '- **Custom `item` component**: task row with checkbox, name, and priority badge',
           '- **`itemProps` for callbacks**: the `onToggle` function is passed via `itemProps` so each task item can toggle its done state',
-          '- **Generic types**: `FolderProps<{ data?: CategoryData }>` and `BaseNodeProps<{ data?: TaskData }>` provide type-safe access to custom data',
+          '- **Generic types**: `BranchProps<{ data?: CategoryData }>` and `BaseNodeProps<{ data?: TaskData }>` provide type-safe access to custom data',
           '',
           'Click any checkbox to toggle a task. The category progress counter updates automatically.',
         ].join('\n'),
