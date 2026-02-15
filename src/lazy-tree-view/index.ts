@@ -1,4 +1,5 @@
 // Component
+export { default as LazyTreeView } from './LazyTreeView'
 export { default } from './LazyTreeView'
 
 // Types — component
