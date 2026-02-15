@@ -92,9 +92,9 @@ const DragAndDropDemo: FC<DragAndDropProps> = ({
         allowDragAndDrop
         disableAnimations={disableAnimations}
         animationDuration={animationDuration}
-        canDrop={({ source, target }) => {
+        canDrop={({ source, target, nextParent }) => {
           if (isFolderNode(source) && target.id === source.id) return false
-          if (target.id === 'folder-locked') return false
+          if (target.id === 'folder-locked' || nextParent?.id === 'folder-locked') return false
           return true
         }}
         onDrop={handleDrop}
@@ -143,11 +143,11 @@ import { isFolderNode } from 'lazy-tree-view/utils'
   initialTree={tree}
   loadChildren={loadChildren}
   allowDragAndDrop
-  canDrop={({ source, target }) => {
+  canDrop={({ source, target, nextParent }) => {
     // Prevent dropping a folder inside itself
     if (isFolderNode(source) && target.id === source.id) return false
-    // Prevent dropping into locked folders
-    if (target.id === 'folder-locked') return false
+    // Prevent dropping into or between items of locked folders
+    if (target.id === 'folder-locked' || nextParent?.id === 'folder-locked') return false
     return true
   }}
   onDrop={({ source, target, position }) => {
@@ -166,7 +166,7 @@ const meta: Meta<typeof DragAndDropDemo> = {
           'Demonstrates all drag & drop features:',
           '',
           '- **Drop positions**: before, inside, and after any node',
-          '- **Validation via `canDrop`**: the "Locked (no drop)" folder rejects all drops, and folders cannot be dropped inside themselves',
+          '- **Validation via `canDrop`**: the "Locked (no drop)" folder blocks drops on it and between its children (uses `nextParent`), and folders cannot be dropped inside themselves',
           '- **`onDrop` callback**: the log panel shows every drop event with source, target, and position',
           '',
           'Try dragging nodes between folders, reordering items, and dropping onto the locked folder to see the validation in action.',
