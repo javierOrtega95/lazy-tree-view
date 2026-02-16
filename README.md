@@ -12,15 +12,17 @@
 
 ---
 
+A lightweight, zero-dependency React tree view built for real-world data — where children are loaded on demand, not upfront.
+
 ## Features
 
-- **Lazy Loading** — Children are fetched on demand when a branch is expanded. Built-in loading, error, and retry states.
-- **Drag & Drop** — Reorder nodes with three drop positions (before, inside, after). Validate moves with `canDrop`.
-- **Keyboard Navigation** — Full [WAI-ARIA TreeView](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) pattern: arrow keys, Home/End, Enter/Space.
-- **Imperative API** — Control the tree via `ref`: add, remove, update, move nodes, replace the entire tree, or read its state.
-- **Custom Renderers** — Replace branch and item components with your own. Pass extra props via `branchProps` / `itemProps`.
-- **Animations** — Smooth expand/collapse transitions. Configurable duration or opt-out entirely.
-- **Type-safe** — Generic types (`BranchProps<T>`, `BaseNode<T>`) for custom data on your nodes.
+- ⚡ **Lazy Loading** — Children are fetched on demand when a branch is expanded. Built-in loading, error, and retry states.
+- 🔀 **Drag & Drop** — Reorder nodes with three drop positions (before, inside, after). Validate moves with `canDrop`.
+- ⌨️ **Keyboard Navigation** — Full [WAI-ARIA TreeView](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) pattern: arrow keys, Home/End, Enter/Space.
+- 🎮 **Imperative API** — Control the tree via `ref`: add, remove, update, move nodes, replace the entire tree, or read its state.
+- 🎨 **Custom Renderers** — Replace branch and item components with your own. Pass extra props via `branchProps` / `itemProps`.
+- ✨ **Animations** — Smooth expand/collapse transitions. Configurable duration or opt-out entirely.
+- 🔒 **Type-safe** — Generic types (`BranchProps<T>`, `BaseNode<T>`) for custom data on your nodes.
 
 ## Installation
 
@@ -137,19 +139,22 @@ const tree = treeRef.current?.getTree()
 
 ## Custom Renderers
 
-Replace the default components with your own:
+Replace the default branch and item components with your own. The generic `<T>` lets you type the extra props passed via `branchProps` / `itemProps`:
 
 ```tsx
 import { LazyTreeView, type BranchProps, type BaseNodeProps } from 'lazy-tree-view'
 
-const MyBranch = (props: BranchProps) => (
-  <div onClick={props.onToggleOpen}>
-    {props.isOpen ? '▼' : '▶'} {props.name}
+type BranchExtra = { icon: string }
+type ItemExtra = { onSelect: (id: string) => void }
+
+const MyBranch = ({ isOpen, name, icon, onToggleOpen }: BranchProps<BranchExtra>) => (
+  <div onClick={onToggleOpen}>
+    {isOpen ? '▾' : '▸'} {icon} {name}
   </div>
 )
 
-const MyItem = (props: BaseNodeProps) => (
-  <div>· {props.name}</div>
+const MyItem = ({ id, name, onSelect }: BaseNodeProps<ItemExtra>) => (
+  <div onClick={() => onSelect(id)}>📄 {name}</div>
 )
 
 <LazyTreeView
@@ -157,8 +162,8 @@ const MyItem = (props: BaseNodeProps) => (
   loadChildren={loadChildren}
   branch={MyBranch}
   item={MyItem}
-  branchProps={{ theme: 'dark' }}
-  itemProps={{ onSelect: handleSelect }}
+  branchProps={{ icon: '📁' }}
+  itemProps={{ onSelect: (id) => console.log('Selected:', id) }}
 />
 ```
 
