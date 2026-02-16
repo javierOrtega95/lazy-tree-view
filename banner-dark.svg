@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="200" viewBox="0 0 900 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f0f"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="200" fill="url(#bg)" rx="12"/>
+  <path stroke="#fff" d="M0 40h900M0 80h900M0 120h900M0 160h900" opacity=".03"/>
+  <g transform="translate(120 58)">
+    <path stroke="#4b5563" stroke-linecap="round" stroke-width="2.5" d="M0 0v80"/>
+    <path stroke="#4b5563" stroke-linecap="round" stroke-width="2" d="M0 12h28"/>
+    <rect width="16" height="16" x="32" y="4" fill="url(#accent)" opacity=".9" rx="3"/>
+    <path stroke="#fff" stroke-linecap="round" stroke-width="1.5" d="M37 12h7"/>
+    <path stroke="#4b5563" stroke-linecap="round" stroke-width="1.5" d="M28 12v30m0-14h22"/>
+    <rect width="12" height="12" x="54" y="21" fill="#60a5fa" opacity=".4" rx="2"/>
+    <path stroke="#4b5563" stroke-linecap="round" stroke-width="1.5" d="M28 42h22"/>
+    <rect width="12" height="12" x="54" y="35" fill="#60a5fa" opacity=".4" rx="2"/>
+    <path stroke="#4b5563" stroke-linecap="round" stroke-width="2" d="M0 56h28"/>
+    <rect width="16" height="16" x="32" y="48" fill="url(#accent2)" opacity=".7" rx="3"/>
+    <path stroke="#fff" stroke-linecap="round" stroke-width="1.5" d="M37 56h7m-3.5-3.5v7"/>
+    <path stroke="#4b5563" stroke-linecap="round" stroke-width="2" d="M0 76h28"/>
+    <rect width="12" height="12" x="32" y="69" fill="#9ca3af" opacity=".5" rx="2"/>
+  </g>
+  <text x="240" y="98" fill="#fff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="42" font-weight="700" letter-spacing="-1">lazy-tree-view</text>
+  <text x="242" y="128" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" letter-spacing=".5">
+    A lightweight, accessible and customizable React tree view component
+  </text>
+  <g transform="translate(242 142)">
+    <rect width="88" height="24" fill="#1e293b" stroke="#334155" rx="12"/>
+    <text x="44" y="16" fill="#60a5fa" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">~7.5 kB gzip</text>
+    <rect width="102" height="24" x="96" fill="#1e293b" stroke="#334155" rx="12"/>
+    <text x="147" y="16" fill="#818cf8" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">Zero deps</text>
+    <rect width="102" height="24" x="206" fill="#1e293b" stroke="#334155" rx="12"/>
+    <text x="257" y="16" fill="#34d399" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">TypeScript</text>
+    <rect width="102" height="24" x="316" fill="#1e293b" stroke="#334155" rx="12"/>
+    <text x="367" y="16" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="11" font-weight="500" text-anchor="middle">WAI-ARIA</text>
+  </g>
+</svg>
