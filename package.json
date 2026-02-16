@@ -2,6 +2,34 @@
   "name": "lazy-tree-view",
   "private": true,
   "version": "0.0.0",
+  "description": "A lightweight, zero-dependency React tree view with lazy loading, drag & drop, and keyboard navigation.",
+  "author": "Javier Ortega",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/javierOrtega95/lazy-tree-view.git"
+  },
+  "homepage": "https://github.com/javierOrtega95/lazy-tree-view#readme",
+  "bugs": {
+    "url": "https://github.com/javierOrtega95/lazy-tree-view/issues"
+  },
+  "keywords": [
+    "react",
+    "tree",
+    "tree-view",
+    "treeview",
+    "lazy-loading",
+    "drag-and-drop",
+    "keyboard-navigation",
+    "accessible",
+    "aria",
+    "typescript",
+    "lightweight",
+    "zero-dependencies",
+    "expandable",
+    "collapsible",
+    "hierarchy"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
