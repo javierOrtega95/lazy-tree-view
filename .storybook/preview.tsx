@@ -4,6 +4,7 @@ import './storybook.css'
 const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
+    backgrounds: { disable: true },
     controls: {
       matchers: {
         color: /(background|color)$/i,
