@@ -18,11 +18,13 @@ const preview: Preview = {
           [
             'Default',
             'Lazy Loading',
+            'Error & Retry',
             'Drag & Drop',
             'Customization',
             'Keyboard Navigation',
             'Imperative API',
             'Animations',
+            'Callbacks',
           ],
           'Use Cases',
           ['File Explorer', 'Organization Hierarchy', 'Help Center'],
