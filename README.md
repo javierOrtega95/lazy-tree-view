@@ -1,29 +1,184 @@
-## Lazy Tree View
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/dev/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/dev/banner-light.svg">
+  <img alt="lazy-tree-view banner" src="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/dev/banner-dark.svg">
+</picture>
 
-React component for managing and displaying hierarchical data with lazy loading.
+<p align="center">
+  <a href="https://www.npmjs.com/package/lazy-tree-view"><img src="https://img.shields.io/npm/v/lazy-tree-view?style=flat&colorA=000000&colorB=000000" alt="npm version" /></a>
+  <a href="https://bundlephobia.com/package/lazy-tree-view"><img src="https://img.shields.io/bundlephobia/minzip/lazy-tree-view?style=flat&label=gzipped&colorA=000000&colorB=000000" alt="bundle size" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/lazy-tree-view?style=flat&colorA=000000&colorB=000000" alt="license" /></a>
+</p>
 
-### Features
+---
 
-- Asynchronous children loading.
-- Drag-and-drop support for reordering nodes.
-- Customizable via props.
+## Features
 
-### Tech Stack
+- **Lazy Loading** — Children are fetched on demand when a branch is expanded. Built-in loading, error, and retry states.
+- **Drag & Drop** — Reorder nodes with three drop positions (before, inside, after). Validate moves with `canDrop`.
+- **Keyboard Navigation** — Full [WAI-ARIA TreeView](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) pattern: arrow keys, Home/End, Enter/Space.
+- **Imperative API** — Control the tree via `ref`: add, remove, update, move nodes, replace the entire tree, or read its state.
+- **Custom Renderers** — Replace branch and item components with your own. Pass extra props via `branchProps` / `itemProps`.
+- **Animations** — Smooth expand/collapse transitions. Configurable duration or opt-out entirely.
+- **Type-safe** — Generic types (`BranchProps<T>`, `BaseNode<T>`) for custom data on your nodes.
 
-- **React**
-- **Vite**
-- **pnpm**
-
-### Getting Started
+## Installation
 
 ```bash
-cd lazy-tree-view
+pnpm add lazy-tree-view
+# or
+npm install lazy-tree-view
 ```
+
+## Quick Start
+
+```tsx
+import { LazyTreeView } from 'lazy-tree-view'
+import 'lazy-tree-view/styles.css'
+
+const tree = [
+  {
+    id: '1',
+    name: 'Documents',
+    children: [
+      { id: '2', name: 'Resume.pdf' },
+      { id: '3', name: 'Cover Letter.docx' },
+    ],
+  },
+  { id: '4', name: 'README.md' },
+]
+
+async function loadChildren(branch) {
+  const res = await fetch(`/api/branches/${branch.id}/children`)
+  return res.json()
+}
+
+function App() {
+  return (
+    <LazyTreeView
+      initialTree={tree}
+      loadChildren={loadChildren}
+    />
+  )
+}
+```
+
+## Why lazy-tree-view?
+
+Most tree components load the entire tree upfront. This works for small datasets but breaks down when nodes have hundreds of children or when data lives behind an API.
+
+**lazy-tree-view** is built around a lazy-first model: branches fetch their children only when expanded, with built-in loading, error, and retry states. You supply a single async function — the component handles the rest.
+
+|                | lazy-tree-view   | rc-tree        | react-arborist |
+| -------------- | ---------------- | -------------- | -------------- |
+| Bundle size    | **~7.5 kB**      | ~40 kB         | ~20 kB         |
+| Dependencies   | **0**            | antd ecosystem | 3+             |
+| Lazy loading   | **Built-in**     | Manual         | Manual         |
+| Drag & drop    | **Built-in**     | Via plugin     | Built-in       |
+| Imperative API | **Full ref API** | Limited        | Partial        |
+| TypeScript     | **First-class**  | Partial        | Yes            |
+
+<!-- TODO: uncomment when Storybook is deployed
+## Live Demos
+
+Explore interactive examples in the [Storybook](https://your-storybook-url.com):
+
+- **Features** — Lazy loading, drag & drop, keyboard navigation, animations, imperative API, customization.
+- **Use Cases** — File explorer, organization hierarchy, help center with search.
+-->
+
+## Props
+
+| Prop                | Type                                                 | Default      | Description                                                |
+| ------------------- | ---------------------------------------------------- | ------------ | ---------------------------------------------------------- |
+| `initialTree`       | `TreeNode[]`                                         | —            | Initial tree structure. Only read on mount.                |
+| `loadChildren`      | `(branch: BranchNode) => Promise<TreeNode[]>`        | —            | Async callback to fetch children when a branch expands.    |
+| `allowDragAndDrop`  | `boolean`                                            | `true`       | Enable drag & drop reordering.                             |
+| `useDragHandle`     | `boolean`                                            | `false`      | Require a drag handle instead of dragging the entire node. |
+| `canDrop`           | `(data: DropData) => boolean`                        | `() => true` | Validate whether a drop is allowed.                        |
+| `dragClassNames`    | `Partial<DragClassNames>`                            | —            | Custom CSS classes for drag states.                        |
+| `branch`            | `FC<BranchProps>`                                    | Built-in     | Custom branch renderer.                                    |
+| `item`              | `FC<BaseNodeProps>`                                  | Built-in     | Custom item (leaf) renderer.                               |
+| `branchProps`       | `Record<string, unknown>`                            | —            | Extra props forwarded to every branch.                     |
+| `itemProps`         | `Record<string, unknown>`                            | —            | Extra props forwarded to every item.                       |
+| `disableAnimations` | `boolean`                                            | `false`      | Disable expand/collapse animations.                        |
+| `animationDuration` | `number`                                             | `300`        | Animation duration in ms.                                  |
+| `className`         | `string`                                             | —            | CSS class for the root `<ul>`.                             |
+| `style`             | `CSSProperties`                                      | —            | Inline styles for the root `<ul>`.                         |
+| `onDrop`            | `(data: DropData) => void`                           | —            | Called after a successful drop.                            |
+| `onTreeChange`      | `(tree: TreeNode[]) => void`                         | —            | Called whenever the tree changes.                          |
+| `onLoadStart`       | `(branch: BranchNode) => void`                       | —            | Called when a branch starts loading.                       |
+| `onLoadSuccess`     | `(branch: BranchNode, children: TreeNode[]) => void` | —            | Called when children load successfully.                    |
+| `onLoadError`       | `(branch: BranchNode, error: unknown) => void`       | —            | Called when loading fails.                                 |
+
+## Imperative API
+
+Control the tree from outside via `ref`:
+
+```tsx
+const treeRef = useRef<LazyTreeViewHandle>(null)
+
+// Add a node to a branch
+treeRef.current?.addNode('branch-1', { id: 'new', name: 'New File' })
+
+// Read the current tree
+const tree = treeRef.current?.getTree()
+```
+
+| Method       | Signature                                      | Description                        |
+| ------------ | ---------------------------------------------- | ---------------------------------- |
+| `addNode`    | `(parentId: string \| null, node) => void`     | Add a node. `null` for root level. |
+| `removeNode` | `(nodeId: string) => void`                     | Remove a node and its children.    |
+| `updateNode` | `(nodeId: string, updates) => void`            | Update node properties.            |
+| `moveNode`   | `(nodeId: string, targetId, position) => void` | Move a node programmatically.      |
+| `setTree`    | `(newTree: TreeNode[]) => void`                | Replace the entire tree.           |
+| `getTree`    | `() => TreeNode[]`                             | Get the current tree.              |
+| `getNode`    | `(nodeId: string) => TreeNode \| undefined`    | Find a node by ID.                 |
+
+## Custom Renderers
+
+Replace the default components with your own:
+
+```tsx
+import { LazyTreeView, type BranchProps, type BaseNodeProps } from 'lazy-tree-view'
+
+const MyBranch = (props: BranchProps) => (
+  <div onClick={props.onToggleOpen}>
+    {props.isOpen ? '▼' : '▶'} {props.name}
+  </div>
+)
+
+const MyItem = (props: BaseNodeProps) => (
+  <div>· {props.name}</div>
+)
+
+<LazyTreeView
+  initialTree={tree}
+  loadChildren={loadChildren}
+  branch={MyBranch}
+  item={MyItem}
+  branchProps={{ theme: 'dark' }}
+  itemProps={{ onSelect: handleSelect }}
+/>
+```
+
+## Keyboard Navigation
+
+Follows the [WAI-ARIA TreeView](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) pattern:
+
+| Key             | Action                                |
+| --------------- | ------------------------------------- |
+| `↑` `↓`         | Move focus between visible nodes      |
+| `→`             | Expand branch, or move to first child |
+| `←`             | Collapse branch, or move to parent    |
+| `Home` `End`    | Jump to first / last node             |
+| `Enter` `Space` | Toggle expand / collapse              |
+
+## Development
 
 ```bash
 pnpm install
-```
-
-```bash
-pnpm dev
+pnpm storybook    # Development environment
+pnpm test         # Run tests
+pnpm build        # Build the library
 ```
