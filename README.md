@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/dev/banner-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/dev/banner-light.svg">
-  <img alt="lazy-tree-view banner" src="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/dev/banner-dark.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/v1.0.0/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/v1.0.0/banner-light.svg">
+  <img alt="lazy-tree-view banner" src="https://raw.githubusercontent.com/javierOrtega95/lazy-tree-view/v1.0.0/banner-dark.svg">
 </picture>
 
 <p align="center">
