@@ -80,14 +80,9 @@ Most tree components load the entire tree upfront. This works for small datasets
 | Imperative API | **Full ref API** | Limited        | Partial        |
 | TypeScript     | **First-class**  | Partial        | Yes            |
 
-<!-- TODO: uncomment when Storybook is deployed
 ## Live Demos
 
-Explore interactive examples in the [Storybook](https://your-storybook-url.com):
-
-- **Features** — Lazy loading, drag & drop, keyboard navigation, animations, imperative API, customization.
-- **Use Cases** — File explorer, organization hierarchy, help center with search.
--->
+Explore all features and use cases in the [interactive Storybook](https://javierortega95.github.io/lazy-tree-view/).
 
 ## Props
 
