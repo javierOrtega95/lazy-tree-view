@@ -30,6 +30,9 @@
     "collapsible",
     "hierarchy"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
