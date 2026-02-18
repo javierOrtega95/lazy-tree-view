@@ -1,6 +1,6 @@
 {
   "name": "lazy-tree-view",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight, zero-dependency React tree view with lazy loading, drag & drop, and keyboard navigation.",
   "author": "Javier Ortega",
   "license": "MIT",
@@ -56,8 +56,8 @@
     "build-storybook": "storybook build"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
