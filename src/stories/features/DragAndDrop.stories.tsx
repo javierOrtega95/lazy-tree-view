@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { type FC, useCallback, useState } from 'react'
+import { type FC, useCallback, useRef, useState } from 'react'
 import LazyTreeView from '../../lazy-tree-view/LazyTreeView'
 import type { TreeNode } from '../../types/tree'
+import type { BaseNodeProps, BranchProps } from '../../lazy-tree-view/types'
 import { isBranchNode } from '../../lazy-tree-view/utils/validations'
 import type { DropData } from '../../types/dnd'
 
@@ -200,6 +201,149 @@ export const Default: Story = {
   parameters: {
     docs: {
       source: { code: SOURCE_CODE, language: 'tsx' },
+    },
+  },
+}
+
+// ---- Drag Handle Story ----
+
+const DragHandleIcon: FC = () => (
+  <svg
+    width='14'
+    height='14'
+    viewBox='0 0 24 24'
+    fill='none'
+    stroke='currentColor'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+    style={{ cursor: 'grab', color: '#9ca3af', flexShrink: 0 }}
+  >
+    <circle cx='9' cy='5' r='1' /><circle cx='15' cy='5' r='1' />
+    <circle cx='9' cy='12' r='1' /><circle cx='15' cy='12' r='1' />
+    <circle cx='9' cy='19' r='1' /><circle cx='15' cy='19' r='1' />
+  </svg>
+)
+
+const HandleBranch: FC<BranchProps> = ({ name, isOpen = false, depth, onToggleOpen, onDragStart }) => {
+  const nodeRef = useRef<HTMLDivElement>(null)
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (nodeRef.current) e.dataTransfer.setDragImage(nodeRef.current, 0, 0)
+    onDragStart?.(e)
+  }
+
+  return (
+    <div
+      ref={nodeRef}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '4px 8px',
+        paddingLeft: `${8 + depth * 16}px`,
+        borderRadius: 4,
+        cursor: 'default',
+      }}
+      onClick={onToggleOpen}
+    >
+      <span draggable onDragStart={handleDragStart} style={{ display: 'flex', alignItems: 'center' }}>
+        <DragHandleIcon />
+      </span>
+      <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' style={{ color: '#6b7280', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'none' }}>
+        <path d='m9 18 6-6-6-6' />
+      </svg>
+      <span style={{ fontSize: 14 }}>{name}</span>
+    </div>
+  )
+}
+
+const HandleItem: FC<BaseNodeProps> = ({ name, depth, onDragStart }) => {
+  const nodeRef = useRef<HTMLDivElement>(null)
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (nodeRef.current) e.dataTransfer.setDragImage(nodeRef.current, 0, 0)
+    onDragStart?.(e)
+  }
+
+  return (
+    <div
+      ref={nodeRef}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '4px 8px',
+        paddingLeft: `${8 + depth * 16}px`,
+        borderRadius: 4,
+        cursor: 'default',
+      }}
+    >
+      <span draggable onDragStart={handleDragStart} style={{ display: 'flex', alignItems: 'center' }}>
+        <DragHandleIcon />
+      </span>
+      <span style={{ fontSize: 14, color: '#6b7280' }}>─</span>
+      <span style={{ fontSize: 14 }}>{name}</span>
+    </div>
+  )
+}
+
+const DRAG_HANDLE_SOURCE_CODE = `
+import LazyTreeView, { type BranchProps, type BaseNodeProps } from 'lazy-tree-view'
+
+const DragHandleIcon = () => (/* your handle icon */)
+
+const MyBranch = ({ name, isOpen, depth, onToggleOpen, onDragStart }: BranchProps) => (
+  <div onClick={onToggleOpen}>
+    {/* Only this element is draggable */}
+    <span draggable onDragStart={onDragStart}>
+      <DragHandleIcon />
+    </span>
+    <span>{name}</span>
+  </div>
+)
+
+const MyItem = ({ name, depth, onDragStart }: BaseNodeProps) => (
+  <div>
+    <span draggable onDragStart={onDragStart}>
+      <DragHandleIcon />
+    </span>
+    <span>{name}</span>
+  </div>
+)
+
+<LazyTreeView
+  initialTree={tree}
+  loadChildren={loadChildren}
+  useDragHandle         // disables drag on the whole node
+  branch={MyBranch}
+  item={MyItem}
+/>
+`.trim()
+
+export const WithDragHandle: Story = {
+  render: (args) => (
+    <LazyTreeView
+      {...args}
+      initialTree={TREE}
+      loadChildren={noop}
+      useDragHandle
+      branch={HandleBranch}
+      item={HandleItem}
+      style={{ minWidth: 260 }}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'When `useDragHandle` is enabled, the entire node is no longer draggable.',
+          'Instead, `onDragStart` is passed to your custom renderer so you can attach it to a specific handle element.',
+          '',
+          'This gives users precise control — they can click anywhere on the node without accidentally starting a drag.',
+        ].join('\n'),
+      },
+      source: { code: DRAG_HANDLE_SOURCE_CODE, language: 'tsx' },
     },
   },
 }
