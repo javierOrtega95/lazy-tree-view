@@ -1,6 +1,6 @@
 {
   "name": "lazy-tree-view",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A lightweight, zero-dependency React tree view with lazy loading, drag & drop, and keyboard navigation.",
   "author": "Javier Ortega",
   "license": "MIT",
