@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/lazy-tree-view"><img src="https://img.shields.io/npm/v/lazy-tree-view?style=flat" alt="npm version" /></a>
-  <a href="https://bundlephobia.com/package/lazy-tree-view"><img src="https://img.shields.io/bundlephobia/minzip/lazy-tree-view?style=flat&label=gzipped" alt="bundle size" /></a>
+  <a href="https://bundlejs.com/?q=lazy-tree-view"><img src="https://deno.bundlejs.com/badge?q=lazy-tree-view" alt="bundle size" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/npm/l/lazy-tree-view?style=flat" alt="license" /></a>
 </p>
 
