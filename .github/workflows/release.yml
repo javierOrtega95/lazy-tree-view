@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  check-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.pkg.outputs.version }}
+      published: ${{ steps.check.outputs.published }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Get version
+        id: pkg
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+
+      - name: Check if already published
+        id: check
+        run: |
+          output=$(npm view "lazy-tree-view@${{ steps.pkg.outputs.version }}" version 2>&1)
+          status=$?
+          if [ "$status" -eq 0 ]; then
+            echo "published=true" >> $GITHUB_OUTPUT
+          elif printf '%s\n' "$output" | grep -qiE 'E404|404 Not Found|is not in this registry'; then
+            echo "published=false" >> $GITHUB_OUTPUT
+          else
+            printf 'Unexpected npm view failure while checking published version:\n%s\n' "$output" >&2
+            exit "$status"
+          fi
+
+      - name: Install dependencies
+        if: steps.check.outputs.published == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        if: steps.check.outputs.published == 'false'
+        run: pnpm test
+
+      - name: Build
+        if: steps.check.outputs.published == 'false'
+        run: pnpm build
+
+      - name: Upload build artifact
+        if: steps.check.outputs.published == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-dist
+          path: dist
+
+  publish:
+    needs: check-and-test
+    if: needs.check-and-test.outputs.published == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Extract release notes
+        run: |
+          VERSION=${{ needs.check-and-test.outputs.version }}
+          awk -v version="$VERSION" '
+            index($0, "## [" version "]") == 1 { flag=1; next }
+            /^## \[/ { flag=0 }
+            flag
+          ' CHANGELOG.md > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "No CHANGELOG entry found for version $VERSION" >&2
+            exit 1
+          fi
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package-dist
+
+      - name: Publish to npm
+        run: npm publish --provenance
+
+      - name: Create tag and GitHub Release
+        run: |
+          VERSION=${{ needs.check-and-test.outputs.version }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+          gh release create "v$VERSION" --title "v$VERSION" --notes-file /tmp/release-notes.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
