@@ -83,15 +83,7 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: package-dist
-
-      - name: Publish to npm
-        run: npm publish --provenance
-
-      - name: Create tag and GitHub Release
+      - name: Extract release notes
         run: |
           VERSION=${{ needs.check-and-test.outputs.version }}
           awk -v version="$VERSION" '
@@ -103,6 +95,18 @@ jobs:
             echo "No CHANGELOG entry found for version $VERSION" >&2
             exit 1
           fi
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package-dist
+
+      - name: Publish to npm
+        run: npm publish --provenance
+
+      - name: Create tag and GitHub Release
+        run: |
+          VERSION=${{ needs.check-and-test.outputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag "v$VERSION"
