@@ -38,10 +38,15 @@ jobs:
       - name: Check if already published
         id: check
         run: |
-          if npm view "lazy-tree-view@${{ steps.pkg.outputs.version }}" version 2>/dev/null; then
+          output=$(npm view "lazy-tree-view@${{ steps.pkg.outputs.version }}" version 2>&1)
+          status=$?
+          if [ "$status" -eq 0 ]; then
             echo "published=true" >> $GITHUB_OUTPUT
-          else
+          elif printf '%s\n' "$output" | grep -qiE 'E404|404 Not Found|is not in this registry'; then
             echo "published=false" >> $GITHUB_OUTPUT
+          else
+            printf 'Unexpected npm view failure while checking published version:\n%s\n' "$output" >&2
+            exit "$status"
           fi
 
       - name: Install dependencies
@@ -89,7 +94,15 @@ jobs:
       - name: Create tag and GitHub Release
         run: |
           VERSION=${{ needs.check-and-test.outputs.version }}
-          awk "/^## \[$VERSION\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md > /tmp/release-notes.md
+          awk -v version="$VERSION" '
+            index($0, "## [" version "]") == 1 { flag=1; next }
+            /^## \[/ { flag=0 }
+            flag
+          ' CHANGELOG.md > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "No CHANGELOG entry found for version $VERSION" >&2
+            exit 1
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag "v$VERSION"
