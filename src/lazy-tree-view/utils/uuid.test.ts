@@ -28,22 +28,18 @@ describe('generateUUID', () => {
   })
 
   describe('fallback when crypto.randomUUID is not available', () => {
-    const originalCrypto = globalThis.crypto
+    const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto')!
 
     beforeEach(() => {
       Object.defineProperty(globalThis, 'crypto', {
-        value: { ...originalCrypto, randomUUID: undefined },
+        value: { ...originalDescriptor.value, randomUUID: undefined },
         configurable: true,
         writable: true,
       })
     })
 
     afterEach(() => {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: originalCrypto,
-        configurable: true,
-        writable: true,
-      })
+      Object.defineProperty(globalThis, 'crypto', originalDescriptor)
     })
 
     it('should return a valid UUID v4 format using fallback', () => {
