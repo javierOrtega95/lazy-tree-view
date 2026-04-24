@@ -31,15 +31,19 @@ describe('generateUUID', () => {
     const originalCrypto = globalThis.crypto
 
     beforeEach(() => {
-      // Remove crypto.randomUUID to test fallback
-      globalThis.crypto = {
-        ...originalCrypto,
-        randomUUID: undefined,
-      } as unknown as Crypto
+      Object.defineProperty(globalThis, 'crypto', {
+        value: { ...originalCrypto, randomUUID: undefined },
+        configurable: true,
+        writable: true,
+      })
     })
 
     afterEach(() => {
-      globalThis.crypto = originalCrypto
+      Object.defineProperty(globalThis, 'crypto', {
+        value: originalCrypto,
+        configurable: true,
+        writable: true,
+      })
     })
 
     it('should return a valid UUID v4 format using fallback', () => {
